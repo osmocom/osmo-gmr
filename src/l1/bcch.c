@@ -23,7 +23,7 @@
  */
 
 /*! \file bcch.c
- *  \file Osmocom GMR-1 BCCH channel coding header
+ *  \file Osmocom GMR-1 BCCH channel coding implementation
  */
 
 #include <stdint.h>
