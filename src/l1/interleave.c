@@ -39,7 +39,7 @@
  * sbit_t or ubit_t.
  */
 void
-gmr1_interleave_intra(void *out, void *in, int N)
+gmr1_interleave_intra(void *out, const void *in, int N)
 {
 	const uint8_t *inb = (uint8_t *)in;
 	uint8_t *outb = (uint8_t *)out;
@@ -64,7 +64,7 @@ gmr1_interleave_intra(void *out, void *in, int N)
  * sbit_t or ubit_t.
  */
 void
-gmr1_deinterleave_intra(void *out, void *in, int N)
+gmr1_deinterleave_intra(void *out, const void *in, int N)
 {
 	const uint8_t *inb = (uint8_t *)in;
 	uint8_t *outb = (uint8_t *)out;
