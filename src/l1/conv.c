@@ -22,8 +22,8 @@
  *  @{
  */
 
-/*! \file conv.c
- *  \file Osmocom GMR-1 convolutional coding implementation
+/*! \file l1/conv.c
+ *  \brief Osmocom GMR-1 convolutional coding implementation
  */
 
 #include <stdint.h>

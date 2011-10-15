@@ -22,8 +22,8 @@
  *  @{
  */
 
-/*! \file scramb.c
- *  \file Osmocom GMR-1 scrambling implementation
+/*! \file l1/scramb.c
+ *  \brief Osmocom GMR-1 scrambling implementation
  */
 
 #include <stdint.h>

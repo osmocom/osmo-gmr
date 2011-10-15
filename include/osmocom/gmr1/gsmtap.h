@@ -25,7 +25,7 @@
  */
 
 /*! \file gsmtap.h
- *  \file Osmocom GMR-1 GSMtap helpers header
+ *  \brief Osmocom GMR-1 GSMtap helpers header
  */
 
 #include <stdint.h>

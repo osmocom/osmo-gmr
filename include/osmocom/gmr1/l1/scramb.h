@@ -21,12 +21,13 @@
 #ifndef __OSMO_GMR1_L1_SCRAMB_H__
 #define __OSMO_GMR1_L1_SCRAMB_H__
 
-/*! \defgroup scramb GMR-1 scrambling
+/*! \defgroup scramb Scrambling
+ *  \ingroup l1_prim
  *  @{
  */
 
-/*! \file scramb.h
- *  \file Osmocom GMR-1 scrambling header
+/*! \file l1/scramb.h
+ *  \brief Osmocom GMR-1 scrambling header
  */
 
 #include <osmocom/core/bits.h>

@@ -22,8 +22,8 @@
  *  @{
  */
 
-/*! \file punct.c
- *  \file Osmocom GMR-1 puncturing implementation
+/*! \file l1/punct.c
+ *  \brief Osmocom GMR-1 puncturing implementation
  */
 
 #include <osmocom/gmr1/l1/punct.h>

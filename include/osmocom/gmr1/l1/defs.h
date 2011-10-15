@@ -1,5 +1,5 @@
-/* GMR-1 interleaving */
-/* See GMR-1 05.003 (ETSI TS 101 376-5-3 V1.2.1) - Section 4.8 */
+/* GMR-1 L1 - Global definitions */
+/* See GMR-1 05.003 (ETSI TS 101 376-5-3 V1.2.1) */
 
 /* (C) 2011 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
@@ -18,23 +18,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __OSMO_GMR1_L1_INTERLEAVE_H__
-#define __OSMO_GMR1_L1_INTERLEAVE_H__
+#ifndef __OSMO_GMR1_L1_DEFS_H__
+#define __OSMO_GMR1_L1_DEFS_H__
 
-/*! \defgroup interleave Interleaving
- *  \ingroup l1_prim
+/*! \defgroup l1 GMR-1 Layer 1 library
  *  @{
  */
 
-/*! \file l1/interleave.h
- *  \brief Osmocom GMR-1 interleaving header
+/*! \file l1/defs.h
+ *  \brief Osmocom GMR-1 L1 global definitions
  */
 
-
-void gmr1_interleave_intra(void *out, const void *in, int N);
-void gmr1_deinterleave_intra(void *out, const void *in, int N);
+/*! \defgroup l1_prim Channel coding primitives */
+/*! \defgroup l1_chan Channel coder / decoders */
 
 
 /*! }@ */
 
-#endif /* __OSMO_GMR1_L1_INTERLEAVE_H__ */
+#endif /* __OSMO_GMR1_SDR_DEFS_H__ */

@@ -21,12 +21,13 @@
 #ifndef __OSMO_GMR1_L1_CONV_H__
 #define __OSMO_GMR1_L1_CONV_H__
 
-/*! \defgroup conv GMR-1 convolutional coding
+/*! \defgroup conv Convolutional coding
+ *  \ingroup l1_prim
  *  @{
  */
 
-/*! \file conv.h
- *  \file Osmocom GMR-1 convolutional coding header
+/*! \file l1/conv.h
+ *  \brief Osmocom GMR-1 convolutional coding header
  */
 
 #include <osmocom/core/conv.h>

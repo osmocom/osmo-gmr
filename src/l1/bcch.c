@@ -22,8 +22,8 @@
  *  @{
  */
 
-/*! \file bcch.c
- *  \file Osmocom GMR-1 BCCH channel coding implementation
+/*! \file l1/bcch.c
+ *  \brief Osmocom GMR-1 BCCH channel coding implementation
  */
 
 #include <stdint.h>

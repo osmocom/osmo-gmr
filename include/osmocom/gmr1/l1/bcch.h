@@ -21,12 +21,13 @@
 #ifndef __OSMO_GMR1_L1_BCCH_H__
 #define __OSMO_GMR1_L1_BCCH_H__
 
-/*! \defgroup bcch GMR-1 BCCH channel coding
+/*! \defgroup bcch BCCH channel coding
+ *  \ingroup l1_chan
  *  @{
  */
 
-/*! \file bcch.h
- *  \file Osmocom GMR-1 BCCH channel coding header
+/*! \file l1/bcch.h
+ *  \brief Osmocom GMR-1 BCCH channel coding header
  */
 
 #include <stdint.h>

@@ -22,8 +22,8 @@
  *  @{
  */
 
-/*! \file interleave.c
- *  \file Osmocom GMR-1 interleaving implementation
+/*! \file l1/interleave.c
+ *  \brief Osmocom GMR-1 interleaving implementation
  */
 
 #include <stdint.h>

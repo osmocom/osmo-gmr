@@ -21,12 +21,13 @@
 #ifndef __OSMO_GMR1_L1_PUNCT_H__
 #define __OSMO_GMR1_L1_PUNCT_H__
 
-/*! \defgroup punct GMR-1 puncturing
+/*! \defgroup punct Puncturing
+ *  \ingroup l1_prim
  *  @{
  */
 
-/*! \file punct.h
- *  \file Osmocom GMR-1 puncturing header
+/*! \file l1/punct.h
+ *  \brief Osmocom GMR-1 puncturing header
  */
 
 #include <stdint.h>

@@ -22,8 +22,8 @@
  *  @{
  */
 
-/*! \file crc.c
- *  \file Osmocom GMR-1 CRC implementation
+/*! \file l1/crc.c
+ *  \brief Osmocom GMR-1 CRC implementation
  */
 
 #include <stdint.h>

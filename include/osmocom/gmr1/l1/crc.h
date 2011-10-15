@@ -21,12 +21,13 @@
 #ifndef __OSMO_GMR1_L1_CRC_H__
 #define __OSMO_GMR1_L1_CRC_H__
 
-/*! \defgroup crc GMR-1 CRC
+/*! \defgroup crc Cyclic Redundancy Check
+ *  \ingroup l1_prim
  *  @{
  */
 
-/*! \file crc.h
- *  \file Osmocom GMR-1 CRC header
+/*! \file l1/crc.h
+ *  \brief Osmocom GMR-1 CRC header
  */
 
 #include <osmocom/core/crcgen.h>
