@@ -72,7 +72,7 @@ gmr1_bcch_encode(ubit_t *bits_e, uint8_t *l2)
 	osmo_crc16gen_set_bits(&gmr1_crc16, bits_u, 192, bits_u+192);
 	osmo_conv_encode(&gmr1_conv_bcch, bits_u, bits_c);
 	gmr1_interleave_intra(bits_ep, bits_c, 53);
-	gmr1_scramble_ubit(bits_e, bits_ep, 424); 
+	gmr1_scramble_ubit(bits_e, bits_ep, 424);
 }
 
 /*! \brief Stateless GMR-1 BCCH channel decoder
@@ -92,7 +92,7 @@ gmr1_bcch_decode(uint8_t *l2, sbit_t *bits_e, int *conv_rv)
 
 	GMR1_BCCH_CHECK_INIT;
 
-	gmr1_scramble_sbit(bits_ep, bits_e, 424); 
+	gmr1_scramble_sbit(bits_ep, bits_e, 424);
 	gmr1_deinterleave_intra(bits_c, bits_ep, 53);
 
 	rv = osmo_conv_decode(&gmr1_conv_bcch, bits_c, bits_u);
