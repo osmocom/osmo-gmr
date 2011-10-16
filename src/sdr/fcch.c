@@ -285,7 +285,7 @@ gmr1_fcch_rough_multi(struct osmo_cxvec *search_win_in, int sps, float freq_shif
 	struct osmo_cxvec *corr = NULL;
 	float *corr_pwr = NULL;
 	float pwr_max, pwrs[2], peaks[2], avg, stddev, th, peaks_pwr[N];
-	int Lw, Lp, i, pwr_max_idx, a, peaks_cnt;
+	int Lw, Lp, nLp, i, pwr_max_idx, a, peaks_cnt;
 	int rv;
 
 	/* Safety : need 650 ms of signal */
@@ -314,7 +314,9 @@ gmr1_fcch_rough_multi(struct osmo_cxvec *search_win_in, int sps, float freq_shif
 		goto err;
 	}
 
-	Lw = (330 * GMR1_SYM_RATE) / 1000;	/* Len window */
+	Lw = (320 * GMR1_SYM_RATE) / 1000;	/* Len window */
+	Lw += GMR1_FCCH_SYMS;
+
 	Lp = (320 * GMR1_SYM_RATE) / 1000;	/* Len period */
 
 	pwr_max_idx = 0;
@@ -354,7 +356,15 @@ gmr1_fcch_rough_multi(struct osmo_cxvec *search_win_in, int sps, float freq_shif
 	peaks[0] /= pwrs[0];
 	peaks[1] /= pwrs[1];
 
-	Lp = (int)round(peaks[1] - peaks[0]);
+	nLp = (int)round(peaks[1] - peaks[0]);
+
+	/* Safety */
+	if (abs(nLp - Lp) > 10) {
+		rv = -EINVAL;
+		goto err;
+	}
+
+	Lp = nLp;
 
 	/* 'Mix' the two cycles to improve signal. Compute avg at the same time */
 	avg = 0.0f;
