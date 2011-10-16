@@ -7,6 +7,6 @@ AM_LDFLAGS = $(LIBOSMOCORE_LIBS) $(LIBOSMOSDR_LIBS)
 bin_PROGRAMS = gmr1_rx
 
 gmr1_rx_SOURCES = gmr1_rx.c gsmtap.c
-gmr1_rx_LDADD =	$(FFTW3F_LIBS) \
-		$(top_builddir)/src/l1/libgmr1-l1.a \
-		$(top_builddir)/src/sdr/libgmr1-sdr.a
+gmr1_rx_LDADD =	$(top_builddir)/src/l1/libgmr1-l1.a \
+		$(top_builddir)/src/sdr/libgmr1-sdr.a \
+		$(FFTW3F_LIBS)
