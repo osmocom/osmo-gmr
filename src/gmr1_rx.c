@@ -363,7 +363,7 @@ int main(int argc, char *argv[])
 	cd->sps = atoi(argv[1]);
 
 	if (cd->sps < 1 || cd->sps > 16) {
-		fprintf(stderr, "[!] sps must be withing [1,16]\n");
+		fprintf(stderr, "[!] sps must be within [1,16]\n");
 		return -EINVAL;
 	}
 
