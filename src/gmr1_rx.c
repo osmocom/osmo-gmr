@@ -184,6 +184,8 @@ fcch_multi_process(struct chan_desc *cd, fcch_multi_cb_t cb)
 	n_fcch = rv;
 
 	/* Check each of them for validity */
+	ref_snr = ref_freq_err = 0.0f;
+
 	for (i=0, j=0; i<n_fcch; i++) {
 		float freq_err, e_fcch, e_cich, snr;
 		int toa;
