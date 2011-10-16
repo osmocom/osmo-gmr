@@ -249,6 +249,10 @@ _peak_record(int *toa, float *pwr, int *n, int N, int Lp, int sps,
 		if (peak_pwr > pwr[i])
 			break;
 
+	/* If it's at the end, nothing to do */
+	if (i == N)
+		return;
+
 	/* Shift everything down */
 	for (j=N-1; j>i; j--) {
 		toa[j] = toa[j-1];
