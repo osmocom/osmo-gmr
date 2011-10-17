@@ -168,6 +168,8 @@ fcch_multi_process(struct chan_desc *cd, fcch_multi_cb_t cb)
 
 	/* Multi FCCH detection (need 650 ms of signals) */
 	base_align = cd->align - GMR1_FCCH_SYMS * cd->sps;
+	if (base_align < 0)
+		base_align = 0;
 
 	rv = win_map(win, cd->bcch, base_align, (650 * GMR1_SYM_RATE * cd->sps) / 1000);
 	if (rv) {
