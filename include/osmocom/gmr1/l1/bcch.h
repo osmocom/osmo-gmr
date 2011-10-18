@@ -34,8 +34,8 @@
 #include <osmocom/core/bits.h>
 
 
-void gmr1_bcch_encode(ubit_t *bits_e, uint8_t *l2);
-int  gmr1_bcch_decode(uint8_t *l2, sbit_t *bits_e, int *conv_rv);
+void gmr1_bcch_encode(ubit_t *bits_e, const uint8_t *l2);
+int  gmr1_bcch_decode(uint8_t *l2, const sbit_t *bits_e, int *conv_rv);
 
 
 /*! }@ */

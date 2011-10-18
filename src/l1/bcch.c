@@ -60,7 +60,7 @@ gmr1_bcch_init(void)
  * mapped on a burst.
  */
 void
-gmr1_bcch_encode(ubit_t *bits_e, uint8_t *l2)
+gmr1_bcch_encode(ubit_t *bits_e, const uint8_t *l2)
 {
 	ubit_t bits_u[208];
 	ubit_t bits_c[424];
@@ -83,7 +83,7 @@ gmr1_bcch_encode(ubit_t *bits_e, uint8_t *l2)
  * mapped on a burst.
  */
 int
-gmr1_bcch_decode(uint8_t *l2, sbit_t *bits_e, int *conv_rv)
+gmr1_bcch_decode(uint8_t *l2, const sbit_t *bits_e, int *conv_rv)
 {
 	sbit_t bits_ep[424];
 	sbit_t bits_c[424];
