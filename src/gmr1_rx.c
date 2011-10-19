@@ -34,6 +34,7 @@
 
 #include <osmocom/gmr1/gsmtap.h>
 #include <osmocom/gmr1/l1/bcch.h>
+#include <osmocom/gmr1/l1/ccch.h>
 #include <osmocom/gmr1/sdr/defs.h>
 #include <osmocom/gmr1/sdr/fcch.h>
 #include <osmocom/gmr1/sdr/pi4cxpsk.h>
@@ -266,13 +267,16 @@ fcch_multi_process(struct chan_desc *cd, fcch_multi_cb_t cb)
 }
 
 static int
-rx_bcch(struct chan_desc *cd)
+rx_bcch(struct chan_desc *cd, float *energy)
 {
 	struct osmo_cxvec _burst, *burst = &_burst;
 	sbit_t ebits[424];
 	uint8_t l2[24];
 	float freq_err, toa;
 	int rv, crc, conv, e_toa;
+
+	/* Debug */
+	fprintf(stderr, "[.]   BCCH\n");
 
 	/* Demodulate burst */
 	e_toa = burst_map(burst, cd, &gmr1_bcch_burst, 0, 20 * cd->sps);
@@ -287,6 +291,10 @@ rx_bcch(struct chan_desc *cd)
 
 	if (rv)
 		return rv;
+
+	/* Measure energy as a reference */
+	if (energy)
+		*energy = burst_energy(burst);
 
 	/* Decode burst */
 	crc = gmr1_bcch_decode(l2, ebits, &conv);
@@ -307,10 +315,53 @@ rx_bcch(struct chan_desc *cd)
 }
 
 static int
+rx_ccch(struct chan_desc *cd, float min_energy)
+{
+	struct osmo_cxvec _burst, *burst = &_burst;
+	sbit_t ebits[432];
+	uint8_t l2[24];
+	int rv, crc, conv, e_toa;
+
+	/* Map potential burst */
+	e_toa = burst_map(burst, cd, &gmr1_dc6_burst, 0, 10 * cd->sps);
+	if (e_toa < 0)
+		return e_toa;
+
+	/* Energy detection */
+	if (burst_energy(burst) < min_energy)
+		return 0; /* Nothing to do */
+
+	/* Debug */
+	fprintf(stderr, "[.]   CCCH\n");
+
+	/* Demodulate burst */
+	rv = gmr1_pi4cxpsk_demod(
+		&gmr1_dc6_burst,
+		burst, cd->sps, -cd->freq_err,
+		ebits, NULL, NULL, NULL
+	);
+
+	if (rv)
+		return rv;
+
+	/* Decode burst */
+	crc = gmr1_ccch_decode(l2, ebits, &conv);
+
+	fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
+
+	/* Send to GSMTap if correct */
+	if (!crc)
+		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(GSMTAP_GMR1_CCCH, l2, 24));
+
+	return 0;
+}
+
+static int
 process_bcch(struct chan_desc *cd)
 {
 	int frame_len;
 	int rfn, sirfn;
+	float bcch_energy;
 
 	fprintf(stderr, "[+] Processing BCCH @%d (%.3f ms). [freq_err = %.1f Hz]\n",
 		cd->align, to_ms(cd, cd->align), to_hz(cd->freq_err));
@@ -328,10 +379,11 @@ process_bcch(struct chan_desc *cd)
 
 		/* BCCH */
 		if (sirfn % 8 == 2)
-		{
-			fprintf(stderr, "[.]   BCCH\n");
-			rx_bcch(cd);
-		}
+			rx_bcch(cd, &bcch_energy);
+
+		/* CCCH */
+		if ((sirfn % 8 != 0) && (sirfn % 8 != 2))
+			rx_ccch(cd, bcch_energy / 2.0f);
 
 		/* Next frame */
 		rfn++;
