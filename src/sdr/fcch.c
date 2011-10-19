@@ -49,7 +49,13 @@
  *  \param[in] up_down Selects chirp direction (0=down 1=up)
  *  \returns A newly allocated complex vector containing the chirp
  *
- *  The length will be 117 * sps
+ * Up-Chirp: \f$\frac{\sqrt{2}}{2}\cdot e^{j\left(
+ * 0.64\pi\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
+ *
+ * Down-Chirp: \f$\frac{\sqrt{2}}{2}\cdot e^{-j\left(
+ * 0.64\pi\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
+ *
+ * The length will be 117 * sps
  */
 static struct osmo_cxvec *
 gmr1_sdr_fcch_gen_up_down_chirp(int sps, int up_down)
@@ -85,7 +91,10 @@ gmr1_sdr_fcch_gen_up_down_chirp(int sps, int up_down)
  *  \param[in] sps Oversampling rate
  *  \returns A newly allocated complex vector containing the chirp
  *
- *  The length will be 117 * sps
+ * \f$\frac{\sqrt{2}}{2}\cdot e^{j\left(
+ * 0.64\pi\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
+ *
+ * The length will be 117 * sps
  */
 static struct osmo_cxvec *
 gmr1_sdr_fcch_gen_up_chirp(int sps)
@@ -97,7 +106,10 @@ gmr1_sdr_fcch_gen_up_chirp(int sps)
  *  \param[in] sps Oversampling rate
  *  \returns A newly allocated complex vector containing the chirp
  *
- *  The length will be 117 * sps
+ * \f$\frac{\sqrt{2}}{2}\cdot e^{-j\left(
+ * 0.64\pi\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
+ *
+ * The length will be 117 * sps
  */
 static struct osmo_cxvec *
 gmr1_sdr_fcch_gen_down_chirp(int sps)
@@ -109,7 +121,9 @@ gmr1_sdr_fcch_gen_down_chirp(int sps)
  *  \param[in] sps Oversampling rate
  *  \returns A newly allocated complex vector containing the dual chirp
  *
- *  The length will be 117 * sps. The vector is also 'real only'.
+ * \f$\sqrt{2}\cdot\cos\left(0.64\pi\left(t-\frac{T}{2}\right)^2/\;T^2\right)\f$
+ *
+ * The length will be 117 * sps. The vector is also 'real only'.
  */
 static struct osmo_cxvec *
 gmr1_sdr_fcch_gen_dual_chirp(int sps)
