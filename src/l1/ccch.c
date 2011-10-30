@@ -83,8 +83,8 @@ gmr1_ccch_encode(ubit_t *bits_e, uint8_t *l2)
  *  \param[out] l2 L2 packet data
  *  \param[in] bits_e Data bits of a burst
  *
- * L2 data is 24 byte long, and bits_e is a 432 hard bit array to be
- * mapped on a burst.
+ * L2 data is 24 byte long, and bits_e is a 432 hard bit array
+ * unmapped from a burst.
  */
 int
 gmr1_ccch_decode(uint8_t *l2, sbit_t *bits_e, int *conv_rv)
