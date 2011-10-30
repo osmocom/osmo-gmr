@@ -48,10 +48,18 @@ static struct gsmtap_inst *g_gti;
 
 
 struct chan_desc {
+	/* Sample source */
 	struct cfile *bcch;
 	int sps;
+
+	/* SDR alignement */
 	int align;
 	float freq_err;
+
+	/* TDMA alignement */
+	int fn;
+	int sa_sirfn_delay;
+	int sa_bcch_stn;
 };
 
 
@@ -114,6 +122,50 @@ burst_energy(struct osmo_cxvec *burst)
 		e += osmo_normsqf(burst->data[i]);
 	e /= burst->len;
 	return e;
+}
+
+
+/* Message parsing -------------------------------------------------------- */
+
+static int
+bcch_tdma_align(struct chan_desc *cd, uint8_t *l2)
+{
+	int sa_sirfn_delay, sa_bcch_stn;
+	int superframe_num, multiframe_num, mffn_high_bit;
+	int fn;
+
+	/* Check if it's a SI1 */
+	if ((l2[0] & 0xf8) != 0x08)
+		return 0;
+
+	/* Check if it contains a Seg 2A bis */
+	if ((l2[9] & 0xfc) != 0x80)
+		return 0;
+
+	/* Retrieve SA_SIRFN_DELAY, SA_BCCH_STN,
+	 * Superframe number, Multiframe number, MFFN high bit */
+	sa_sirfn_delay =  (l2[10] >> 3) & 0x0f;
+	sa_bcch_stn    = ((l2[10] << 2) & 0x1c) | (l2[11] >> 6);
+
+	superframe_num = ((l2[11] & 0x3f) << 7) | (l2[12] >> 1);
+	multiframe_num = ((l2[12] & 0x01) << 1) | (l2[13] >> 7);
+	mffn_high_bit  = ((l2[13] & 0x40) >> 6);
+
+	/* Compute frame number */
+	fn = (superframe_num << 6) |
+	     (multiframe_num << 4) |
+	     (mffn_high_bit << 3) |
+	     ((2 + sa_sirfn_delay) & 7);
+
+	/* Fix SDR alignement */
+	cd->align += (cd->sa_bcch_stn - sa_bcch_stn) * 39 * cd->sps;
+
+	/* Align TDMA */
+	cd->fn = fn;
+	cd->sa_sirfn_delay = sa_sirfn_delay;
+	cd->sa_bcch_stn = sa_bcch_stn;
+
+	return 0;
 }
 
 
@@ -279,7 +331,7 @@ rx_bcch(struct chan_desc *cd, float *energy)
 	fprintf(stderr, "[.]   BCCH\n");
 
 	/* Demodulate burst */
-	e_toa = burst_map(burst, cd, &gmr1_bcch_burst, 0, 20 * cd->sps);
+	e_toa = burst_map(burst, cd, &gmr1_bcch_burst, cd->sa_bcch_stn, 20 * cd->sps);
 	if (e_toa < 0)
 		return e_toa;
 
@@ -303,8 +355,12 @@ rx_bcch(struct chan_desc *cd, float *energy)
 
 	/* If burst turned out OK, use data to align channel */
 	if (!crc) {
+		/* SDR alignement */
 		cd->align += ((int)roundf(toa)) - e_toa;
 		cd->freq_err += freq_err / 4.0f;
+
+		/* Acquire TDMA alignement */
+		bcch_tdma_align(cd, l2);
 	}
 
 	/* Send to GSMTap if correct */
@@ -323,7 +379,7 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 	int rv, crc, conv, e_toa;
 
 	/* Map potential burst */
-	e_toa = burst_map(burst, cd, &gmr1_dc6_burst, 0, 10 * cd->sps);
+	e_toa = burst_map(burst, cd, &gmr1_dc6_burst, cd->sa_bcch_stn, 10 * cd->sps);
 	if (e_toa < 0)
 		return e_toa;
 
@@ -360,7 +416,7 @@ static int
 process_bcch(struct chan_desc *cd)
 {
 	int frame_len;
-	int rfn, sirfn;
+	int sirfn;
 	float bcch_energy;
 
 	fprintf(stderr, "[+] Processing BCCH @%d (%.3f ms). [freq_err = %.1f Hz]\n",
@@ -368,14 +424,13 @@ process_bcch(struct chan_desc *cd)
 
 	/* Process frame by frame */
 	frame_len = cd->sps * 24 * 39;
-	rfn = 0;
 
 	while (1) {
 		/* Debug */
-		fprintf(stderr, "[-]  RFN: %d (%f ms)\n", rfn, to_ms(cd, cd->align));
+		fprintf(stderr, "[-]  FN: %d (%f ms)\n", cd->fn, to_ms(cd, cd->align));
 
 		/* SI relative frame number inside an hyperframe */
-		sirfn = rfn % 64;
+		sirfn = (cd->fn - cd->sa_sirfn_delay) & 63;
 
 		/* BCCH */
 		if (sirfn % 8 == 2)
@@ -386,11 +441,12 @@ process_bcch(struct chan_desc *cd)
 			rx_ccch(cd, bcch_energy / 2.0f);
 
 		/* Next frame */
-		rfn++;
+		cd->fn++;
 		cd->align += frame_len;
 
-		/* Stop if we don't have a complete frame */
-		if ((cd->align + frame_len) > cd->bcch->len)
+		/* Stop if we don't have 2 complete frame
+		 * (with TN offset, we can go beyond one) */
+		if ((cd->align + 2*frame_len) > cd->bcch->len)
 			break;
 	}
 
@@ -406,7 +462,8 @@ int main(int argc, char *argv[])
 	int rv=0;
 
 	/* Init channel description */
-	cd->bcch = NULL;
+	memset(cd, 0x00, sizeof(struct chan_desc));
+
 	cd->align = START_DISCARD;
 	cd->freq_err = 0.0f;
 
