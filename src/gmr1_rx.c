@@ -365,7 +365,9 @@ rx_bcch(struct chan_desc *cd, float *energy)
 
 	/* Send to GSMTap if correct */
 	if (!crc)
-		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(GSMTAP_GMR1_BCCH, l2, 24));
+		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+			GSMTAP_GMR1_BCCH,
+			cd->fn, cd->sa_bcch_stn, l2, 24));
 
 	return 0;
 }
@@ -407,7 +409,9 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 
 	/* Send to GSMTap if correct */
 	if (!crc)
-		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(GSMTAP_GMR1_CCCH, l2, 24));
+		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+			GSMTAP_GMR1_CCCH,
+			cd->fn, cd->sa_bcch_stn, l2, 24));
 
 	return 0;
 }

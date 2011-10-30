@@ -28,6 +28,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <arpa/inet.h>
+
 #include <osmocom/core/msgb.h>
 #include <osmocom/core/gsmtap.h>
 #include <osmocom/gmr1/gsmtap.h>
@@ -39,7 +41,8 @@
  *  \param[in] len Length of the l2 data in bytes
  */
 struct msgb *
-gmr1_gsmtap_makemsg(uint8_t chan_type, const uint8_t *l2, int len)
+gmr1_gsmtap_makemsg(uint8_t chan_type, uint32_t fn, uint8_t tn,
+                    const uint8_t *l2, int len)
 {
 	struct msgb *msg;
 	struct gsmtap_hdr *gh;
@@ -53,11 +56,11 @@ gmr1_gsmtap_makemsg(uint8_t chan_type, const uint8_t *l2, int len)
 	gh->version = GSMTAP_VERSION;
 	gh->hdr_len = sizeof(*gh)/4;
 	gh->type = GSMTAP_TYPE_GMR1_UM;
-	gh->timeslot = 0;
+	gh->timeslot = tn;
 	gh->sub_slot = 0;
 	gh->snr_db = 0;
 	gh->signal_dbm = 0;
-	gh->frame_number = 0;
+	gh->frame_number = htonl(fn);
 	gh->sub_type = chan_type;
 	gh->antenna_nr = 0;
 
