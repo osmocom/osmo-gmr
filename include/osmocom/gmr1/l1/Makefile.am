@@ -1,3 +1,3 @@
 noinst_HEADERS = \
 	conv.h crc.h interleave.h punct.h scramb.h \
-	bcch.h ccch.h facch3.h tch3.h
+	a5.h bcch.h ccch.h facch3.h tch3.h
