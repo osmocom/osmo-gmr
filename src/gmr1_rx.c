@@ -421,7 +421,7 @@ process_bcch(struct chan_desc *cd)
 {
 	int frame_len;
 	int sirfn;
-	float bcch_energy;
+	float bcch_energy = nan("inf");
 
 	fprintf(stderr, "[+] Processing BCCH @%d (%.3f ms). [freq_err = %.1f Hz]\n",
 		cd->align, to_ms(cd, cd->align), to_hz(cd->freq_err));
