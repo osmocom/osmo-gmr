@@ -431,7 +431,7 @@ process_bcch(struct chan_desc *cd)
 
 	while (1) {
 		/* Debug */
-		fprintf(stderr, "[-]  FN: %d (%f ms)\n", cd->fn, to_ms(cd, cd->align));
+		fprintf(stderr, "[-]  FN: %6d (%10.3f ms)\n", cd->fn, to_ms(cd, cd->align));
 
 		/* SI relative frame number inside an hyperframe */
 		sirfn = (cd->fn - cd->sa_sirfn_delay) & 63;
