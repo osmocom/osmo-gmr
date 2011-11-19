@@ -36,20 +36,14 @@
 
 
 static struct osmo_conv_code gmr1_conv_bcch;
-static int bcch_init_done = 0;
 
-static void
+static void __attribute__ ((constructor))
 gmr1_bcch_init(void)
 {
 	/* Init convolutional coder */
 	memcpy(&gmr1_conv_bcch, &gmr1_conv_12, sizeof(struct osmo_conv_code));
 	gmr1_conv_bcch.len = 208;
-
-	/* Init done */
-	bcch_init_done = 1;
 }
-
-#define GMR1_BCCH_CHECK_INIT if (!bcch_init_done) gmr1_bcch_init()
 
 
 /*! \brief Stateless GMR-1 BCCH channel coder
@@ -65,8 +59,6 @@ gmr1_bcch_encode(ubit_t *bits_e, const uint8_t *l2)
 	ubit_t bits_u[208];
 	ubit_t bits_c[424];
 	ubit_t bits_ep[424];
-
-	GMR1_BCCH_CHECK_INIT;
 
 	osmo_pbit2ubit_ext(bits_u, 0, l2, 0, 192, 1);
 	osmo_crc16gen_set_bits(&gmr1_crc16, bits_u, 192, bits_u+192);
@@ -89,8 +81,6 @@ gmr1_bcch_decode(uint8_t *l2, const sbit_t *bits_e, int *conv_rv)
 	sbit_t bits_c[424];
 	ubit_t bits_u[208];
 	int rv;
-
-	GMR1_BCCH_CHECK_INIT;
 
 	gmr1_scramble_sbit(bits_ep, bits_e, 424);
 	gmr1_deinterleave_intra(bits_c, bits_ep, 53);
