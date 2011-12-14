@@ -26,7 +26,53 @@
  *  \brief Osmocom GMR-1 puncturing implementation
  */
 
+#include <osmocom/core/conv.h>
+
 #include <osmocom/gmr1/l1/punct.h>
+
+#include <errno.h>
+#include <stdlib.h>
+
+
+/*! \brief Generate convolutional code puncturing array for a osmo_conv_code
+ *  \param[inout] code The code for which to generate the puncturing array
+ *  \param[in] punct The puncturing scheme description
+ *  \return 0 for success, <0 for error codes.
+ *
+ * The array is allocated with malloc and must be free'd by the caller
+ * when no longer required.
+ */
+int
+gmr1_puncturer_generate(struct osmo_conv_code *code,
+                        const struct gmr1_puncturer *punct)
+{
+	int i, j, cl, pl;
+	int *p;
+
+	/* Safety checks */
+	if (code->N != punct->N)
+		return -EINVAL;
+
+	/* Upper bound for length */
+	cl = osmo_conv_get_output_length(code, 0);
+	pl = ((cl + punct->L - 1) / punct->L) * punct->r + 1;
+
+	/* Alloc array */
+	p = malloc(pl * sizeof(int));
+	if (!p)
+		return -ENOMEM;
+
+	code->puncture = p;
+
+	/* Fill */
+	for (i=0, j=0; i<cl; i++) {
+		if (punct->mask[i % (punct->N * punct->L)] == 0)
+			p[j++] = i;
+	}
+	p[j] = -1;
+
+	return 0;
+}
 
 
 /*! \brief GMR-1 P(1;2) puncturing code for the rate 1/2 conv coder */
