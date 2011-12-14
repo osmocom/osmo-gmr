@@ -6,4 +6,4 @@ noinst_LIBRARIES = libgmr1-l1.a
 
 libgmr1_l1_a_SOURCES = \
 	conv.c crc.c interleave.c punct.c scramb.c \
-	bcch.c ccch.c facch3.c
+	bcch.c ccch.c facch3.c tch3.c
