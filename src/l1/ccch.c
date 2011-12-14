@@ -54,7 +54,7 @@ gmr1_ccch_init(void)
  * mapped on a burst.
  */
 void
-gmr1_ccch_encode(ubit_t *bits_e, uint8_t *l2)
+gmr1_ccch_encode(ubit_t *bits_e, const uint8_t *l2)
 {
 	ubit_t bits_u[208];
 	ubit_t bits_c[428];
@@ -79,7 +79,7 @@ gmr1_ccch_encode(ubit_t *bits_e, uint8_t *l2)
  * unmapped from a burst.
  */
 int
-gmr1_ccch_decode(uint8_t *l2, sbit_t *bits_e, int *conv_rv)
+gmr1_ccch_decode(uint8_t *l2, const sbit_t *bits_e, int *conv_rv)
 {
 	sbit_t bits_ep[432];
 	sbit_t bits_c[428];
