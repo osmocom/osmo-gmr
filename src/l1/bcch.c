@@ -70,6 +70,8 @@ gmr1_bcch_encode(ubit_t *bits_e, const uint8_t *l2)
 /*! \brief Stateless GMR-1 BCCH channel decoder
  *  \param[out] l2 L2 packet data
  *  \param[in] bits_e Data bits of a burst
+ *  \param[out] conv_rv Return of the convolutional decode (can be NULL)
+ *  \return 0 if CRC check pass, any other value for fail.
  *
  * L2 data is 24 byte long, and bits_e is a 424 hard bit array
  * unmapped from a burst.
