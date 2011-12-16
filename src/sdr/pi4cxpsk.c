@@ -360,7 +360,7 @@ _gmr1_pi4cxpsk_freq_err(struct gmr1_pi4cxpsk_burst *burst_type,
 		/* From the data points, extract a single value */
 		f = 0.0f;
 		for (i=1; i<n; i++)
-			f += carg(corr[i] * conjf(corr[0])) / (pos[i] - pos[0]);
+			f += cargf(corr[i] * conjf(corr[0])) / (pos[i] - pos[0]);
 		f /= n - 1;
 
 		*freq_error = f;
@@ -423,7 +423,7 @@ _gmr1_pi4cxpsk_soft_symbols(struct gmr1_pi4cxpsk_burst *burst_type,
 	d = (2.0f * M_PIf) / (1<<burst_type->mod->nbits);
 
 	for (i=0; i<burst->len; i++)
-		ssyms[i] = carg(burst->data[i]) / d;
+		ssyms[i] = cargf(burst->data[i]) / d;
 
 	return ssyms;
 }
