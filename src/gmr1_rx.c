@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include <osmocom/core/bits.h>
+#include <osmocom/core/utils.h>
 #include <osmocom/core/gsmtap.h>
 #include <osmocom/core/gsmtap_util.h>
 
@@ -35,7 +36,10 @@
 #include <osmocom/gmr1/gsmtap.h>
 #include <osmocom/gmr1/l1/bcch.h>
 #include <osmocom/gmr1/l1/ccch.h>
+#include <osmocom/gmr1/l1/facch3.h>
+#include <osmocom/gmr1/l1/tch3.h>
 #include <osmocom/gmr1/sdr/defs.h>
+#include <osmocom/gmr1/sdr/dkab.h>
 #include <osmocom/gmr1/sdr/fcch.h>
 #include <osmocom/gmr1/sdr/pi4cxpsk.h>
 #include <osmocom/gmr1/sdr/nb.h>
@@ -47,9 +51,29 @@
 static struct gsmtap_inst *g_gti;
 
 
+struct tch3_state {
+	/* Status */
+	int active;
+
+	/* Channel params */
+	int tn;
+	int p;
+
+	/* Energy */
+	float energy_dkab;
+	float energy_burst;
+
+	/* FACCH state */
+	sbit_t ebits[104*4];
+	uint32_t bi_fn[4];
+	int sync_id;
+	int burst_cnt;
+};
+
 struct chan_desc {
 	/* Sample source */
 	struct cfile *bcch;
+	struct cfile *tch;
 	int sps;
 
 	/* SDR alignement */
@@ -60,6 +84,9 @@ struct chan_desc {
 	int fn;
 	int sa_sirfn_delay;
 	int sa_bcch_stn;
+
+	/* TCH */
+	struct tch3_state tch_state;
 };
 
 
@@ -96,19 +123,23 @@ win_map(struct osmo_cxvec *win, struct cfile *cf, int begin, int len)
 
 static int
 burst_map(struct osmo_cxvec *burst, struct chan_desc *cd,
-          struct gmr1_pi4cxpsk_burst *burst_type, int tn, int win)
+          struct gmr1_pi4cxpsk_burst *burst_type, int tn, int win, int tch)
 {
 	int begin, len;
 	int etoa;
+	struct cfile *df = tch ? cd->tch : cd->bcch;
+
+	if (!df)
+		return -EINVAL;
 
 	etoa  = win >> 1;
 	begin = cd->align + (cd->sps * tn * 39) - etoa;
 	len   = (burst_type->len * cd->sps) + win;
 
 	if ((begin + len) > cd->bcch->len)
-		return -1;
+		return -EIO;
 
-	osmo_cxvec_init_from_data(burst, &cd->bcch->data[begin], len);
+	osmo_cxvec_init_from_data(burst, &df->data[begin], len);
 
 	return etoa;
 }
@@ -166,6 +197,213 @@ bcch_tdma_align(struct chan_desc *cd, uint8_t *l2)
 	cd->sa_bcch_stn = sa_bcch_stn;
 
 	return 0;
+}
+
+static inline int
+ccch_is_imm_ass(const uint8_t *l2)
+{
+	return (l2[1] == 0x06) && (l2[2] == 0x3f);
+}
+
+static void
+ccch_imm_ass_parse(const uint8_t *l2, int *rx_tn, int *p)
+{
+	*p = (l2[8] & 0xfc) >> 2;
+	*rx_tn = ((l2[8] & 0x03) << 3) | (l2[9] >> 5);
+}
+
+
+/* TCH3 Procesing --------------------------------------------------------- */
+
+static void
+rx_tch3_init(struct chan_desc *cd, const uint8_t *imm_ass, float ref_energy)
+{
+	/* Activate */
+	cd->tch_state.active = 1;
+
+	/* Extract TN & DKAB position */
+	ccch_imm_ass_parse(imm_ass, &cd->tch_state.tn, &cd->tch_state.p);
+
+	/* Estimate energy threshold */
+	cd->tch_state.energy_dkab  = ref_energy / 8.0f;
+	cd->tch_state.energy_burst = ref_energy / 2.0f;
+
+	/* Init FACCH state */
+	cd->tch_state.sync_id = 0;
+	memset(&cd->tch_state.ebits, 0x00, sizeof(sbit_t) * 104 * 4);
+}
+
+static int
+_rx_tch3_dkab(struct chan_desc *cd, struct osmo_cxvec *burst)
+{
+	sbit_t ebits[8];
+	float toa;
+	int rv;
+
+	fprintf(stderr, "[.]   DKAB\n");
+
+	rv = gmr1_dkab_demod(burst, cd->sps, -cd->freq_err, cd->tch_state.p, ebits, &toa);
+
+	fprintf(stderr, "toa=%f\n", toa);
+
+	return rv;
+}
+
+static int
+_rx_tch3_facch_flush(struct chan_desc *cd)
+{
+	struct tch3_state *st = &cd->tch_state;
+	uint8_t l2[10];
+	ubit_t sbits[8*4];
+	int crc, conv;
+
+	/* Decode the burst */
+	crc = gmr1_facch3_decode(l2, sbits, st->ebits, NULL, &conv);
+
+	fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
+
+	/* Send to GSMTap if correct */
+	if (!crc)
+		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+			GSMTAP_GMR1_TCH3 | GSMTAP_GMR1_FACCH,
+			cd->fn-3, st->tn, l2, 10));
+
+	/* Clear state */
+	st->sync_id ^= 1;
+	st->burst_cnt = 0;
+	memset(st->bi_fn, 0xff, sizeof(uint32_t) * 4);
+	memset(st->ebits, 0x00, sizeof(sbit_t) * 104 * 4);
+
+	/* Done */
+	return 0;
+}
+
+static int
+_rx_tch3_facch(struct chan_desc *cd, struct osmo_cxvec *burst)
+{
+	struct tch3_state *st = &cd->tch_state;
+	sbit_t ebits[104];
+	int rv, bi, sync_id;
+	float toa;
+
+	/* Burst index */
+	bi = cd->fn & 3;
+
+	/* Debug */
+	fprintf(stderr, "[.]   FACCH3 (bi=%d)\n", bi);
+
+	/* Demodulate burst */
+	rv = gmr1_pi4cxpsk_demod(
+		&gmr1_nt3_facch_burst,
+		burst, cd->sps, -cd->freq_err,
+		ebits, &sync_id, &toa, NULL
+	);
+
+	fprintf(stderr, "toa=%.1f, sync_id=%d\n", toa, sync_id);
+
+	/* Does this burst belong with previous ones ? */
+	if (sync_id != st->sync_id)
+		_rx_tch3_facch_flush(cd);
+
+	/* Store this burst */
+	memcpy(&st->ebits[104*bi], ebits, sizeof(sbit_t) * 104);
+	st->sync_id = sync_id;
+	st->bi_fn[bi] = cd->fn;
+	st->burst_cnt += 1;
+
+	/* Is it time to flush ? */
+	if (st->burst_cnt == 4)
+		_rx_tch3_facch_flush(cd);
+
+	return 0;
+}
+
+static int
+_rx_tch3_speech(struct chan_desc *cd, struct osmo_cxvec *burst)
+{
+	sbit_t ebits[212];
+	ubit_t sbits[4];
+	uint8_t frame0[10], frame1[10];
+	int rv, conv[2];
+	float toa;
+
+	/* Debug */
+	fprintf(stderr, "[.]   TCH3\n");
+
+	/* Demodulate burst */
+	rv = gmr1_pi4cxpsk_demod(
+		&gmr1_nt3_speech_burst,
+		burst, cd->sps, -cd->freq_err,
+		ebits, NULL, &toa, NULL
+	);
+
+	/* Decode it */
+	gmr1_tch3_decode(frame0, frame1, sbits, ebits, NULL, 0, &conv[0], &conv[1]);
+
+	/* More debug */
+	fprintf(stderr, "toa=%.1f\n", toa);
+	fprintf(stderr, "conv=%3d,%3d\n", conv[0], conv[1]);
+	fprintf(stderr, "frame0=%s\n", osmo_hexdump_nospc(frame0, 10));
+	fprintf(stderr, "frame1=%s\n", osmo_hexdump_nospc(frame1, 10));
+
+	return 0;
+}
+
+static int
+rx_tch3(struct chan_desc *cd)
+{
+	static struct gmr1_pi4cxpsk_burst *burst_types[] = {
+		&gmr1_nt3_facch_burst,
+		&gmr1_nt3_speech_burst,
+		NULL
+	};
+
+	struct osmo_cxvec _burst, *burst = &_burst;
+	int e_toa, rv, btid, sid;
+	float be, det, toa;
+
+	/* Is TCH active at all ? */
+	if (!cd->tch_state.active)
+		return 0;
+
+	/* Map potential burst (use FACCH3 as reference) */
+	e_toa = burst_map(burst, cd, &gmr1_nt3_facch_burst,
+	                  cd->tch_state.tn, cd->sps + (cd->sps/2), 1);
+	if (e_toa < 0)
+		return e_toa;
+
+	/* Burst energy (and check for DKAB) */
+	be = burst_energy(burst);
+
+	det = (cd->tch_state.energy_dkab + cd->tch_state.energy_burst) / 2.0f;
+	if (be < det) {
+		cd->tch_state.energy_dkab =
+			(0.1f * be) +
+			(0.9f * cd->tch_state.energy_dkab);
+		return _rx_tch3_dkab(cd, burst);
+	}
+
+	cd->tch_state.energy_burst =
+		(0.1f * be) +
+		(0.9f * cd->tch_state.energy_burst);
+
+	/* Detect burst type */
+	rv = gmr1_pi4cxpsk_detect(
+		burst_types, (float)e_toa,
+		burst, cd->sps, -cd->freq_err,
+		&btid, &sid, &toa
+	);
+	if (rv < 0)
+		return rv;
+
+	/* Delegate appropriately */
+	if (btid == 0)
+		rv = _rx_tch3_facch(cd, burst);
+	else
+		rv = _rx_tch3_speech(cd, burst);
+
+	/* Done */
+	return rv;
 }
 
 
@@ -331,7 +569,7 @@ rx_bcch(struct chan_desc *cd, float *energy)
 	fprintf(stderr, "[.]   BCCH\n");
 
 	/* Demodulate burst */
-	e_toa = burst_map(burst, cd, &gmr1_bcch_burst, cd->sa_bcch_stn, 20 * cd->sps);
+	e_toa = burst_map(burst, cd, &gmr1_bcch_burst, cd->sa_bcch_stn, 20 * cd->sps, 0);
 	if (e_toa < 0)
 		return e_toa;
 
@@ -381,7 +619,7 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 	int rv, crc, conv, e_toa;
 
 	/* Map potential burst */
-	e_toa = burst_map(burst, cd, &gmr1_dc6_burst, cd->sa_bcch_stn, 10 * cd->sps);
+	e_toa = burst_map(burst, cd, &gmr1_dc6_burst, cd->sa_bcch_stn, 10 * cd->sps, 0);
 	if (e_toa < 0)
 		return e_toa;
 
@@ -406,6 +644,14 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 	crc = gmr1_ccch_decode(l2, ebits, &conv);
 
 	fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
+
+	/* Check for IMM.ASS */
+	if (!crc) {
+		if (ccch_is_imm_ass(l2)) {
+			rx_tch3_init(cd, l2, min_energy);
+			fprintf(stderr, "\n[+] TCH3 assigned on TN %d\n", cd->tch_state.tn);
+		}
+	}
 
 	/* Send to GSMTap if correct */
 	if (!crc)
@@ -444,6 +690,9 @@ process_bcch(struct chan_desc *cd)
 		if ((sirfn % 8 != 0) && (sirfn % 8 != 2))
 			rx_ccch(cd, bcch_energy / 2.0f);
 
+		/* TCH */
+		rx_tch3(cd);
+
 		/* Next frame */
 		cd->fn++;
 		cd->align += frame_len;
@@ -472,8 +721,8 @@ int main(int argc, char *argv[])
 	cd->freq_err = 0.0f;
 
 	/* Arg check */
-	if (argc != 3) {
-		fprintf(stderr, "Usage: %s sps bcch.cfile\n", argv[0]);
+	if (argc < 3 || argc > 4) {
+		fprintf(stderr, "Usage: %s sps bcch.cfile [tch.cfile]\n", argv[0]);
 		return -EINVAL;
 	}
 
@@ -486,9 +735,18 @@ int main(int argc, char *argv[])
 
 	cd->bcch = cfile_load(argv[2]);
 	if (!cd->bcch) {
-		fprintf(stderr, "[!] Failed to load fcch input file\n");
+		fprintf(stderr, "[!] Failed to load bcch input file\n");
 		rv = -EIO;
 		goto err;
+	}
+
+	if (argc > 3) {
+		cd->tch = cfile_load(argv[3]);
+		if (!cd->tch) {
+			fprintf(stderr, "[!] Failed to load tch input file\n");
+			rv = -EIO;
+			goto err;
+		}
 	}
 
 	/* Init GSMTap */
@@ -515,6 +773,9 @@ int main(int argc, char *argv[])
 
 	/* Clean up */
 err:
+	if (cd->tch)
+		cfile_release(cd->tch);
+
 	if (cd->bcch)
 		cfile_release(cd->bcch);
 
