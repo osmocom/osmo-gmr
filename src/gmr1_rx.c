@@ -34,6 +34,7 @@
 #include <osmocom/sdr/cxvec_math.h>
 
 #include <osmocom/gmr1/gsmtap.h>
+#include <osmocom/gmr1/l1/a5.h>
 #include <osmocom/gmr1/l1/bcch.h>
 #include <osmocom/gmr1/l1/ccch.h>
 #include <osmocom/gmr1/l1/facch3.h>
@@ -58,6 +59,7 @@ struct tch3_state {
 	/* Channel params */
 	int tn;
 	int p;
+	int ciph;
 
 	/* Energy */
 	float energy_dkab;
@@ -87,6 +89,9 @@ struct chan_desc {
 
 	/* TCH */
 	struct tch3_state tch_state;
+
+	/* A5 */
+	uint8_t kc[8];
 };
 
 
@@ -253,14 +258,37 @@ static int
 _rx_tch3_facch_flush(struct chan_desc *cd)
 {
 	struct tch3_state *st = &cd->tch_state;
+	ubit_t _ciph[96*4], *ciph;
 	uint8_t l2[10];
 	ubit_t sbits[8*4];
-	int crc, conv;
+	int i, crc, conv;
+
+	/* Cipher stream ? */
+	if (st->ciph) {
+		ciph = _ciph;
+		for (i=0; i<4; i++)
+			gmr1_a5(1, cd->kc, st->bi_fn[i], 96, ciph+(96*i), NULL);
+	} else
+		ciph = NULL;
 
 	/* Decode the burst */
-	crc = gmr1_facch3_decode(l2, sbits, st->ebits, NULL, &conv);
+	crc = gmr1_facch3_decode(l2, sbits, st->ebits, ciph, &conv);
 
 	fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
+
+	/* Retry with ciphering ? */
+	if (!st->ciph && crc) {
+		ciph = _ciph;
+		for (i=0; i<4; i++)
+			gmr1_a5(1, cd->kc, st->bi_fn[i], 96, ciph+(96*i), NULL);
+
+		crc = gmr1_facch3_decode(l2, sbits, st->ebits, ciph, &conv);
+
+		fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
+
+		if (!crc)
+			st->ciph = 1;
+	}
 
 	/* Send to GSMTap if correct */
 	if (!crc)
@@ -322,7 +350,7 @@ static int
 _rx_tch3_speech(struct chan_desc *cd, struct osmo_cxvec *burst)
 {
 	sbit_t ebits[212];
-	ubit_t sbits[4];
+	ubit_t sbits[4], ciph[208];
 	uint8_t frame0[10], frame1[10];
 	int rv, conv[2];
 	float toa;
@@ -338,7 +366,9 @@ _rx_tch3_speech(struct chan_desc *cd, struct osmo_cxvec *burst)
 	);
 
 	/* Decode it */
-	gmr1_tch3_decode(frame0, frame1, sbits, ebits, NULL, 0, &conv[0], &conv[1]);
+	gmr1_a5(cd->tch_state.ciph, cd->kc, cd->fn, 208, ciph, NULL);
+
+	gmr1_tch3_decode(frame0, frame1, sbits, ebits, ciph, 0, &conv[0], &conv[1]);
 
 	/* More debug */
 	fprintf(stderr, "toa=%.1f\n", toa);
@@ -721,8 +751,8 @@ int main(int argc, char *argv[])
 	cd->freq_err = 0.0f;
 
 	/* Arg check */
-	if (argc < 3 || argc > 4) {
-		fprintf(stderr, "Usage: %s sps bcch.cfile [tch.cfile]\n", argv[0]);
+	if (argc < 3 || argc > 5) {
+		fprintf(stderr, "Usage: %s sps bcch.cfile [tch.cfile [key]]\n", argv[0]);
 		return -EINVAL;
 	}
 
@@ -745,6 +775,14 @@ int main(int argc, char *argv[])
 		if (!cd->tch) {
 			fprintf(stderr, "[!] Failed to load tch input file\n");
 			rv = -EIO;
+			goto err;
+		}
+	}
+
+	if (argc > 4) {
+		if (osmo_hexparse(argv[4], cd->kc, 8) != 8) {
+			fprintf(stderr, "[!] Invalid key\n");
+			rv = -EINVAL;
 			goto err;
 		}
 	}
