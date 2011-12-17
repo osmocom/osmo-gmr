@@ -101,6 +101,10 @@ gmr1_pi4cxpsk_demod(struct gmr1_pi4cxpsk_burst *burst_type,
                     sbit_t *ebits,
                     int *sync_id_p, float *toa_p, float *freq_err_p);
 
+int
+gmr1_pi4cxpsk_detect(struct gmr1_pi4cxpsk_burst **burst_types, float e_toa,
+                     struct osmo_cxvec *burst_in, int sps, float freq_shift,
+                     int *bt_id_p, int *sync_id_p, float *toa_p);
 
 /*! }@ */
 

@@ -162,12 +162,12 @@ _gmr1_pi4cxpsk_sync_gen_ref(struct gmr1_pi4cxpsk_burst *burst_type)
 static int
 _gmr1_pi4cxpsk_sync_find(struct gmr1_pi4cxpsk_burst *burst_type,
                          struct osmo_cxvec *burst, int sps,
-                         float *toa)
+                         float *toa, float *pwr)
 {
 	struct osmo_cxvec _win, *win = &_win;
 	struct osmo_cxvec *corr, *corr_tmp;
 	int i, j, w;
-	float p_toa, p_pwr = 0.0f, p_idx;
+	float p_toa = 0.0f, p_pwr = 0.0f, p_idx = -1;
 	int rv;
 
 	/* Window size */
@@ -188,7 +188,7 @@ _gmr1_pi4cxpsk_sync_find(struct gmr1_pi4cxpsk_burst *burst_type,
 		struct gmr1_pi4cxpsk_sync *csync;
 		float s_toa, s_pwr;
 		float complex s_peak;
-		int first = 1;
+		int first = 1, tl = 0;
 
 		/* Correlate all 'chunks' */
 		for (csync=burst_type->sync[i]; csync->pos>=0; csync++)
@@ -209,10 +209,14 @@ _gmr1_pi4cxpsk_sync_find(struct gmr1_pi4cxpsk_burst *burst_type,
 					corr->data[j] += corr_tmp->data[j];
 
 			first = 0;
+
+			/* Add length of this 'chunk' */
+			tl += csync->_ref->len;
 		}
 
 		/* Find peak */
 		s_toa = osmo_cxvec_peak_energy_find(corr, 3, PEAK_EARLY_LATE, &s_peak);
+		s_peak /= (float)tl;
 		s_pwr = osmo_normsqf(s_peak);
 
 		if (s_pwr > p_pwr) {
@@ -227,7 +231,10 @@ _gmr1_pi4cxpsk_sync_find(struct gmr1_pi4cxpsk_burst *burst_type,
 	}
 
 	/* Return winner */
-	*toa = p_toa;
+	if (toa)
+		*toa = p_toa;
+	if (pwr)
+		*pwr = p_pwr;
 	rv = p_idx;
 
 	/* Clean up */
@@ -514,7 +521,7 @@ gmr1_pi4cxpsk_demod(struct gmr1_pi4cxpsk_burst *burst_type,
 	DEBUG_SIGNAL("pi4cxpsk_burst", burst);
 
 	/* Find the training sequence */
-	sync_id = _gmr1_pi4cxpsk_sync_find(burst_type, burst, sps, &toa);
+	sync_id = _gmr1_pi4cxpsk_sync_find(burst_type, burst, sps, &toa, NULL);
 	if (sync_id < 0) {
 		rv = sync_id;
 		goto err;
@@ -565,6 +572,86 @@ gmr1_pi4cxpsk_demod(struct gmr1_pi4cxpsk_burst *burst_type,
 	/* Cleanup */
 err:
 	free(ssyms);
+	osmo_cxvec_free(burst);
+
+	return rv;
+}
+
+/*! \brief Try to identify burst type by matching training sequences
+ *  \param[in] burst_types Array of burst types to test (NULL terminated)
+ *  \param[in] e_toa Expected time of arrival
+ *  \param[in] burst_in Complex signal of the burst
+ *  \param[in] sps Oversampling used in the input complex signal
+ *  \param[in] freq_shift Frequency shift to pre-apply to burst_in (rad/sym)
+ *  \param[out] bt_id_p Pointer to burst type ID return variable
+ *  \param[out] sync_id_p Pointer to sync sequence id return variable
+ *  \param[out] toa_p Pointer to TOA return variable
+ *  \returns -errno for errors, 0 for success
+ *
+ * The various burst types must be compatible in length.
+ */
+int
+gmr1_pi4cxpsk_detect(struct gmr1_pi4cxpsk_burst **burst_types, float e_toa,
+                     struct osmo_cxvec *burst_in, int sps, float freq_shift,
+                     int *bt_id_p, int *sync_id_p, float *toa_p)
+{
+	struct gmr1_pi4cxpsk_burst *bt;
+	struct osmo_cxvec *burst = NULL;
+	int id, p_id=-1, p_sid=-1;
+	float p_toa=0.0f, p_pwr=0.0f;
+	int rv = 0;
+
+	/* Normalize the burst and counter rotate by pi/4 */
+	burst = osmo_cxvec_sig_normalize(burst_in, 1, (freq_shift - (M_PIf/4)) / sps, NULL);
+	if (!burst) {
+		rv = -ENOMEM;
+		goto err;
+	}
+
+	DEBUG_SIGNAL("pi4cxpsk_burst", burst);
+
+	/* Scan all burst types */
+	for (id=0; burst_types[id]; id++)
+	{
+		int sid;
+		float toa, pwr;
+
+		bt = burst_types[id];
+
+		/* Generate reference sync bursts */
+		rv = _gmr1_pi4cxpsk_sync_gen_ref(bt);
+		if (rv)
+			goto err;
+
+		/* Try this burst type */
+		sid = _gmr1_pi4cxpsk_sync_find(bt, burst, sps, &toa, &pwr);
+		if (sid < 0) {
+			rv = sid;
+			goto err;
+		}
+
+		/* If we have an expected, toa, we 'modulate' power */
+		if (e_toa >= 0.0f)
+			pwr /= fabs(e_toa - toa);
+
+		/* Check for better ? */
+		if (pwr > p_pwr) {
+			p_id  = id;
+			p_sid = sid;
+			p_pwr = pwr;
+			p_toa = toa;
+		}
+	}
+
+	if (bt_id_p)
+		*bt_id_p = p_id;
+	if (sync_id_p)
+		*sync_id_p = p_sid;
+	if (toa_p)
+		*toa_p = p_toa;
+
+	/* Done */
+err:
 	osmo_cxvec_free(burst);
 
 	return rv;
