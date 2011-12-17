@@ -657,4 +657,48 @@ err:
 	return rv;
 }
 
+/*! \brief Estimates modulation order by comparing power of x^2 vs x^4
+ *  \param[in] burst_in Complex signal of the burst
+ *  \param[in] sps Oversampling used in the input complex signal
+ *  \param[in] freq_shift Frequency shift to pre-apply to burst_in (rad/sym)
+ *  \returns <0 for error. 2 for BPSK, 4 for QPSK.
+ */
+int
+gmr1_pi4cxpsk_mod_order(struct osmo_cxvec *burst_in, int sps, float freq_shift)
+{
+	struct osmo_cxvec *burst = NULL;
+	float complex sb = 0.0f, sq = 0.0f;
+	float pb, pq;
+	int rv, i;
+
+	/* Normalize the burst and counter rotate by pi/4 */
+	burst = osmo_cxvec_sig_normalize(burst_in, 1, (freq_shift - (M_PIf/4)) / sps, NULL);
+	if (!burst) {
+		rv = -ENOMEM;
+		goto err;
+	}
+
+	DEBUG_SIGNAL("pi4cxpsk_burst", burst);
+
+	/* Detect modulation order by estimating power of x^2 vs x^4 */
+	for (i=0; i<burst->len; i++) {
+		float complex v;
+		v = burst->data[i];
+		v = (v * v) / osmo_normsqf(v);
+		sb += v;
+		sq += v * v;
+	}
+
+	pb = osmo_normsqf(sb);
+	pq = osmo_normsqf(sq);
+
+	rv = pb < (pq / 2.0f) ? 4 : 2;
+
+	/* Done */
+err:
+	osmo_cxvec_free(burst);
+
+	return rv;
+}
+
 /*! }@ */

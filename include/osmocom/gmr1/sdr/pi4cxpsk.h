@@ -106,6 +106,9 @@ gmr1_pi4cxpsk_detect(struct gmr1_pi4cxpsk_burst **burst_types, float e_toa,
                      struct osmo_cxvec *burst_in, int sps, float freq_shift,
                      int *bt_id_p, int *sync_id_p, float *toa_p);
 
+int
+gmr1_pi4cxpsk_mod_order(struct osmo_cxvec *burst_in, int sps, float freq_shift);
+
 /*! }@ */
 
 #endif /* __OSMO_GMR1_SDR_PI4CXPSK_H__ */
