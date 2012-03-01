@@ -126,12 +126,12 @@ _a5_clock(uint32_t r, uint32_t mask, uint32_t taps)
 #define A51_R3_MASK	((1<<A51_R3_LEN)-1)
 #define A51_R4_MASK	((1<<A51_R4_LEN)-1)
 
-#define A51_R1_TAPS	0x072000	/* x^19 + x^5 + x^2 + x + 1 */
-#define A51_R2_TAPS	0x311000	/* x^22 + x^9 + x^5 + x + 1 */
-#define A51_R3_TAPS	0x660000	/* x^23 + x^5 + x^4 + x + 1 */
-#define A51_R4_TAPS	0x013100	/* x^17 + x^8 + x^4 + x^3 + 1 */
+#define A51_R1_TAPS	0x072000	/* x^19 + x^18 + x^17 + x^14 + 1 */
+#define A51_R2_TAPS	0x311000	/* x^22 + x^21 + x^17 + x^13 + 1 */
+#define A51_R3_TAPS	0x660000	/* x^23 + x^22 + x^19 + x^18 + 1 */
+#define A51_R4_TAPS	0x013100	/* x^17 + x^14 + x^13 + x^9 + 1 */
 
-#define A51_BIT(r,n)	(1 << (A51_ ## r ## _LEN - 1 - (n)))
+#define A51_BIT(r,n)	(1 << n)
 
 
 /*! \brief GMR1-A5/1: Set the high bits of all register states
@@ -166,9 +166,9 @@ _a5_1_clock(uint32_t *r)
 {
 	int cb[3], m;
 
-	cb[0] = !!(r[3] & A51_BIT(R4,  1));
-	cb[1] = !!(r[3] & A51_BIT(R4, 10));
-	cb[2] = !!(r[3] & A51_BIT(R4, 15));
+	cb[0] = !!(r[3] & A51_BIT(R4, 15));
+	cb[1] = !!(r[3] & A51_BIT(R4,  6));
+	cb[2] = !!(r[3] & A51_BIT(R4,  1));
 
 	m = (cb[0] + cb[1] + cb[2]) >= 2;
 
@@ -200,15 +200,15 @@ _a5_1_output(uint32_t *r)
 			r[rnum] & A51_BIT(rname, c)	\
 		);
 
-	MAJ(0, R1, 17, 12,  3);
-	MAJ(1, R2, 18, 13,  7);
-	MAJ(2, R3, 18,  7,  3);
+	MAJ(0, R1, 1,  6, 15);
+	MAJ(1, R2, 3,  8, 14);
+	MAJ(2, R3, 4, 15, 19);
 
 	#undef MAJ
 
-	m[0] ^= !!(r[0] & A51_BIT(R1,  7));
-	m[1] ^= !!(r[1] & A51_BIT(R2, 20));
-	m[2] ^= !!(r[2] & A51_BIT(R3, 22));
+	m[0] ^= !!(r[0] & A51_BIT(R1, 11));
+	m[1] ^= !!(r[1] & A51_BIT(R2,  1));
+	m[2] ^= !!(r[2] & A51_BIT(R3,  0));
 
 	return m[0] ^ m[1] ^ m[2];
 }
