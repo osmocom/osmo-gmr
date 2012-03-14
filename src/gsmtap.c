@@ -37,11 +37,14 @@
 
 /*! \brief Helper to build GSM tap message with GMR-1 payload
  *  \param[in] chan_type Type of channel (one of GSMTAP_GMR1_xxx)
+ *  \param[in] arfcn ARFCN
+ *  \param[in] fn Frame number
+ *  \param[in] tn Timeslot number
  *  \param[in] l2 Packet of L2 data to encapsulate
  *  \param[in] len Length of the l2 data in bytes
  */
 struct msgb *
-gmr1_gsmtap_makemsg(uint8_t chan_type, uint32_t fn, uint8_t tn,
+gmr1_gsmtap_makemsg(uint8_t chan_type, uint16_t arfcn, uint32_t fn, uint8_t tn,
                     const uint8_t *l2, int len)
 {
 	struct msgb *msg;
@@ -56,6 +59,7 @@ gmr1_gsmtap_makemsg(uint8_t chan_type, uint32_t fn, uint8_t tn,
 	gh->version = GSMTAP_VERSION;
 	gh->hdr_len = sizeof(*gh)/4;
 	gh->type = GSMTAP_TYPE_GMR1_UM;
+	gh->arfcn = htons(arfcn);
 	gh->timeslot = tn;
 	gh->sub_slot = 0;
 	gh->snr_db = 0;
