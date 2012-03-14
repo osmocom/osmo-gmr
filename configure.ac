@@ -51,6 +51,7 @@ AC_OUTPUT(
 	src/Makefile
 	src/codec/Makefile
 	src/l1/Makefile
+	src/rtfwk/Makefile
 	src/sdr/Makefile
 	Makefile
 	Doxyfile

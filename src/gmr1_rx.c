@@ -310,7 +310,7 @@ rx_tch9(struct chan_desc *cd)
 		if (!crc)
 			gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 				GSMTAP_GMR1_TCH9 | GSMTAP_GMR1_FACCH,
-				cd->fn, cd->tch9_state.tn, l2, 38));
+				0, cd->fn, cd->tch9_state.tn, l2, 38));
 	} else { /* TCH9 */
 		uint8_t l2[60];
 		int i, s = 0;
@@ -329,7 +329,7 @@ rx_tch9(struct chan_desc *cd)
 		/* Forward to GSMTap (no CRC to validate :( ) */
 		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_TCH9,
-			cd->fn, cd->tch9_state.tn, l2, 60));
+			0, cd->fn, cd->tch9_state.tn, l2, 60));
 
 		/* Save to file */
 		{
@@ -424,7 +424,7 @@ _rx_tch3_facch_flush(struct chan_desc *cd)
 	if (!crc)
 		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_TCH3 | GSMTAP_GMR1_FACCH,
-			cd->fn-3, st->tn, l2, 10));
+			0, cd->fn-3, st->tn, l2, 10));
 
 	/* Parse for assignement */
 	if (!crc && facch3_is_ass_cmd_1(l2))
@@ -785,7 +785,7 @@ rx_bcch(struct chan_desc *cd, float *energy)
 	if (!crc)
 		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_BCCH,
-			cd->fn, cd->sa_bcch_stn, l2, 24));
+			0, cd->fn, cd->sa_bcch_stn, l2, 24));
 
 	return 0;
 }
@@ -837,7 +837,7 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 	if (!crc)
 		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_CCCH,
-			cd->fn, cd->sa_bcch_stn, l2, 24));
+			0, cd->fn, cd->sa_bcch_stn, l2, 24));
 
 	return 0;
 }

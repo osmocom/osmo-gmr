@@ -1,4 +1,4 @@
-/* GMR-1 GSMtap helpers */
+/* GMR-1 RT framework: FCCH task */
 
 /* (C) 2011-2019 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
@@ -17,27 +17,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __OSMO_GMR1_GSMTAP_H__
-#define __OSMO_GMR1_GSMTAP_H__
+#ifndef __RTFWK_SA_FCCH_H__
+#define __RTFWK_SA_FCCH_H__
 
-/*! \defgroup gsmtap GMR-1 GSMtap helpers
- *  @{
- */
+struct app_state;
+struct gmr1_fcch_burst;
 
-/*! \file gsmtap.h
- *  \brief Osmocom GMR-1 GSMtap helpers header
- */
+struct fcch_sink_params {
+	struct app_state *as;
+	int chan_id;
 
-#include <stdint.h>
+	int start_discard;
+	const struct gmr1_fcch_burst *burst_type;
+};
 
-struct msgb;
+extern const struct sample_actor_desc fcch_sink;
 
-
-struct msgb *gmr1_gsmtap_makemsg(
-	uint8_t chan_type, uint16_t arfcn, uint32_t fn, uint8_t tn,
-	const uint8_t *l2, int len);
-
-
-/*! @} */
-
-#endif /* __OSMO_GMR1_GSMTAP_H__ */
+#endif /* __RTFWK_SA_FCCH_H__ */

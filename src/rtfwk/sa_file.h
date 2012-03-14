@@ -1,4 +1,4 @@
-/* GMR-1 GSMtap helpers */
+/* GMR-1 RT framework: File source/sink */
 
 /* (C) 2011-2019 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
@@ -17,27 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __OSMO_GMR1_GSMTAP_H__
-#define __OSMO_GMR1_GSMTAP_H__
-
-/*! \defgroup gsmtap GMR-1 GSMtap helpers
- *  @{
- */
-
-/*! \file gsmtap.h
- *  \brief Osmocom GMR-1 GSMtap helpers header
- */
-
-#include <stdint.h>
-
-struct msgb;
+#ifndef __RTFWK_SA_FILE_H__
+#define __RTFWK_SA_FILE_H__
 
 
-struct msgb *gmr1_gsmtap_makemsg(
-	uint8_t chan_type, uint16_t arfcn, uint32_t fn, uint8_t tn,
-	const uint8_t *l2, int len);
+#include "sampbuf.h"
+
+extern const struct sample_actor_desc sa_file_src;
+extern const struct sample_actor_desc sa_file_sink;
 
 
-/*! @} */
-
-#endif /* __OSMO_GMR1_GSMTAP_H__ */
+#endif /* __RTFWK_SA_FILE_H__ */
