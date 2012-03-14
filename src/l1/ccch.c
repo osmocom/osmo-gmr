@@ -29,6 +29,10 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <osmocom/core/bits.h>
+#include <osmocom/core/conv.h>
+#include <osmocom/core/crc16gen.h>
+
 #include <osmocom/gmr1/l1/conv.h>
 #include <osmocom/gmr1/l1/crc.h>
 #include <osmocom/gmr1/l1/interleave.h>
