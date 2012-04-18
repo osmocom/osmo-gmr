@@ -38,6 +38,6 @@ void gmr1_ccch_encode(ubit_t *bits_e, const uint8_t *l2);
 int  gmr1_ccch_decode(uint8_t *l2, const sbit_t *bits_e, int *conv_rv);
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_L1_CCCH_H__ */

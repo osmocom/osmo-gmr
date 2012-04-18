@@ -193,4 +193,4 @@ gmr1_rach_decode(uint8_t *rach, const sbit_t *bits_e, uint8_t sb_mask,
 	return crc[0] || crc[1];
 }
 
-/*! }@ */
+/*! @} */

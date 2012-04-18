@@ -37,6 +37,6 @@ void gmr1_scramble_sbit(sbit_t *out, const sbit_t *in, int len);
 void gmr1_scramble_ubit(ubit_t *out, const ubit_t *in, int len);
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_L1_SCRAMB_H__ */

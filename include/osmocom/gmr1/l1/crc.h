@@ -38,6 +38,6 @@ extern const struct osmo_crc16gen_code gmr1_crc12;
 extern const struct osmo_crc16gen_code gmr1_crc16;
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_L1_CRC_H__ */

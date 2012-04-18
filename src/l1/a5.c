@@ -281,4 +281,4 @@ gmr1_a5_1(uint8_t *key, uint32_t fn, int nbits, ubit_t *dl, ubit_t *ul)
 	}
 }
 
-/*! }@ */
+/*! @} */

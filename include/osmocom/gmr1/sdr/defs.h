@@ -39,6 +39,6 @@
 #endif
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_SDR_DEFS_H__ */

@@ -66,6 +66,6 @@ extern const struct gmr1_puncturer gmr1_punct15_P53;
 extern const struct gmr1_puncturer gmr1_punct15_Ps53;
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_L1_PUNCT_H__ */

@@ -182,4 +182,4 @@ gmr1_tch3_decode(uint8_t *frame0, uint8_t *frame1, ubit_t *bits_s,
 	}
 }
 
-/*! }@ */
+/*! @} */

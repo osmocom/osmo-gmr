@@ -195,4 +195,4 @@ const struct osmo_conv_code gmr1_conv_tch3 = {
 	.next_state  = gmr1_conv_tch3_next_state,
 };
 
-/*! }@ */
+/*! @} */

@@ -106,4 +106,4 @@ gmr1_ccch_decode(uint8_t *l2, const sbit_t *bits_e, int *conv_rv)
 	return rv;
 }
 
-/*! }@ */
+/*! @} */

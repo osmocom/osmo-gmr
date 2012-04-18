@@ -41,6 +41,6 @@ struct msgb *gmr1_gsmtap_makemsg(
 	const uint8_t *l2, int len);
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_GSMTAP_H__ */

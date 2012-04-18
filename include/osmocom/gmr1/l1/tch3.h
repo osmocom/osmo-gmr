@@ -42,6 +42,6 @@ void gmr1_tch3_decode(uint8_t *frame0, uint8_t *frame1, ubit_t *bits_s,
                       int *conv0_rv, int *conv1_rv);
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_L1_TCH3_H__ */

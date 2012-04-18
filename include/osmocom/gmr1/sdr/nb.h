@@ -45,6 +45,6 @@ extern struct gmr1_pi4cxpsk_burst gmr1_rach_burst;
 extern struct gmr1_pi4cxpsk_burst gmr1_sdcch_burst;
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_SDR_NB_H__ */

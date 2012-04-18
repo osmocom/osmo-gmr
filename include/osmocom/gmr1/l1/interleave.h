@@ -35,6 +35,6 @@ void gmr1_interleave_intra(void *out, const void *in, int N);
 void gmr1_deinterleave_intra(void *out, const void *in, int N);
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_L1_INTERLEAVE_H__ */

@@ -42,6 +42,6 @@ gmr1_dkab_demod(struct osmo_cxvec *burst_in, int sps, float freq_shift, int p,
                 sbit_t *ebits, float *toa_p);
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_SDR_DKAB_H__ */

@@ -40,6 +40,6 @@ extern const struct osmo_conv_code gmr1_conv_15;
 extern const struct osmo_conv_code gmr1_conv_tch3;
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_L1_CONV_H__ */

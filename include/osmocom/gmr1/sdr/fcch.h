@@ -49,6 +49,6 @@ int gmr1_fcch_snr(struct osmo_cxvec *burst_in, int sps, float freq_shift,
                   float *snr);
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_SDR_FCCH_H__ */

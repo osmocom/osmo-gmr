@@ -33,6 +33,6 @@
 /*! \defgroup l1_chan Channel coder / decoders */
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_SDR_DEFS_H__ */

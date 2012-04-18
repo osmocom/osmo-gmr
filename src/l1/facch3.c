@@ -169,4 +169,4 @@ gmr1_facch3_decode(uint8_t *l2, ubit_t *bits_s,
 	return rv;
 }
 
-/*! }@ */
+/*! @} */

@@ -79,4 +79,4 @@ gmr1_deinterleave_intra(void *out, const void *in, int N)
 	}
 }
 
-/*! }@ */
+/*! @} */

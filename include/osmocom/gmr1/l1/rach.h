@@ -39,6 +39,6 @@ int  gmr1_rach_decode(uint8_t *rach, const sbit_t *bits_e, uint8_t sb_mask,
                       int *conv_rv, int *crc_rv);
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_L1_RACH_H__ */

@@ -345,4 +345,4 @@ struct gmr1_pi4cxpsk_burst gmr1_sdcch_burst = {
 	.data = _sdcch_data,
 };
 
-/*! }@ */
+/*! @} */

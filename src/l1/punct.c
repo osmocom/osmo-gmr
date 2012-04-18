@@ -281,4 +281,4 @@ const struct gmr1_puncturer gmr1_punct15_Ps53 = {
 	},
 };
 
-/*! }@ */
+/*! @} */

@@ -70,4 +70,4 @@ gmr1_gsmtap_makemsg(uint8_t chan_type, uint32_t fn, uint8_t tn,
 	return msg;
 }
 
-/*! }@ */
+/*! @} */

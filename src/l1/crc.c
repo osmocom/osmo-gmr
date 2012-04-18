@@ -62,4 +62,4 @@ const struct osmo_crc16gen_code gmr1_crc16 = {
 	.remainder = 0x0000,
 };
 
-/*! }@ */
+/*! @} */

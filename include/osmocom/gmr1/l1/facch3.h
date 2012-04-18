@@ -40,6 +40,6 @@ int  gmr1_facch3_decode(uint8_t *l2, ubit_t *bits_s,
                         const sbit_t *bits_e, const ubit_t *ciph, int *conv_rv);
 
 
-/*! }@ */
+/*! @} */
 
 #endif /* __OSMO_GMR1_L1_FACCH3_H__ */
