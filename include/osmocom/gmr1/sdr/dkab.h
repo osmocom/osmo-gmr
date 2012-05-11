@@ -33,7 +33,7 @@
 
 #include <stdint.h>
 #include <osmocom/core/bits.h>
-#include <osmocom/sdr/cxvec.h>
+#include <osmocom/dsp/cxvec.h>
 
 #define GMR1_DKAB_SYMS (39*3)
 

@@ -30,7 +30,7 @@
  *  \brief Osmocom GMR-1 FCCH bursts header
  */
 
-#include <osmocom/sdr/cxvec.h>
+#include <osmocom/dsp/cxvec.h>
 
 
 #define GMR1_FCCH_SYMS	(39*3)	/*!< \brief FCCH burst duration in symbols */

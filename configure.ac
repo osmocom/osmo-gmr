@@ -21,7 +21,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 dnl checks for libraries
 PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 0.4.1)
-PKG_CHECK_MODULES(LIBOSMOSDR, libosmosdr)
+PKG_CHECK_MODULES(LIBOSMODSP, libosmodsp)
 PKG_CHECK_MODULES(FFTW3F, fftw3f >= 3.2.0)
 
 dnl checks for header files

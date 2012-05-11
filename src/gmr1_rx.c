@@ -29,9 +29,9 @@
 #include <osmocom/core/gsmtap.h>
 #include <osmocom/core/gsmtap_util.h>
 
-#include <osmocom/sdr/cfile.h>
-#include <osmocom/sdr/cxvec.h>
-#include <osmocom/sdr/cxvec_math.h>
+#include <osmocom/dsp/cfile.h>
+#include <osmocom/dsp/cxvec.h>
+#include <osmocom/dsp/cxvec_math.h>
 
 #include <osmocom/gmr1/gsmtap.h>
 #include <osmocom/gmr1/l1/a5.h>

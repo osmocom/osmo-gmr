@@ -32,7 +32,7 @@
 
 #include <stdint.h>
 #include <osmocom/core/bits.h>
-#include <osmocom/sdr/cxvec.h>
+#include <osmocom/dsp/cxvec.h>
 
 
 #define GMR1_MAX_SYM_EBITS	2	/*!< \brief Max e bits in a symbol */

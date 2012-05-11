@@ -35,8 +35,8 @@
 
 #include <osmocom/core/bits.h>
 
-#include <osmocom/sdr/cxvec.h>
-#include <osmocom/sdr/cxvec_math.h>
+#include <osmocom/dsp/cxvec.h>
+#include <osmocom/dsp/cxvec_math.h>
 
 #include <osmocom/gmr1/sdr/defs.h>
 #include <osmocom/gmr1/sdr/pi4cxpsk.h>
