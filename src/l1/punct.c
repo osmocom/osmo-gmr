@@ -36,7 +36,10 @@
 
 /*! \brief Generate convolutional code puncturing array for a osmo_conv_code
  *  \param[inout] code The code for which to generate the puncturing array
- *  \param[in] punct The puncturing scheme description
+ *  \param[in] punct_pre The puncturing scheme for first block (can be NULL)
+ *  \param[in] punct_main The puncturing scheme
+ *  \param[in] punct_post The puncturing scheme for last block (can be NULL)
+ *  \param[in] repeat How many time to apply main punctured (0 = auto)
  *  \return 0 for success, <0 for error codes.
  *
  * The array is allocated with malloc and must be free'd by the caller
@@ -44,32 +47,87 @@
  */
 int
 gmr1_puncturer_generate(struct osmo_conv_code *code,
-                        const struct gmr1_puncturer *punct)
+                        const struct gmr1_puncturer *punct_pre,
+                        const struct gmr1_puncturer *punct_main,
+                        const struct gmr1_puncturer *punct_post,
+			int repeat)
 {
-	int i, j, cl, pl;
+	int N, d, cl, pl;
+	int ip, ii, io, i;
 	int *p;
 
 	/* Safety checks */
-	if (code->N != punct->N)
+	N = code->N;
+
+	if (punct_pre && (punct_pre->N != N))
+		return -EINVAL;
+
+	if (punct_main->N != N)
+		return -EINVAL;
+
+	if (punct_post && (punct_post->N != N))
 		return -EINVAL;
 
 	/* Upper bound for length */
 	cl = osmo_conv_get_output_length(code, 0);
-	pl = ((cl + punct->L - 1) / punct->L) * punct->r + 1;
+	pl = 0;
+
+	if (punct_pre) {
+		cl -= punct_pre->L * N;
+		pl += punct_pre->r;
+	}
+
+	if (punct_post) {
+		cl -= punct_post->L * N;
+		pl += punct_post->r;
+	}
+
+	d = punct_main->L * N;
+
+	if (!repeat)
+		repeat = ((cl + d - 1) / d);
+
+	pl += repeat * punct_main->r + 1;
 
 	/* Alloc array */
 	p = malloc(pl * sizeof(int));
 	if (!p)
 		return -ENOMEM;
 
-	code->puncture = p;
-
 	/* Fill */
-	for (i=0, j=0; i<cl; i++) {
-		if (punct->mask[i % (punct->N * punct->L)] == 0)
-			p[j++] = i;
+	cl = osmo_conv_get_output_length(code, 0);
+	ii = io = 0;
+
+	if (punct_pre) {
+		d = punct_pre->L * N;
+		for (ip=0; ii<cl && ip<d ; ii++,ip++)
+			if (punct_pre->mask[ip] == 0)
+				p[io++] = ii;
 	}
-	p[j] = -1;
+
+	if (punct_post) {
+		cl -= punct_post->L * N;
+	}
+
+	for (i=0; i<repeat; i++) {
+		d = punct_main->L * N;
+		for (ip=0; ii<cl && ip<d; ii++,ip++) {
+			if (punct_main->mask[ip] == 0)
+				p[io++] = ii;
+		}
+	}
+
+	if (punct_post) {
+		d = punct_post->L * N;
+		ii = cl;
+		for (ip=0; ii>0 && ip<d; ii++,ip++)
+			if (punct_post->mask[ip] == 0)
+				p[io++] = ii;
+	}
+
+	p[io] = -1;
+
+	code->puncture = p;
 
 	return 0;
 }

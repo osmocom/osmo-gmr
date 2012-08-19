@@ -45,7 +45,7 @@ gmr1_tch3_init(void)
 	/* Init convolutional coder */
 	memcpy(&gmr1_conv_tch3_speech, &gmr1_conv_tch3, sizeof(struct osmo_conv_code));
 	gmr1_conv_tch3_speech.len = 48;
-	gmr1_puncturer_generate(&gmr1_conv_tch3_speech, &gmr1_punct12_P12);
+	gmr1_puncturer_generate(&gmr1_conv_tch3_speech, NULL, &gmr1_punct12_P12, NULL, 0);
 }
 
 

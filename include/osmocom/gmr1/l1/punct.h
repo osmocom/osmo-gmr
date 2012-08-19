@@ -45,7 +45,10 @@ struct gmr1_puncturer {
 struct osmo_conv_code;
 
 int gmr1_puncturer_generate(struct osmo_conv_code *code,
-                            const struct gmr1_puncturer *punct);
+                            const struct gmr1_puncturer *punct_pre,
+                            const struct gmr1_puncturer *punct_main,
+                            const struct gmr1_puncturer *punct_post,
+                            int repeat);
 
 
 /* Various puncturing codes used in GMR-1 */
