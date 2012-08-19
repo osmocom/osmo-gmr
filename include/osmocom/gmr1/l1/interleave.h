@@ -31,8 +31,29 @@
  */
 
 
+/* Intra burst interleaving */
+
 void gmr1_interleave_intra(void *out, const void *in, int N);
 void gmr1_deinterleave_intra(void *out, const void *in, int N);
+
+
+/* Inter burst interleaving */
+
+/*! \brief GMR1 inter-burst (de)interleaver state */
+struct gmr1_interleaver
+{
+	int N;			/*!< \brief Interleaver depth */
+	int K;			/*!< \brief Interleaver width */
+	int n;			/*!< \brief Current burst number */
+	uint8_t *bits_cpp;	/*!< \brief c'' bit state storage */
+};
+
+int  gmr1_interleaver_init(struct gmr1_interleaver *il, int N, int K);
+void gmr1_interleaver_fini(struct gmr1_interleaver *il);
+void gmr1_interleave_inter(struct gmr1_interleaver *il,
+                           void *bits_epp, void *bits_ep);
+void gmr1_deinterleave_inter(struct gmr1_interleaver *il,
+                             void *bits_ep, void *bits_epp);
 
 
 /*! @} */
