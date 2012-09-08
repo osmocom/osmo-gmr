@@ -495,7 +495,7 @@ int main(int argc, char** argv)
     pthread_sigmask(SIG_BLOCK, &new_mask, &old_mask);
 
     /* Launch the flowgraph in a separate thread. */
-    boost::thread fg_thread( boost::bind( &gr_top_block::run, fg.get() ) );
+    boost::thread fg_thread( boost::bind( &gr_top_block::run, fg.get(), 10000) );
 
     /* Restore previous signals. */
     pthread_sigmask(SIG_SETMASK, &old_mask, 0);
