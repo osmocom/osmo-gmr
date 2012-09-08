@@ -7,7 +7,7 @@ PKGLIBS += gnuradio-fcd
 CFLAGS += -DHAVE_FCD
 endif
 ifeq ($(TARGET),uhd)
-PKGLIBS += gnuradio-uhd
+PKGLIBS += gnuradio-uhd uhd
 CFLAGS += -DHAVE_UHD
 endif
 ifeq ($(TARGET),usrp)
