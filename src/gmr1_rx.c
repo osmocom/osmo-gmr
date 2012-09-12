@@ -88,7 +88,7 @@ struct chan_desc {
 	int sa_bcch_stn;
 
 	/* TCH */
-	struct tch3_state tch_state;
+	struct tch3_state tch3_state;
 
 	/* A5 */
 	uint8_t kc[8];
@@ -224,18 +224,18 @@ static void
 rx_tch3_init(struct chan_desc *cd, const uint8_t *imm_ass, float ref_energy)
 {
 	/* Activate */
-	cd->tch_state.active = 1;
+	cd->tch3_state.active = 1;
 
 	/* Extract TN & DKAB position */
-	ccch_imm_ass_parse(imm_ass, &cd->tch_state.tn, &cd->tch_state.p);
+	ccch_imm_ass_parse(imm_ass, &cd->tch3_state.tn, &cd->tch3_state.p);
 
 	/* Estimate energy threshold */
-	cd->tch_state.energy_dkab  = ref_energy / 8.0f;
-	cd->tch_state.energy_burst = ref_energy / 2.0f;
+	cd->tch3_state.energy_dkab  = ref_energy / 8.0f;
+	cd->tch3_state.energy_burst = ref_energy / 2.0f;
 
 	/* Init FACCH state */
-	cd->tch_state.sync_id = 0;
-	memset(&cd->tch_state.ebits, 0x00, sizeof(sbit_t) * 104 * 4);
+	cd->tch3_state.sync_id = 0;
+	memset(&cd->tch3_state.ebits, 0x00, sizeof(sbit_t) * 104 * 4);
 }
 
 static int
@@ -247,7 +247,7 @@ _rx_tch3_dkab(struct chan_desc *cd, struct osmo_cxvec *burst)
 
 	fprintf(stderr, "[.]   DKAB\n");
 
-	rv = gmr1_dkab_demod(burst, cd->sps, -cd->freq_err, cd->tch_state.p, ebits, &toa);
+	rv = gmr1_dkab_demod(burst, cd->sps, -cd->freq_err, cd->tch3_state.p, ebits, &toa);
 
 	fprintf(stderr, "toa=%f\n", toa);
 
@@ -257,7 +257,7 @@ _rx_tch3_dkab(struct chan_desc *cd, struct osmo_cxvec *burst)
 static int
 _rx_tch3_facch_flush(struct chan_desc *cd)
 {
-	struct tch3_state *st = &cd->tch_state;
+	struct tch3_state *st = &cd->tch3_state;
 	ubit_t _ciph[96*4], *ciph;
 	uint8_t l2[10];
 	ubit_t sbits[8*4];
@@ -309,7 +309,7 @@ _rx_tch3_facch_flush(struct chan_desc *cd)
 static int
 _rx_tch3_facch(struct chan_desc *cd, struct osmo_cxvec *burst)
 {
-	struct tch3_state *st = &cd->tch_state;
+	struct tch3_state *st = &cd->tch3_state;
 	sbit_t ebits[104];
 	int rv, bi, sync_id;
 	float toa;
@@ -366,7 +366,7 @@ _rx_tch3_speech(struct chan_desc *cd, struct osmo_cxvec *burst)
 	);
 
 	/* Decode it */
-	gmr1_a5(cd->tch_state.ciph, cd->kc, cd->fn, 208, ciph, NULL);
+	gmr1_a5(cd->tch3_state.ciph, cd->kc, cd->fn, 208, ciph, NULL);
 
 	gmr1_tch3_decode(frame0, frame1, sbits, ebits, ciph, 0, &conv[0], &conv[1]);
 
@@ -393,29 +393,29 @@ rx_tch3(struct chan_desc *cd)
 	float be, det, toa;
 
 	/* Is TCH active at all ? */
-	if (!cd->tch_state.active)
+	if (!cd->tch3_state.active)
 		return 0;
 
 	/* Map potential burst (use FACCH3 as reference) */
 	e_toa = burst_map(burst, cd, &gmr1_nt3_facch_burst,
-	                  cd->tch_state.tn, cd->sps + (cd->sps/2), 1);
+	                  cd->tch3_state.tn, cd->sps + (cd->sps/2), 1);
 	if (e_toa < 0)
 		return e_toa;
 
 	/* Burst energy (and check for DKAB) */
 	be = burst_energy(burst);
 
-	det = (cd->tch_state.energy_dkab + cd->tch_state.energy_burst) / 2.0f;
+	det = (cd->tch3_state.energy_dkab + cd->tch3_state.energy_burst) / 2.0f;
 	if (be < det) {
-		cd->tch_state.energy_dkab =
+		cd->tch3_state.energy_dkab =
 			(0.1f * be) +
-			(0.9f * cd->tch_state.energy_dkab);
+			(0.9f * cd->tch3_state.energy_dkab);
 		return _rx_tch3_dkab(cd, burst);
 	}
 
-	cd->tch_state.energy_burst =
+	cd->tch3_state.energy_burst =
 		(0.1f * be) +
-		(0.9f * cd->tch_state.energy_burst);
+		(0.9f * cd->tch3_state.energy_burst);
 
 	/* Detect burst type */
 	rv = gmr1_pi4cxpsk_detect(
@@ -679,7 +679,7 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 	if (!crc) {
 		if (ccch_is_imm_ass(l2)) {
 			rx_tch3_init(cd, l2, min_energy);
-			fprintf(stderr, "\n[+] TCH3 assigned on TN %d\n", cd->tch_state.tn);
+			fprintf(stderr, "\n[+] TCH3 assigned on TN %d\n", cd->tch3_state.tn);
 		}
 	}
 
