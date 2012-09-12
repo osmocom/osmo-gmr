@@ -38,7 +38,10 @@
 #include <osmocom/gmr1/l1/bcch.h>
 #include <osmocom/gmr1/l1/ccch.h>
 #include <osmocom/gmr1/l1/facch3.h>
+#include <osmocom/gmr1/l1/facch9.h>
+#include <osmocom/gmr1/l1/interleave.h>
 #include <osmocom/gmr1/l1/tch3.h>
+#include <osmocom/gmr1/l1/tch9.h>
 #include <osmocom/gmr1/sdr/defs.h>
 #include <osmocom/gmr1/sdr/dkab.h>
 #include <osmocom/gmr1/sdr/fcch.h>
@@ -72,10 +75,22 @@ struct tch3_state {
 	int burst_cnt;
 };
 
+struct tch9_state {
+	/* Status */
+	int active;
+
+	/* Channel params */
+	int tn;
+
+	/* Interleaver */
+	struct gmr1_interleaver il;
+};
+
 struct chan_desc {
 	/* Sample source */
 	struct cfile *bcch;
 	struct cfile *tch;
+	struct cfile *tch_csd;
 	int sps;
 
 	/* SDR alignement */
@@ -89,6 +104,7 @@ struct chan_desc {
 
 	/* TCH */
 	struct tch3_state tch3_state;
+	struct tch9_state tch9_state;
 
 	/* A5 */
 	uint8_t kc[8];
@@ -132,7 +148,7 @@ burst_map(struct osmo_cxvec *burst, struct chan_desc *cd,
 {
 	int begin, len;
 	int etoa;
-	struct cfile *df = tch ? cd->tch : cd->bcch;
+	struct cfile *df = tch == 2 ? cd->tch_csd : (tch ? cd->tch : cd->bcch);
 
 	if (!df)
 		return -EINVAL;
@@ -217,6 +233,113 @@ ccch_imm_ass_parse(const uint8_t *l2, int *rx_tn, int *p)
 	*rx_tn = ((l2[8] & 0x03) << 3) | (l2[9] >> 5);
 }
 
+static inline int
+facch3_is_ass_cmd_1(const uint8_t *l2)
+{
+	return (l2[3] == 0x06) && (l2[4] == 0x2e);
+}
+
+static void
+facch3_ass_cmd_1_parse(const uint8_t *l2, int *rx_tn)
+{
+	*rx_tn = ((l2[5] & 0x03) << 3) | (l2[6] >> 5);
+}
+
+
+/* TCH9 Procesing --------------------------------------------------------- */
+
+static void
+rx_tch9_init(struct chan_desc *cd, const uint8_t *ass_cmd)
+{
+	/* Activate */
+	cd->tch9_state.active = 1;
+
+	/* Extract TN */
+	facch3_ass_cmd_1_parse(ass_cmd, &cd->tch9_state.tn);
+
+	/* Init interleaver */
+	gmr1_interleaver_init(&cd->tch9_state.il, 3, 648);
+}
+
+static int
+rx_tch9(struct chan_desc *cd)
+{
+	struct osmo_cxvec _burst, *burst = &_burst;
+	int e_toa, rv, sync_id, crc, conv;
+	sbit_t ebits[662], bits_sacch[10], bits_status[4];
+	ubit_t ciph[658];
+	float toa;
+
+	/* Is TCH active at all ? */
+	if (!cd->tch9_state.active)
+		return 0;
+
+	/* Map potential burst */
+	e_toa = burst_map(burst, cd, &gmr1_nt9_burst,
+	                  cd->tch9_state.tn, cd->sps + (cd->sps/2), 2);
+	if (e_toa < 0)
+		return e_toa;
+
+	/* Demodulate burst */
+	rv = gmr1_pi4cxpsk_demod(
+		&gmr1_nt9_burst,
+		burst, cd->sps, -cd->freq_err,
+		ebits, &sync_id, &toa, NULL
+	);
+
+	fprintf(stderr, "[.]   %s\n", sync_id ? "TCH9" : "FACCH9");
+	fprintf(stderr, "toa=%.1f, sync_id=%d\n", toa, sync_id);
+
+	/* Process depending on type */
+	if (!sync_id) { /* FACCH9 */
+		uint8_t l2[38];
+
+		/* Generate cipher stream */
+		gmr1_a5(1, cd->kc, cd->fn, 658, ciph, NULL);
+
+		/* Decode */
+		crc = gmr1_facch9_decode(l2, bits_sacch, bits_status, ebits, ciph, &conv);
+		fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
+
+		/* Send to GSMTap if correct */
+		if (!crc)
+			gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+				GSMTAP_GMR1_TCH9 | GSMTAP_GMR1_FACCH,
+				cd->fn, cd->tch9_state.tn, l2, 38));
+	} else { /* TCH9 */
+		uint8_t l2[60];
+		int i, s = 0;
+
+		/* Generate cipher stream */
+		gmr1_a5(1, cd->kc, cd->fn, 658, ciph, NULL);
+
+		for (i=0; i<662; i++)
+			s += ebits[i] < 0 ? -ebits[i] : ebits[i];
+		s /= 662;
+
+		/* Decode */
+		gmr1_tch9_decode(l2, bits_sacch, bits_status, ebits, GMR1_TCH9_9k6, ciph, &cd->tch9_state.il, &conv);
+		fprintf(stderr, "fn=%d, conv9=%d, avg=%d\n", cd->fn, conv, s);
+
+		/* Forward to GSMTap (no CRC to validate :( ) */
+		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+			GSMTAP_GMR1_TCH9,
+			cd->fn, cd->tch9_state.tn, l2, 60));
+
+		/* Save to file */
+		{
+			static FILE *f = NULL;
+			if (!f)
+				f = fopen("/tmp/csd.data", "wb");
+			fwrite(l2, 60, 1, f);
+		}
+	}
+
+	/* Done */
+	return rv;
+
+}
+
 
 /* TCH3 Procesing --------------------------------------------------------- */
 
@@ -295,6 +418,14 @@ _rx_tch3_facch_flush(struct chan_desc *cd)
 		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_TCH3 | GSMTAP_GMR1_FACCH,
 			cd->fn-3, st->tn, l2, 10));
+
+	/* Parse for assignement */
+	if (!crc && facch3_is_ass_cmd_1(l2))
+	{
+		/* Follow if we have the data */
+		if (cd->tch_csd)
+			rx_tch9_init(cd, l2);
+	}
 
 	/* Clear state */
 	st->sync_id ^= 1;
@@ -722,6 +853,7 @@ process_bcch(struct chan_desc *cd)
 
 		/* TCH */
 		rx_tch3(cd);
+		rx_tch9(cd);
 
 		/* Next frame */
 		cd->fn++;
@@ -751,8 +883,8 @@ int main(int argc, char *argv[])
 	cd->freq_err = 0.0f;
 
 	/* Arg check */
-	if (argc < 3 || argc > 5) {
-		fprintf(stderr, "Usage: %s sps bcch.cfile [tch.cfile [key]]\n", argv[0]);
+	if (argc < 3 || argc > 6) {
+		fprintf(stderr, "Usage: %s sps bcch.cfile [tch.cfile [key [tch_csd.cfile]]]\n", argv[0]);
 		return -EINVAL;
 	}
 
@@ -787,6 +919,15 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	if (argc > 5) {
+		cd->tch_csd = cfile_load(argv[5]);
+		if (!cd->tch_csd) {
+			fprintf(stderr, "[!] Failed to load tch CSD input file\n");
+			rv = -EIO;
+			goto err;
+		}
+	}
+
 	/* Init GSMTap */
 	g_gti = gsmtap_source_init("127.0.0.1", GSMTAP_UDP_PORT, 0);
 	gsmtap_source_add_sink(g_gti);
@@ -811,6 +952,9 @@ int main(int argc, char *argv[])
 
 	/* Clean up */
 err:
+	if (cd->tch_csd)
+		cfile_release(cd->tch_csd);
+
 	if (cd->tch)
 		cfile_release(cd->tch);
 
