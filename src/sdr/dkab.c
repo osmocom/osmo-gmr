@@ -43,19 +43,25 @@
 #include <osmocom/gmr1/sdr/dkab.h>
 
 
+/*! \brief Ratio between peak power and valley power for DKAB detection */
+#define DKAB_PWR_RATIO_THRESHOLD	10.0f
+
+
 /*! \brief Finds the precise TOA of a DKAB burts by looking for power spikes
  *  \param[in] burst Complex signal of the burst
  *  \param[in] sps Oversampling used in the input complex signal
  *  \param[in] p DKAB position
  *  \param[out] toa_p Pointer to TOA return variable
- *  \returns 0 for success. -errno for errors
+ *  \returns 0 for success, 1 if DKAB not found, -errno for fatal errors
  */
 static int
 _gmr1_dkab_find_toa(struct osmo_cxvec *burst, int sps, int p, float *toa_p)
 {
 	struct osmo_cxvec *pwr = NULL;
-	int w, i, ofs[2], d, mi;
+	int rv, w, i, ofs[2], d, mi;
 	float mp, toa;
+	float egy_peak, egy_valley;
+	int l_peak, l_valley, toa_i;
 
 	/* Window size */
 	w = burst->len - (GMR1_DKAB_SYMS * sps) + 1;
@@ -111,10 +117,30 @@ _gmr1_dkab_find_toa(struct osmo_cxvec *burst, int sps, int p, float *toa_p)
 
 	*toa_p = toa;
 
+	toa_i = (int)roundf(toa);
+
+	/* Check the ratio between the peaks and valley to validate */
+	egy_peak = 0.0f;
+	l_peak = d * 2;
+	for (i=0; i<d; i++) {
+		egy_peak +=
+			osmo_normsqf(burst->data[toa_i+ofs[0]+i]) +
+			osmo_normsqf(burst->data[toa_i+ofs[1]+i]);
+	}
+	egy_peak /= l_peak;
+
+	egy_valley = 0.0f;
+	l_valley = ofs[1] - ofs[0] - d;
+	for (i=0; i<l_valley; i++)
+		egy_valley += osmo_normsqf(burst->data[toa_i+ofs[0]+d+i]);
+	egy_valley /= l_valley;
+
+	rv = ((egy_peak /egy_valley) > DKAB_PWR_RATIO_THRESHOLD) ? 0 : 1;
+
 	/* Done */
 	osmo_cxvec_free(pwr);
 
-	return 0;
+	return rv;
 }
 
 /*! \brief Converts a burst into softbits given proper TOA
@@ -152,7 +178,7 @@ _gmr1_dkab_soft_bits(struct osmo_cxvec *burst, int sps, int p, float toa,
  *  \param[in] p DKAB position
  *  \param[out] ebits Encoded soft bits return array
  *  \param[out] toa_p Pointer to TOA return variable
- *  \returns 0 for success. -errno for errors
+ *  \returns 0 for success, 1 if DKAB not found, -errno for fatal errors
  *
  * burst_in is expected to be longer than necessary. Any extra length will be
  * used as 'search window' to find proper alignement. Good practice is to have
