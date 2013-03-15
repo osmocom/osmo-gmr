@@ -554,7 +554,7 @@ gmr1_pi4cxpsk_demod(struct gmr1_pi4cxpsk_burst *burst_type,
 	_gmr1_pi4cxpsk_phase(burst_type, burst, sync_id, &phasor);
 
 	/* Align phase for detection */
-	osmo_cxvec_scale(burst, 1.0f / phasor, burst);
+	osmo_cxvec_scale(burst, conjf(phasor), burst);
 	DEBUG_SIGNAL("pi4cxpsk_final", burst);
 
 	/* Convert phase to soft symbols */
