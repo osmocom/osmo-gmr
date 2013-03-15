@@ -33,9 +33,6 @@
 struct msgb;
 
 
-#define GSMTAP_TYPE_GMR1_UM		0x0a    /* GMR-1 L2 packets */
-#define GSMTAP_GMR1_BCCH		0x01
-
 struct msgb *gmr1_gsmtap_makemsg(
 	uint8_t chan_type, uint32_t fn, uint8_t tn,
 	const uint8_t *l2, int len);
