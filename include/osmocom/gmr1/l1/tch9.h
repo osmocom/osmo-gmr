@@ -33,7 +33,7 @@
 #include <stdint.h>
 #include <osmocom/core/bits.h>
 
-struct gmr1_interleave;
+struct gmr1_interleaver;
 
 
 enum gmr1_tch9_mode {
