@@ -457,6 +457,8 @@ _rx_tch3_facch(struct chan_desc *cd, struct osmo_cxvec *burst)
 		burst, cd->sps, -cd->freq_err,
 		ebits, &sync_id, &toa, NULL
 	);
+	if (rv < 0)
+		return rv;
 
 	fprintf(stderr, "toa=%.1f, sync_id=%d\n", toa, sync_id);
 
@@ -495,6 +497,8 @@ _rx_tch3_speech(struct chan_desc *cd, struct osmo_cxvec *burst)
 		burst, cd->sps, -cd->freq_err,
 		ebits, NULL, &toa, NULL
 	);
+	if (rv < 0)
+		return rv;
 
 	/* Decode it */
 	gmr1_a5(cd->tch3_state.ciph, cd->kc, cd->fn, 208, ciph, NULL);
