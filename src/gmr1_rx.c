@@ -760,7 +760,7 @@ rx_bcch(struct chan_desc *cd, float *energy)
 	if (!crc) {
 		/* SDR alignement */
 		cd->align += ((int)roundf(toa)) - e_toa;
-		cd->freq_err += freq_err / 4.0f;
+		cd->freq_err += freq_err;
 
 		/* Acquire TDMA alignement */
 		bcch_tdma_align(cd, l2);
