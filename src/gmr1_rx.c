@@ -68,6 +68,8 @@ struct tch3_state {
 	float energy_dkab;
 	float energy_burst;
 
+	int weak_cnt;
+
 	/* FACCH state */
 	sbit_t ebits[104*4];
 	uint32_t bi_fn[4];
@@ -354,8 +356,10 @@ rx_tch3_init(struct chan_desc *cd, const uint8_t *imm_ass, float ref_energy)
 	ccch_imm_ass_parse(imm_ass, &cd->tch3_state.tn, &cd->tch3_state.p);
 
 	/* Estimate energy threshold */
-	cd->tch3_state.energy_dkab  = ref_energy / 8.0f;
-	cd->tch3_state.energy_burst = ref_energy / 2.0f;
+	cd->tch3_state.energy_burst = ref_energy * 0.75f;
+	cd->tch3_state.energy_dkab  = cd->tch3_state.energy_burst / 8.0f; /* ~ 8 times less pwr */
+
+	cd->tch3_state.weak_cnt = 0;
 
 	/* Init FACCH state */
 	cd->tch3_state.sync_id = 0;
@@ -541,13 +545,27 @@ rx_tch3(struct chan_desc *cd)
 	/* Burst energy (and check for DKAB) */
 	be = burst_energy(burst);
 
-	det = (cd->tch3_state.energy_dkab + cd->tch3_state.energy_burst) / 2.0f;
+	det = (cd->tch3_state.energy_dkab + cd->tch3_state.energy_burst) / 4.0f;
+
 	if (be < det) {
-		cd->tch3_state.energy_dkab =
-			(0.1f * be) +
-			(0.9f * cd->tch3_state.energy_dkab);
-		return _rx_tch3_dkab(cd, burst);
-	}
+		rv = _rx_tch3_dkab(cd, burst);
+
+		if (rv < 0)
+			return rv;
+		else if (rv == 1) {
+			if (cd->tch3_state.weak_cnt++ > 8) {
+				fprintf(stderr, "END @%d\n", cd->fn);
+				cd->tch3_state.active = 0;
+			}
+		} else {
+			cd->tch3_state.energy_dkab =
+				(0.1f * be) +
+				(0.9f * cd->tch3_state.energy_dkab);
+		}
+
+		return 0;
+	} else
+		cd->tch3_state.weak_cnt = 0;
 
 	cd->tch3_state.energy_burst =
 		(0.1f * be) +
