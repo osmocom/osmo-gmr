@@ -170,7 +170,8 @@ burst_energy(struct osmo_cxvec *burst)
 {
 	int i;
 	float e = 0.0f;
-	for (i=0; i<burst->len; i++)
+	int b = (burst->len >> 5); /* exclude the borders */
+	for (i=b; i<burst->len-b; i++)
 		e += osmo_normsqf(burst->data[i]);
 	e /= burst->len;
 	return e;
