@@ -63,7 +63,7 @@ gmr1_a5(int n, uint8_t *key, uint32_t fn, int nbits,
 		if (dl)
 			memset(dl, 0x00, nbits);
 		if (ul)
-			memset(dl, 0x00, nbits);
+			memset(ul, 0x00, nbits);
 		break;
 
 	case 1:
