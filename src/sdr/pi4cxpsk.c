@@ -353,8 +353,10 @@ _gmr1_pi4cxpsk_freq_err(struct gmr1_pi4cxpsk_burst *burst_type,
 		float pos[n], f;
 
 		/* Correlate all 'chunks' */
-		for (i=0,csync=burst_type->sync[sync_id]; csync->pos>=0; i++,csync++)
+		for (i=0; i<n; i++)
 		{
+			csync = &burst_type->sync[sync_id][i];
+
 			corr[i] = 0.0f;
 			pos[i] = (float)csync->pos + (float)csync->len / 2.0f;
 
