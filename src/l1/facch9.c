@@ -137,7 +137,7 @@ gmr1_facch9_decode(uint8_t *l2, sbit_t *bits_sacch, sbit_t *bits_status,
 
 	rv = osmo_crc16gen_check_bits(&gmr1_crc16, bits_u, 300, bits_u+300);
 
-	l2[38] = 0; /* upper nibble won't be written */
+	l2[37] = 0; /* upper nibble won't be written */
 	osmo_ubit2pbit_ext(l2, 0, bits_u, 0, 300, 1);
 
 	return rv;
