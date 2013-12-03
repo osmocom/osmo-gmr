@@ -18,7 +18,7 @@ CFLAGS += $(shell pkg-config --cflags $(PKGLIBS))
 LDLIBS = $(shell pkg-config --libs $(PKGLIBS)) \
 	-lboost_program_options \
 	-lboost_system \
-	-lboost_thread \
+	-lboost_thread -lpthread \
 
 all: gmr_multi_rx
 
