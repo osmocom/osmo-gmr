@@ -45,9 +45,11 @@ AC_OUTPUT(
 	include/Makefile
 	include/osmocom/Makefile
 	include/osmocom/gmr1/Makefile
+	include/osmocom/gmr1/codec/Makefile
 	include/osmocom/gmr1/l1/Makefile
 	include/osmocom/gmr1/sdr/Makefile
 	src/Makefile
+	src/codec/Makefile
 	src/l1/Makefile
 	src/sdr/Makefile
 	Makefile
