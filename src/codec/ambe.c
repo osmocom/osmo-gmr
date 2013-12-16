@@ -37,7 +37,7 @@ void
 ambe_decode_init(struct ambe_decoder *dec)
 {
 	memset(dec, 0x00, sizeof(struct ambe_decoder));
-	mbe_initMbeParms(&dec->mp_cur, &dec->mp_prev, &dec->mp_prev_enh);
+	mbe_initMbeParms(&dec->mp_prev);
 }
 
 void
@@ -62,6 +62,26 @@ ambe_classify_frame(const uint8_t *frame)
 	};
 }
 
+static void
+ambe_subframe_to_mbelib(mbe_parms *mp, struct ambe_subframe *sf)
+{
+	float unvc;
+	int i;
+
+	mp->w0 = sf->f0 * (2.0f * (float)M_PI);
+	mp->L  = sf->L;
+
+	unvc = 0.2046f / sqrtf(mp->w0);	/* ??? */
+
+	for (i=1; i<=mp->L; i++) {
+		int j = (int)((i-1) * 16.0f * sf->f0);
+		mp->Vl[i] = sf->v_uv[j];
+		mp->Ml[i] = powf(2.0, sf->Mlog[i-1]) / 6.0f;
+		if (!mp->Vl[i])
+			mp->Ml[i] *= unvc;
+	}
+}
+
 static int
 ambe_decode_speech(struct ambe_decoder *dec,
                    int16_t *audio, int N,
@@ -69,8 +89,7 @@ ambe_decode_speech(struct ambe_decoder *dec,
 {
 	struct ambe_raw_params rp;
 	struct ambe_subframe sf[2];
-	float unvc;
-	int i;
+	mbe_parms mp[2];
 
 	/* Unpack frame */
 	ambe_frame_unpack_raw(&rp, frame);
@@ -78,25 +97,18 @@ ambe_decode_speech(struct ambe_decoder *dec,
 	/* Decode subframe parameters */
 	ambe_frame_decode_params(sf, &dec->sf_prev, &rp);
 
-	/* Convert to mbelib's format */
-	dec->mp_cur.w0 = sf[1].f0 * (2.0f * (float)M_PI);
-	dec->mp_cur.L  = sf[1].L;
-
-	unvc = 0.2046f / sqrtf(dec->mp_cur.w0);	/* ??? */
-
-	for (i=1; i<=dec->mp_cur.L; i++) {
-		int j = (int)((i-1) * 16.0f * sf[1].f0);
-		dec->mp_cur.Vl[i] = sf[1].v_uv[j];
-		dec->mp_cur.Ml[i] = powf(2.0, sf[1].Mlog[i-1]) / 8.0f;
-		if (!dec->mp_cur.Vl[i])
-			dec->mp_cur.Ml[i] *= unvc;
-	}
+	/* Convert both subframes to mbelib's format */
+	ambe_subframe_to_mbelib(&mp[0], &sf[0]);
+	ambe_subframe_to_mbelib(&mp[1], &sf[1]);
 
 	/* Synthesize speech (using mbelib for now) */
-	mbe_moveMbeParms(&dec->mp_cur, &dec->mp_prev);
-	mbe_spectralAmpEnhance(&dec->mp_cur);
-	mbe_synthesizeSpeech(audio, &dec->mp_cur, &dec->mp_prev_enh, 2);
-	mbe_moveMbeParms(&dec->mp_cur, &dec->mp_prev_enh);
+	mbe_spectralAmpEnhance(&mp[0]);
+	mbe_spectralAmpEnhance(&mp[1]);
+
+	mbe_synthesizeSpeech(audio,    &mp[0], &dec->mp_prev, 2);
+	mbe_synthesizeSpeech(audio+80, &mp[1], &mp[0],        2);
+
+	mbe_moveMbeParms(&mp[1], &dec->mp_prev);
 
 	/* Save subframe */
 	memcpy(&dec->sf_prev, &sf[1], sizeof(struct ambe_subframe));

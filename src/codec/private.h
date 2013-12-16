@@ -83,9 +83,7 @@ struct ambe_decoder
 
 	struct ambe_subframe sf_prev;	/*!< \brief Previous subframe */
 
-	mbe_parms mp_cur;	/*!< \brief mbelib current frame */
 	mbe_parms mp_prev;	/*!< \brief mbelib previous frame */
-	mbe_parms mp_prev_enh;	/*!< \brief mbelib previous frame (enhanced) */
 };
 
 /* From ambe.c */

@@ -40,7 +40,7 @@ typedef struct mbe_parameters mbe_parms;
 void mbe_printVersion (char *str);
 void mbe_moveMbeParms (mbe_parms * cur_mp, mbe_parms * prev_mp);
 void mbe_useLastMbeParms (mbe_parms * cur_mp, mbe_parms * prev_mp);
-void mbe_initMbeParms (mbe_parms * cur_mp, mbe_parms * prev_mp, mbe_parms * prev_mp_enhanced);
+void mbe_initMbeParms (mbe_parms *mp);
 void mbe_spectralAmpEnhance (mbe_parms * cur_mp);
 void mbe_synthesizeSilencef (float *aout_buf);
 void mbe_synthesizeSilence (short *aout_buf);

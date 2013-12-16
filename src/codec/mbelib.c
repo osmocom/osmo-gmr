@@ -26,35 +26,32 @@
 /*
  * Speech Synthesis Window 8k version
  */
-static const float Ws[321] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0,
-	0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18,
-	0.2, 0.22, 0.24, 0.26, 0.28, 0.3, 0.32, 0.34, 0.36, 0.38,
-	0.4, 0.42, 0.44, 0.46, 0.48, 0.5, 0.52, 0.54, 0.56, 0.58,
-	0.6, 0.62, 0.64, 0.66, 0.68, 0.7, 0.72, 0.74, 0.76, 0.78,
-	0.8, 0.82, 0.84, 0.86, 0.88, 0.9, 0.92, 0.94, 0.96, 0.98,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-	0.98, 0.96, 0.94, 0.92, 0.9, 0.88, 0.86, 0.84, 0.82, 0.8,
-	0.78, 0.76, 0.74, 0.72, 0.7, 0.68, 0.66, 0.64, 0.62, 0.6,
-	0.58, 0.56, 0.54, 0.52, 0.5, 0.48, 0.46, 0.44, 0.42, 0.4,
-	0.38, 0.36, 0.34, 0.32, 0.3, 0.28, 0.26, 0.24, 0.22, 0.2,
-	0.18, 0.16, 0.14, 0.12, 0.1, 0.08, 0.06, 0.04, 0.02, 0,
-	0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+static const int N = 80;
+
+static const float Ws[161] = {
+	0.00, 0.00, 0.00, 0.00,
+	0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
+	0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
+	0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
+	0.02, 0.06, 0.10, 0.14, 0.18, 0.22, 0.26, 0.30,
+	0.34,
+	0.38, 0.42, 0.46, 0.50, 0.54, 0.58, 0.62, 0.66,
+	0.70, 0.74, 0.78, 0.82, 0.86, 0.90, 0.94, 0.98,
+	1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00,
+	1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00,
+	1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00,
+	1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00,
+	1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00,
+	1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00,
+	1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00,
+	0.98, 0.94, 0.90, 0.86, 0.82, 0.78, 0.74, 0.70,
+	0.66, 0.62, 0.58, 0.54, 0.50, 0.46, 0.42, 0.38,
+	0.34, 0.30, 0.26, 0.22, 0.18, 0.14, 0.10, 0.06,
+	0.02,
+	0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
+	0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
+	0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00,
+	0.00, 0.00, 0.00, 0.00
 };
 
 
@@ -109,26 +106,23 @@ mbe_useLastMbeParms (mbe_parms * cur_mp, mbe_parms * prev_mp)
 }
 
 void
-mbe_initMbeParms (mbe_parms * cur_mp, mbe_parms * prev_mp, mbe_parms * prev_mp_enhanced)
+mbe_initMbeParms (mbe_parms *mp)
 {
-
 	int l;
 
-	prev_mp->w0 = 0.09378;
-	prev_mp->L = 30;
-	prev_mp->K = 10;
-	prev_mp->gamma = (float) 0;
+	mp->w0 = 0.09378;
+	mp->L = 30;
+	mp->K = 10;
+	mp->gamma = (float) 0;
 	for (l = 0; l <= 56; l++)
 	{
-		prev_mp->Ml[l] = (float) 0;
-		prev_mp->Vl[l] = 0;
-		prev_mp->log2Ml[l] = (float) 0;   // log2 of 1 == 0
-		prev_mp->PHIl[l] = (float) 0;
-		prev_mp->PSIl[l] = (M_PI / (float) 2);
+		mp->Ml[l] = (float) 0;
+		mp->Vl[l] = 0;
+		mp->log2Ml[l] = (float) 0;   // log2 of 1 == 0
+		mp->PHIl[l] = (float) 0;
+		mp->PSIl[l] = (M_PI / (float) 2);
 	}
-	prev_mp->repeat = 0;
-	mbe_moveMbeParms (prev_mp, cur_mp);
-	mbe_moveMbeParms (prev_mp, prev_mp_enhanced);
+	mp->repeat = 0;
 }
 
 void
@@ -209,7 +203,7 @@ mbe_synthesizeSilencef (float *aout_buf)
 	float *aout_buf_p;
 
 	aout_buf_p = aout_buf;
-	for (n = 0; n < 160; n++)
+	for (n = 0; n < N; n++)
 	{
 		*aout_buf_p = (float) 0;
 		aout_buf_p++;
@@ -224,7 +218,7 @@ mbe_synthesizeSilence (short *aout_buf)
 	short *aout_buf_p;
 
 	aout_buf_p = aout_buf;
-	for (n = 0; n < 160; n++)
+	for (n = 0; n < N; n++)
 	{
 		*aout_buf_p = (short) 0;
 		aout_buf_p++;
@@ -245,8 +239,6 @@ mbe_synthesizeSpeechf (float *aout_buf, mbe_parms * cur_mp, mbe_parms * prev_mp,
 	float uvstep, uvoffset;
 	float qfactor;
 	float rphase[64], rphase2[64];
-
-	const int N = 160;
 
 	uvthresholdf = (float) 2700;
 	uvthreshold = ((uvthresholdf * M_PI) / (float) 4000);
@@ -475,7 +467,7 @@ mbe_synthesizeSpeechf (float *aout_buf, mbe_parms * cur_mp, mbe_parms * prev_mp,
 void
 mbe_synthesizeSpeech (short *aout_buf, mbe_parms * cur_mp, mbe_parms * prev_mp, int uvquality)
 {
-	float float_buf[160];
+	float float_buf[N];
 
 	mbe_synthesizeSpeechf (float_buf, cur_mp, prev_mp, uvquality);
 	mbe_floattoshort (float_buf, aout_buf);
@@ -493,7 +485,7 @@ mbe_floattoshort (float *float_buf, short *aout_buf)
 	again = 7;
 	aout_buf_p = aout_buf;
 	float_buf_p = float_buf;
-	for (i = 0; i < 160; i++)
+	for (i = 0; i < N; i++)
 	{
 		audio = again * *float_buf_p;
 		if (audio > 32760)
