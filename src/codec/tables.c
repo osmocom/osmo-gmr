@@ -1020,11 +1020,11 @@ const float ambe_hoc3_tbl[64][4] = {
 };
 
 /* \brief Interpolation ratios for subframe 0 magnitude prediction */
-const float ambe_sf0_interp_tbl[4][2] = {
-	{ +0.90f, +0.10f },
-	{ +0.70f, +0.30f },
-	{ +0.50f, +0.50f },
-	{ +0.17f, +0.83f },
+const float ambe_sf0_interp_tbl[4] = {
+	0.90f,
+	0.70f,
+	0.50f,
+	0.17f,
 };
 
 /* \brief Prediction Error [1:4] for subframe 0 */

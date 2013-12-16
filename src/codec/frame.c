@@ -67,82 +67,105 @@ ambe_frame_unpack_raw(struct ambe_raw_params *rp, const uint8_t *frame)
 	rp->sf0_perr_58    = _get_bits(p, 44, 2, 3) | _get_bits(p, 77, 3, 0);
 }
 
-int
-ambe_frame_decode_params(struct ambe_subframe *sf,
-                         struct ambe_subframe *sf_prev,
-                         struct ambe_raw_params *rp)
+static float
+ambe_interpolate_f0log(float f0log_prev, float f0log_cur, int rule)
 {
-	uint16_t v_uv;
+	if (f0log_cur != f0log_prev) {
+		switch (rule) {
+		case 0:
+			return f0log_cur;
+
+		case 1:
+			return (0.65f * f0log_cur)
+			     + (0.35f * f0log_prev);
+
+		case 2:
+			return (f0log_cur + f0log_prev) / 2.0f;
+
+		case 3:
+			return f0log_prev;
+		}
+	} else {
+		float step = 4.2672e-2f;
+
+		switch (rule) {
+		case 0:
+		case 1:
+			return f0log_cur;
+
+		case 2:
+			return f0log_cur + step;
+
+		case 3:
+			return f0log_cur - step;
+		}
+	}
+
+	return 0.0f;	/* Not reached */
+}
+
+static void
+ambe_subframe_compute_L_Lb(struct ambe_subframe *sf)
+{
+	sf->L = (int)floorf(0.4761f / sf->f0);
+
+	if (sf->L < 9)
+		sf->L = 9;
+	else if (sf->L > 56)
+		sf->L = 56;
+
+	sf->Lb[0] = ambe_hpg_tbl[sf->L - 9][0];
+	sf->Lb[1] = ambe_hpg_tbl[sf->L - 9][1];
+	sf->Lb[2] = ambe_hpg_tbl[sf->L - 9][2];
+	sf->Lb[3] = ambe_hpg_tbl[sf->L - 9][3];
+}
+
+static void
+ambe_resample_mag(float *mag_dst, int L_dst, float *mag_src, int L_src)
+{
+	float avg, step, pos;
 	int i;
 
-	/* w0 : fundamental */
-	sf[1].f0 = powf(2.0, -4.312 - 2.1336e-2 * (rp->pitch /* + 0.5 */));
+	avg  = 0.0f;
+	step = (float)L_src / (float)L_dst;
+	pos  = step;
 
-		/* FIXME: sf[0] interpolation */
-
-	/* Harmonics count (total and per-block) */
-	sf[1].L = (int)floorf(0.4761f / sf[1].f0);
-
-	if (sf[1].L < 9)
-		sf[1].L = 9;
-	else if (sf[1].L > 56)
-		sf[1].L = 56;
-
-	sf[1].Lb[0] = ambe_hpg_tbl[sf[1].L - 9][0];
-	sf[1].Lb[1] = ambe_hpg_tbl[sf[1].L - 9][1];
-	sf[1].Lb[2] = ambe_hpg_tbl[sf[1].L - 9][2];
-	sf[1].Lb[3] = ambe_hpg_tbl[sf[1].L - 9][3];
-
-	/* Voicing decision */
-	v_uv = ambe_v_uv_tbl[rp->v_uv];
-
-	for (i=0; i<8; i++) {
-		sf[0].v_uv[i] = (v_uv >> ( 7-i)) & 1;
-		sf[1].v_uv[i] = (v_uv >> (15-i)) & 1;
-	}
-
-	/* Gain */
-	float gain = ambe_gain_tbl[rp->gain][1];
-
-	gain += 0.5f * sf_prev->gain;
-	if (gain > 13.0f)
-		gain = 13.0f;
-	sf[1].gain = gain;
-
-	gain -= 0.5f * log2f(sf[1].L);
-
-	/* Prediction */
+	for (i=0; i<L_dst; i++)
 	{
-		float avg, step, pos;
+		int posi = (int)floorf(pos);
 
-		avg  = 0.0f;
-		step = (float)sf_prev->L / (float)sf[1].L;
-		pos  = step;
-
-		for (i=0; i<sf[1].L; i++)
-		{
-			int posi = (int)floorf(pos);
-
-			if (posi == 0) {
-				sf[1].Mlog[i] = sf_prev->Mlog[0];
-			} else if (posi >= sf_prev->L) {
-				sf[1].Mlog[i] = sf_prev->Mlog[sf_prev->L-1];
-			} else {
-				float alpha = pos - posi;
-				sf[1].Mlog[i] =
-					sf_prev->Mlog[posi-1] * (1.0f - alpha) +
-					sf_prev->Mlog[posi]   * alpha;
-			}
-
-			avg += sf[1].Mlog[i];
-			pos += step;
+		if (posi == 0) {
+			mag_dst[i] = mag_src[0];
+		} else if (posi >= L_src) {
+			mag_dst[i] = mag_src[L_src-1];
+		} else {
+			float alpha = pos - posi;
+			mag_dst[i] = mag_src[posi-1] * (1.0f - alpha)
+			           + mag_src[posi]   * alpha;
 		}
 
-		avg /= sf[1].L;
-
-		for (i=0; i<sf[1].L; i++)
-			sf[1].Mlog[i] = 0.65f * (sf[1].Mlog[i] - avg);
+		avg += mag_dst[i];
+		pos += step;
 	}
+
+	avg /= L_dst;
+
+	for (i=0; i<L_dst; i++)
+		mag_dst[i] -= avg;
+}
+
+static void
+ambe_subframe1_compute_mag(struct ambe_subframe *sf,
+                           struct ambe_subframe *sf_prev,
+                           struct ambe_raw_params *rp)
+{
+	int i, j, k;
+
+	/* Prediction */
+	ambe_resample_mag(sf->Mlog, sf->L, sf_prev->Mlog, sf_prev->L);
+
+	for (i=0; i<sf->L; i++)
+		sf->Mlog[i] *= 0.65f;
 
 	/* PRBA */
 	float prba[8];
@@ -162,8 +185,8 @@ ambe_frame_decode_params(struct ambe_subframe *sf,
 	/* Process each block */
 	float rconst = (1.0f / (2.0f * (float)M_SQRT2));
 	float sum = 0.0f;
-	int j=0;
-	int k;
+
+	k = 0;
 
 	for (i=0; i<4; i++) {
 		const float *hoc_tbl[] = {
@@ -185,19 +208,104 @@ ambe_frame_decode_params(struct ambe_subframe *sf,
 		C[5] = hoc_tbl[i][3];
 
 		/* De-DCT */
-		ambe_idct(c, C, sf[1].Lb[i], 6);
+		ambe_idct(c, C, sf->Lb[i], 6);
 
 		/* Set magnitudes */
-		for (k=0; k<sf[1].Lb[i]; k++)
-			sf[1].Mlog[j++] += c[k];
+		for (j=0; j<sf->Lb[i]; j++)
+			sf->Mlog[k++] += c[j];
 
-		sum += C[0] * sf[1].Lb[i];
+		sum += C[0] * sf->Lb[i];
 	}
 
-	float g = gain - (sum / sf[1].L);
+	/* Adjust to final gain value */
+	float ofs = sf->gain - (0.5f * log2f(sf->L)) - (sum / sf->L);
 
-	for (i=0; i<sf[1].L; i++)
-		sf[1].Mlog[i] += g;
+	for (i=0; i<sf->L; i++)
+		sf->Mlog[i] += ofs;
+}
+
+static void
+ambe_subframe0_compute_mag(struct ambe_subframe *sf,
+                           struct ambe_subframe *sf1_prev,
+                           struct ambe_subframe *sf1_cur,
+                           struct ambe_raw_params *rp)
+{
+	float mag_p[56], mag_c[56], alpha;
+	float perr[9], corr[56];
+	float gain;
+	int i;
+
+	/* Base for interpolation */
+	ambe_resample_mag(mag_p, sf->L, sf1_prev->Mlog, sf1_prev->L);
+	ambe_resample_mag(mag_c, sf->L, sf1_cur->Mlog,  sf1_cur->L );
+
+	/* Interpolate / Prediction coefficient */
+	alpha = ambe_sf0_interp_tbl[rp->sf0_mag_interp];
+
+	/* Correction */
+	perr[0] = 0.0f;
+	perr[1] = ambe_sf0_perr14_tbl[rp->sf0_perr_14][0];
+	perr[2] = ambe_sf0_perr14_tbl[rp->sf0_perr_14][1];
+	perr[3] = ambe_sf0_perr14_tbl[rp->sf0_perr_14][2];
+	perr[4] = ambe_sf0_perr14_tbl[rp->sf0_perr_14][3];
+	perr[5] = ambe_sf0_perr58_tbl[rp->sf0_perr_58][0];
+	perr[6] = ambe_sf0_perr58_tbl[rp->sf0_perr_58][1];
+	perr[7] = ambe_sf0_perr58_tbl[rp->sf0_perr_58][2];
+	perr[8] = ambe_sf0_perr58_tbl[rp->sf0_perr_58][3];
+
+	ambe_idct(corr, perr, sf->L, 9);
+
+	/* Target gain value */
+	gain = sf->gain - (0.5f * log2f(sf->L));
+
+	/* Build final value */
+	for (i=0; i<sf->L; i++)
+		sf->Mlog[i] = gain + corr[i] + (alpha * mag_p[i]) + ((1.0f - alpha) * mag_c[i]);
+}
+
+int
+ambe_frame_decode_params(struct ambe_subframe *sf,
+                         struct ambe_subframe *sf_prev,
+                         struct ambe_raw_params *rp)
+{
+	uint16_t v_uv;
+	int i;
+
+	/* Fundamental */
+	sf[1].f0log = -4.312f - 2.1336e-2f * (rp->pitch /* + 0.5 */);
+	sf[1].f0 = powf(2.0f, sf[1].f0log);
+
+	sf[0].f0log = ambe_interpolate_f0log(sf_prev->f0log, sf[1].f0log,
+	                                     rp->pitch_interp);
+	sf[0].f0 = powf(2.0f, sf[0].f0log);
+
+	/* Harmonics count (total and per-block) */
+	ambe_subframe_compute_L_Lb(&sf[0]);
+	ambe_subframe_compute_L_Lb(&sf[1]);
+
+	/* Voicing decision */
+	v_uv = ambe_v_uv_tbl[rp->v_uv];
+
+	for (i=0; i<8; i++) {
+		sf[0].v_uv[i] = (v_uv >> ( 7-i)) & 1;
+		sf[1].v_uv[i] = (v_uv >> (15-i)) & 1;
+	}
+
+	/* Gain */
+	sf[0].gain = (0.5f * sf_prev->gain) + ambe_gain_tbl[rp->gain][0];
+	sf[1].gain = (0.5f * sf_prev->gain) + ambe_gain_tbl[rp->gain][1];
+
+	if (sf[0].gain > 13.0f)
+		sf[0].gain = 13.0f;
+
+	if (sf[1].gain > 13.0f)
+		sf[1].gain = 13.0f;
+
+	/* Subframe 1 spectral magnitudes */
+	ambe_subframe1_compute_mag(&sf[1], sf_prev, rp);
+
+	/* Subframe 0 spectral magnitudes */
+	ambe_subframe0_compute_mag(&sf[0], sf_prev, &sf[1], rp);
 
 	return 0;
 }

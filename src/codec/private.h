@@ -67,6 +67,7 @@ struct ambe_raw_params
 struct ambe_subframe
 {
 	float f0;               /*!< \brief fundamental normalized frequency */
+	float f0log;		/*!< \brief log2(f0) */
 	int L;                  /*!< \brief Number of harmonics */
 	int Lb[4];              /*!< \brief Harmonics per block */
 	int v_uv[8];            /*!< \brief Voicing state */
@@ -119,7 +120,7 @@ extern const float ambe_hoc0_tbl[128][4];
 extern const float ambe_hoc1_tbl[64][4];
 extern const float ambe_hoc2_tbl[64][4];
 extern const float ambe_hoc3_tbl[64][4];
-extern const float ambe_sf0_interp_tbl[4][2];
+extern const float ambe_sf0_interp_tbl[4];
 extern const float ambe_sf0_perr14_tbl[64][4];
 extern const float ambe_sf0_perr58_tbl[32][4];
 
