@@ -147,10 +147,10 @@ ambe_decode_tone(struct ambe_decoder *dec,
 	memset(audio, 0x00, sizeof(int16_t) * N);
 
 	/* Audio start / stop */
-	start = (p_sf_sel & 2) ? 0 : N << 1;
-	stop  = (p_sf_sel & 1) ? ((N << 1) - 1) : (N - 1);
+	start = (p_sf_sel & 2) ? 0 : N >> 1;
+	stop  = (p_sf_sel & 1) ? (N-1) : ((N >> 1) - 1);
 
-	if (start < stop)
+	if (start >= stop)
 		return 0;
 
 	/* Compute amplitude */

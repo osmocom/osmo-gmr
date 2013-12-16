@@ -132,9 +132,7 @@ ambe_decode_frame(struct ambe_decoder *dec,
 			return 0;
 
 		case AMBE_TONE:
-			/* FIXME: Tone gen */
-			memset(audio, 0, 160*sizeof(int16_t));
-			return 0;
+			return ambe_decode_tone(dec, audio, N, frame);
 	}
 
 	return -EINVAL;
