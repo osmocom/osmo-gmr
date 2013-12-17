@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \addtogroup codec/private
+/*! \addtogroup codec_private
  *  @{
  */
 
@@ -33,6 +33,9 @@
 #include "private.h"
 
 
+/*! \brief Initializes decoder state
+ *  \param[in] dec Decoder state structure
+ */
 void
 ambe_decode_init(struct ambe_decoder *dec)
 {
@@ -40,6 +43,9 @@ ambe_decode_init(struct ambe_decoder *dec)
 	mbe_initMbeParms(&dec->mp_prev);
 }
 
+/*! \brief Release all resources associated with a decoder
+ *  \param[in] dec Decoder state structure
+ */
 void
 ambe_decode_fini(struct ambe_decoder *dec)
 {
@@ -47,6 +53,10 @@ ambe_decode_fini(struct ambe_decoder *dec)
 }
 
 
+/*! \brief Identify the type of frame
+ *  \param[in] frame Frame data (10 bytes = 80 bits)
+ *  \returns See \ref ambe_frame_type for possible return values
+ */
 static enum ambe_frame_type
 ambe_classify_frame(const uint8_t *frame)
 {
@@ -62,6 +72,10 @@ ambe_classify_frame(const uint8_t *frame)
 	};
 }
 
+/*! \brief Converts an internal \ref ambe_subframe to a mbelib's \ref mbe_parameters
+ *  \param[out] mp mbelib's parameters structure to fill in
+ *  \param[in] sf Internal suframe data
+ */
 static void
 ambe_subframe_to_mbelib(mbe_parms *mp, struct ambe_subframe *sf)
 {
@@ -82,6 +96,14 @@ ambe_subframe_to_mbelib(mbe_parms *mp, struct ambe_subframe *sf)
 	}
 }
 
+/*! \brief Decodes an AMBE speech frame to audio
+ *  \param[in] dec Decoder state structure
+ *  \param[out] audio Output audio buffer
+ *  \param[in] N number of audio samples to produce (152..168)
+ *  \param[in] frame Frame data (10 bytes = 80 bits)
+ *  \param[in] bad Bad Frame Indicator. Set to 1 if frame is corrupt
+ *  \returns 0 for success. Negative error code otherwise.
+ */
 static int
 ambe_decode_speech(struct ambe_decoder *dec,
                    int16_t *audio, int N,
@@ -117,6 +139,14 @@ ambe_decode_speech(struct ambe_decoder *dec,
 	return 0;
 }
 
+/*! \brief Decodes an AMBE frame to audio
+ *  \param[in] dec Decoder state structure
+ *  \param[out] audio Output audio buffer
+ *  \param[in] N number of audio samples to produce (152..168)
+ *  \param[in] frame Frame data (10 bytes = 80 bits)
+ *  \param[in] bad Bad Frame Indicator. Set to 1 if frame is corrupt
+ *  \returns 0 for success. Negative error code otherwise.
+ */
 int
 ambe_decode_frame(struct ambe_decoder *dec,
                   int16_t *audio, int N,
@@ -138,6 +168,11 @@ ambe_decode_frame(struct ambe_decoder *dec,
 	return -EINVAL;
 }
 
+/*! \brief Generates audio for DTX period
+ *  \param[in] dec Decoder state structure
+ *  \param[out] audio Output audio buffer
+ *  \param[in] N number of audio samples to produce (152..168)
+ */
 int
 ambe_decode_dtx(struct ambe_decoder *dec,
                 int16_t *audio, int N)

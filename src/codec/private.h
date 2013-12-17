@@ -20,8 +20,8 @@
 #ifndef __OSMO_GMR1_CODEC_PRIVATE_H__
 #define __OSMO_GMR1_CODEC_PRIVATE_H__
 
-/*! \defgroup codec/private AMBE vocoder - internal API
- *  \ingroup codec/private
+/*! \defgroup codec_private AMBE vocoder - internal API
+ *  \ingroup codec
  *  @{
  */
 
@@ -34,15 +34,15 @@
 #include "mbelib.h"
 
 
-#define AMBE_RATE 8000		/*< \brief AMBE sample rate */
+#define AMBE_RATE 8000		/*!< \brief AMBE sample rate (Hz) */
 
 
 /*! \brief AMBE possible frame types */
 enum ambe_frame_type
 {
-	AMBE_SPEECH,		/*< \brief Speed frame */
-	AMBE_SILENCE,		/*< \brief Silence indication frame */
-	AMBE_TONE,		/*< \brief Tone frame  */
+	AMBE_SPEECH,		/*!< \brief Speech frame */
+	AMBE_SILENCE,		/*!< \brief Silence indication frame */
+	AMBE_TONE,		/*!< \brief Tone frame  */
 };
 
 /*! \brief AMBE encoded frame raw parameters */

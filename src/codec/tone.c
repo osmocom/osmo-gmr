@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \addtogroup codec/private
+/*! \addtogroup codec_private
  *  @{
  */
 
@@ -35,9 +35,9 @@
 
 /*! \brief Structure describing a dual-frequency tone */
 struct tone_desc {
-	char *name;
-	int f1;
-	int f2;
+	char *name;	/*!< \brief Tone description */
+	int f1;		/*!< \brief Frequency 1 (Hz) */
+	int f2;		/*!< \brief Frequency 2 (Hz) */
 };
 
 /*! \brief DTMF tones descriptions */

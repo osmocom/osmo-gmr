@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*! \addtogroup codec/private
+/*! \addtogroup codec_private
  *  @{
  */
 
@@ -32,6 +32,13 @@
 #include "private.h"
 
 
+/*! \brief Grab the requested bits from a frame and shift them up as requested
+ *  \param[in] frame Frame data bytes
+ *  \param[in] p Position of the first bit to grab
+ *  \param[in] l Number of bits to grab (max 8)
+ *  \param[in] s How many bits to shift the result up
+ *  \returns The selected bits as a uint8_t
+ */
 static inline uint8_t
 _get_bits(const uint8_t *frame, int p, int l, int s)
 {
@@ -46,6 +53,10 @@ _get_bits(const uint8_t *frame, int p, int l, int s)
 	return (v & ((1<<l)-1)) << s;
 }
 
+/*! \brief Unpack a frame into its raw encoded parameters
+ *  \param[out] rp Encoded frame raw parameters to unpack into
+ *  \param[in] frame Frame data (10 bytes = 80 bits)
+ */
 void
 ambe_frame_unpack_raw(struct ambe_raw_params *rp, const uint8_t *frame)
 {
@@ -67,6 +78,12 @@ ambe_frame_unpack_raw(struct ambe_raw_params *rp, const uint8_t *frame)
 	rp->sf0_perr_58    = _get_bits(p, 44, 2, 3) | _get_bits(p, 77, 3, 0);
 }
 
+/*! \brief Interpolates fundamental between subframes
+ *  \param[in] f0log_prev log(fund(-1)) Previous subframe log freq
+ *  \param[in] f0log_cur  log(fund(0))  Current  subframe log freq
+ *  \param[in] rule Which interpolation rule to apply
+ *  \returns The interpolated log(fund) frequency
+ */
 static float
 ambe_interpolate_f0log(float f0log_prev, float f0log_cur, int rule)
 {
@@ -104,6 +121,9 @@ ambe_interpolate_f0log(float f0log_prev, float f0log_cur, int rule)
 	return 0.0f;	/* Not reached */
 }
 
+/*! \brief Computes and fill-in L and Lb vaues for a given subframe (from f0)
+ *  \param[in] sf Subframe
+ */
 static void
 ambe_subframe_compute_L_Lb(struct ambe_subframe *sf)
 {
@@ -120,6 +140,12 @@ ambe_subframe_compute_L_Lb(struct ambe_subframe *sf)
 	sf->Lb[3] = ambe_hpg_tbl[sf->L - 9][3];
 }
 
+/*! \brief Resample and "ac-couple" (remove mean) a magnitude array to a new L
+ *  \param[in] mag_dst Destination magnitude array (L_dst elements)
+ *  \param[in] L_dst Target number of magnitudes
+ *  \param[in] mag_src Source magnitude array (L_src elements)
+ *  \param[in] L_src Source number of magnitudes
+ */
 static void
 ambe_resample_mag(float *mag_dst, int L_dst, float *mag_src, int L_src)
 {
@@ -154,6 +180,11 @@ ambe_resample_mag(float *mag_dst, int L_dst, float *mag_src, int L_src)
 		mag_dst[i] -= avg;
 }
 
+/*! \brief Compute the spectral magnitudes of subframe 1 from raw params
+ *  \param[inout] sf Current subframe1 data
+ *  \param[in] sf_prev Previous subframe1 data
+ *  \param[in] rp Encoded frame raw parameters
+ */
 static void
 ambe_subframe1_compute_mag(struct ambe_subframe *sf,
                            struct ambe_subframe *sf_prev,
@@ -224,6 +255,12 @@ ambe_subframe1_compute_mag(struct ambe_subframe *sf,
 		sf->Mlog[i] += ofs;
 }
 
+/*! \brief Compute the spectral magnitudes of subframe 0 from raw params & sf1
+ *  \param[inout] sf Current subframe0 data
+ *  \param[in] sf1_prev Previous subframe 1 data
+ *  \param[in] sf1_cur  Current subframe 1 data
+ *  \param[in] rp Encoded frame raw parameters
+ */
 static void
 ambe_subframe0_compute_mag(struct ambe_subframe *sf,
                            struct ambe_subframe *sf1_prev,
@@ -263,6 +300,11 @@ ambe_subframe0_compute_mag(struct ambe_subframe *sf,
 		sf->Mlog[i] = gain + corr[i] + (alpha * mag_p[i]) + ((1.0f - alpha) * mag_c[i]);
 }
 
+/*! \brief Decodes the speech parameters for both subframes from raw params
+ *  \param[out] sf Array of 2 subframes data to fill-in
+ *  \param[in] sf_prev Previous subframe 1 data
+ *  \param[in] rp Encoded frame raw parameters
+ */
 int
 ambe_frame_decode_params(struct ambe_subframe *sf,
                          struct ambe_subframe *sf_prev,

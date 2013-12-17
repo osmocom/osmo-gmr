@@ -37,7 +37,7 @@
 /*! \brief Structure for GMR1 codec state */
 struct gmr1_codec
 {
-	struct ambe_decoder dec;	/*< \brief decoder state */
+	struct ambe_decoder dec;	/*!< \brief Decoder state */
 };
 
 
