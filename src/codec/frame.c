@@ -127,7 +127,7 @@ ambe_interpolate_f0log(float f0log_prev, float f0log_cur, int rule)
 static void
 ambe_subframe_compute_L_Lb(struct ambe_subframe *sf)
 {
-	sf->L = (int)floorf(0.4761f / sf->f0);
+	sf->L = (int)floorf(0.4751f / sf->f0);
 
 	if (sf->L < 9)
 		sf->L = 9;
