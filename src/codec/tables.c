@@ -28,7 +28,7 @@
 #include <stdint.h>
 
 /*! \brief Number of harmonics per group for a given L (starts at L=9) */
-extern const uint8_t ambe_hpg_tbl[48][4] = {
+const uint8_t ambe_hpg_tbl[48][4] = {
 	{  2,  2,  2,  3}	/* L = 9 */,
 	{  2,  2,  3,  3},
 	{  2,  3,  3,  3},
@@ -80,7 +80,7 @@ extern const uint8_t ambe_hpg_tbl[48][4] = {
 };
 
 /*! \brief Gain (subframe 0, subframe 1) */
-extern const float ambe_gain_tbl[256][2] = {
+const float ambe_gain_tbl[256][2] = {
 	{ -0.250000f, -0.250000f },
 	{ +0.500000f, -0.500000f },
 	{ +0.750000f, +0.750000f },
@@ -340,7 +340,7 @@ extern const float ambe_gain_tbl[256][2] = {
 };
 
 /*! \brief V/UV decisions (subframe 0 = low byte. MSBs = low freq) */
-extern const uint16_t ambe_v_uv_tbl[64] = {
+const uint16_t ambe_v_uv_tbl[64] = {
 	0x0000, 0xffff, 0xc0c0, 0xe0e0, 0xf0f0, 0x8080, 0xfefe, 0x0080,
 	0xfcfc, 0x80c0, 0xf8f8, 0x8000, 0x00c0, 0xfffe, 0xfeff, 0xc000,
 	0xf0e0, 0xc0e0, 0xfbfb, 0xfcfe, 0xf8f0, 0xfdfd, 0xfffb, 0xe000,
@@ -352,7 +352,7 @@ extern const uint16_t ambe_v_uv_tbl[64] = {
 };
 
 /*! \brief PRBA[1:2] */
-extern const float ambe_prba12_tbl[128][2] = {
+const float ambe_prba12_tbl[128][2] = {
 	{ -0.042480f, +0.271484f },
 	{ -0.082031f, +0.219727f },
 	{ -0.579102f, +0.062988f },
@@ -484,7 +484,7 @@ extern const float ambe_prba12_tbl[128][2] = {
 };
 
 /*! \brief PRBA[3:4] */
-extern const float ambe_prba34_tbl[64][2] = {
+const float ambe_prba34_tbl[64][2] = {
 	{ +0.439453f, +0.273438f },
 	{ +0.307129f, +0.220215f },
 	{ +0.338867f, +0.147949f },
@@ -552,7 +552,7 @@ extern const float ambe_prba34_tbl[64][2] = {
 };
 
 /*! \brief PRBA[5:7] */
-extern const float ambe_prba57_tbl[128][3] = {
+const float ambe_prba57_tbl[128][3] = {
 	{ +0.012695f, -0.156250f, -0.120605f },
 	{ -0.009277f, -0.090332f, -0.065918f },
 	{ -0.062500f, -0.173340f, -0.151855f },
@@ -684,7 +684,7 @@ extern const float ambe_prba57_tbl[128][3] = {
 };
 
 /*! \brief HOC for 1st frequency block */
-extern const float ambe_hoc0_tbl[128][4] = {
+const float ambe_hoc0_tbl[128][4] = {
 	{ +0.368652f, -0.230469f, -0.191406f, +0.158203f },
 	{ +0.300781f, -0.079102f, -0.018066f, +0.124512f },
 	{ +0.318848f, -0.202637f, +0.081055f, -0.000977f },
@@ -816,7 +816,7 @@ extern const float ambe_hoc0_tbl[128][4] = {
 };
 
 /*! \brief HOC for 2nd frequency block */
-extern const float ambe_hoc1_tbl[64][4] = {
+const float ambe_hoc1_tbl[64][4] = {
 	{ -0.364258f, +0.365723f, +0.244141f, +0.045410f },
 	{ -0.579102f, +0.200684f, -0.009766f, +0.049316f },
 	{ -0.227051f, +0.341309f, -0.048828f, -0.008301f },
@@ -884,7 +884,7 @@ extern const float ambe_hoc1_tbl[64][4] = {
 };
 
 /*! \brief HOC for 3rd frequency block */
-extern const float ambe_hoc2_tbl[64][4] = {
+const float ambe_hoc2_tbl[64][4] = {
 	{ -0.107422f, +0.202637f, +0.255859f, -0.011719f },
 	{ -0.214844f, -0.538086f, -0.206543f, +0.003418f },
 	{ -0.027832f, -0.366211f, -0.125488f, +0.198730f },
@@ -952,7 +952,7 @@ extern const float ambe_hoc2_tbl[64][4] = {
 };
 
 /*! \brief HOC for last frequency block */
-extern const float ambe_hoc3_tbl[64][4] = {
+const float ambe_hoc3_tbl[64][4] = {
 	{ +0.168457f, +0.110352f, +0.166504f, -0.110840f },
 	{ +0.338379f, +0.063965f, +0.101074f, +0.089844f },
 	{ +0.256836f, -0.126465f, +0.064941f, -0.130371f },
@@ -1020,7 +1020,7 @@ extern const float ambe_hoc3_tbl[64][4] = {
 };
 
 /*! \brief Interpolation ratios for subframe 0 magnitude prediction */
-extern const float ambe_sf0_interp_tbl[4] = {
+const float ambe_sf0_interp_tbl[4] = {
 	0.90f,
 	0.70f,
 	0.50f,
@@ -1028,7 +1028,7 @@ extern const float ambe_sf0_interp_tbl[4] = {
 };
 
 /*! \brief Prediction Error [1:4] for subframe 0 */
-extern const float ambe_sf0_perr14_tbl[64][4] = {
+const float ambe_sf0_perr14_tbl[64][4] = {
 	{ -0.106445f, +0.011230f, -0.166992f, -0.022461f },
 	{ -0.056641f, +0.166504f, -0.139648f, -0.102051f },
 	{ -0.004883f, +0.052246f, -0.106934f, +0.084961f },
@@ -1096,7 +1096,7 @@ extern const float ambe_sf0_perr14_tbl[64][4] = {
 };
 
 /*! \brief Prediction Error [5:8] for subframe 0 */
-extern const float ambe_sf0_perr58_tbl[32][4] = {
+const float ambe_sf0_perr58_tbl[32][4] = {
 	{ -0.006836f, +0.065430f, +0.135254f, +0.032715f },
 	{ -0.019531f, +0.053223f, +0.054688f, -0.052734f },
 	{ -0.143066f, +0.037598f, +0.059082f, +0.054688f },
