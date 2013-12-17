@@ -154,6 +154,7 @@ _gmr1_pi4cxpsk_sync_gen_ref(struct gmr1_pi4cxpsk_burst *burst_type)
  *  \param[in] burst The input complex vector
  *  \param[in] sps Input sample per symbol (how much to decimate)
  *  \param[out] toa Pointer to estimated fractional TOA return variable
+ *  \param[out] pwr Pointer to power return variable
  *  \returns >=0 index of found sync sequence. -errno for errors
  *
  * The burst input is expected to be longer than the burst. The extra amount

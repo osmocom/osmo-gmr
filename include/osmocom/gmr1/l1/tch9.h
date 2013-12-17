@@ -36,11 +36,12 @@
 struct gmr1_interleaver;
 
 
+/*! \brief TCH9 possible data rates */
 enum gmr1_tch9_mode {
-	GMR1_TCH9_2k4,
-	GMR1_TCH9_4k8,
-	GMR1_TCH9_9k6,
-	GMR1_TCH9_MAX
+	GMR1_TCH9_2k4,	/*!< \brief TCH9 with 2.4k data rate */
+	GMR1_TCH9_4k8,	/*!< \brief TCH9 with 4.8k data rate */
+	GMR1_TCH9_9k6,	/*!< \brief TCH9 with 9.6k data rate */
+	GMR1_TCH9_MAX	/*!< \brief Dummy value*/
 };
 
 void gmr1_tch9_encode(ubit_t *bits_e, const uint8_t *l2, enum gmr1_tch9_mode mode,

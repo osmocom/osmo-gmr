@@ -187,6 +187,7 @@ static const uint8_t gmr1_conv_tch3_next_state[][2] = {
 	{ 56, 57 }, { 58, 59 }, { 60, 61 }, { 62, 63 },
 };
 
+/*! \brief GMR-1 TCH3 speech tail-biting  convolutional code */
 const struct osmo_conv_code gmr1_conv_tch3 = {
 	.N = 2,
 	.K = 7,
