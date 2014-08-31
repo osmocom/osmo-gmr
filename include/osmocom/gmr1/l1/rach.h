@@ -36,7 +36,7 @@
 
 void gmr1_rach_encode(ubit_t *bits_e, const uint8_t *rach, uint8_t sb_mask);
 int  gmr1_rach_decode(uint8_t *rach, const sbit_t *bits_e, uint8_t sb_mask,
-                      int *conv_rv, int *crc_rv);
+                      int *conv_rv, int *crc_rv, uint8_t *sb_mask_rv);
 
 
 /*! @} */

@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<block>
+ <name>RACH FFT Detection</name>
+ <key>rach_detect_fft</key>
+ <category>GMR-1</category>
+ <import>import math</import>
+ <import>from gnuradio import gmr1</import>
+ <make>gmr1.rach_detect_fft($fft_size, $overlap_ratio, $threshold, $burst_length, $burst_offset, $freq_offset, $len_tag_key)</make>
+ <param>
+   <name>FFT size</name>
+   <key>fft_size</key>
+   <value>1 &lt;&lt; int(round(math.log(samp_rate / 1e3) / math.log(2)))</value>
+   <type>int</type>
+ </param>
+ <param>
+   <name>Overlap ratio</name>
+   <key>overlap_ratio</key>
+   <value>2</value>
+   <type>int</type>
+ </param>
+ <param>
+   <name>Detection Threshold</name>
+   <key>threshold</key>
+   <value>8.5</value>
+   <type>float</type>
+ </param>
+ <param>
+   <name>Burst length</name>
+   <key>burst_length</key>
+   <value>int(3 * samp_rate * 15e-3)</value>
+   <type>int</type>
+ </param>
+ <param>
+   <name>Burst offset</name>
+   <key>burst_offset</key>
+   <value>0</value>
+   <type>int</type>
+ </param>
+ <param>
+   <name>Frequency offset</name>
+   <key>freq_offset</key>
+   <value>- (math.pi / 4.0) * (23400.0 / samp_rate)</value>
+   <type>float</type>
+ </param>
+ <param>
+   <name>Length Tag Name</name>
+   <key>len_tag_key</key>
+   <value>packet_len</value>
+   <type>string</type>
+ </param>
+ <sink>
+   <name>in</name>
+   <type>complex</type>
+ </sink>
+ <source>
+   <name>burst</name>
+   <type>complex</type>
+ </source>
+</block>

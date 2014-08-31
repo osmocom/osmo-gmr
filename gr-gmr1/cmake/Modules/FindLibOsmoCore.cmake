@@ -1,0 +1,27 @@
+if(NOT LIBOSMOCORE_FOUND)
+  pkg_check_modules (LIBOSMOCORE_PKG libosmocore)
+  find_path(LIBOSMOCORE_INCLUDE_DIRS NAMES osmocom/core/defs.h
+    PATHS
+    ${LIBOSMOCORE_PKG_INCLUDE_DIRS}
+    /usr/include
+    /usr/local/include
+  )
+
+  find_library(LIBOSMOCORE_LIBRARIES NAMES osmocore
+    PATHS
+    ${LIBOSMOCORE_PKG_LIBRARY_DIRS}
+    /usr/lib
+    /usr/local/lib
+  )
+
+  if(LIBOSMOCORE_INCLUDE_DIRS AND LIBOSMOCORE_LIBRARIES)
+    set(LIBOSMOCORE_FOUND TRUE CACHE INTERNAL "libosmocore found")
+    message(STATUS "Found libosmocore: ${LIBOSMOCORE_INCLUDE_DIR}, ${LIBOSMOCORE_LIBRARIES}")
+  else(LIBOSMOCORE_INCLUDE_DIRS AND LIBOSMOCORE_LIBRARIES)
+    set(LIBOSMOCORE_FOUND FALSE CACHE INTERNAL "libosmocore found")
+    message(STATUS "libosmocore not found.")
+  endif(LIBOSMOCORE_INCLUDE_DIRS AND LIBOSMOCORE_LIBRARIES)
+
+  mark_as_advanced(LIBOSMOCORE_INCLUDE_DIRS LIBOSMOCORE_LIBRARIES)
+
+endif(NOT LIBOSMOCORE_FOUND)

@@ -128,6 +128,7 @@ gmr1_rach_encode(ubit_t *bits_e, const uint8_t *rach, uint8_t sb_mask)
  *  \param[in] sb_mask RACH SB Mask value (see GMR-1 04.008)
  *  \param[out] conv_rv Return of the convolutional decode (can be NULL)
  *  \param[out] crc_rv Return array of the 2 CRC checks (can be NULL)
+ *  \param[out] sb_mask_rv Returns guessed SB Mask (can be NULL)
  *  \return 0 if all CRC check pass, any other value for fail.
  *
  * RACH data is 18 bytes long (2 class-1, 16 class-2), and bits_e is a
@@ -135,7 +136,7 @@ gmr1_rach_encode(ubit_t *bits_e, const uint8_t *rach, uint8_t sb_mask)
  */
 int
 gmr1_rach_decode(uint8_t *rach, const sbit_t *bits_e, uint8_t sb_mask,
-                 int *conv_rv, int *crc_rv)
+                 int *conv_rv, int *crc_rv, uint8_t *sb_mask_rv)
 {
 	sbit_t bits_x[494];
 	sbit_t bits_ep[494];
@@ -178,12 +179,19 @@ gmr1_rach_decode(uint8_t *rach, const sbit_t *bits_e, uint8_t sb_mask,
 	if (crc[0]) {
 		for (i=0; i<8; i++)
 			bits_u1[16+i] ^= (sb_mask >> (7-i)) & 1;
-		crc[0] = osmo_crc8gen_check_bits (&gmr1_crc8,  bits_u1,  16, bits_u1+16);
+		crc[0] = osmo_crc8gen_check_bits(&gmr1_crc8, bits_u1, 16, bits_u1+16);
 	}
 
 	if (crc_rv) {
 		crc_rv[0] = crc[0];
 		crc_rv[1] = crc[1];
+	}
+
+	if (sb_mask_rv) {
+		sb_mask = osmo_crc8gen_compute_bits(&gmr1_crc8, bits_u1, 16);
+		for (i=0; i<8; i++)
+			sb_mask ^= (bits_u1[16+i] << (7-i));
+		*sb_mask_rv = sb_mask;
 	}
 
 	/* CRC removal & packing */
