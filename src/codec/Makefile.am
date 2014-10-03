@@ -5,4 +5,4 @@ AM_LDFLAGS = $(LIBOSMOCORE_LIBS)
 noinst_LIBRARIES = libgmr1-codec.a
 
 libgmr1_codec_a_SOURCES = \
-	ambe.c codec.c frame.c math.c mbelib.c tables.c tone.c
+	ambe.c codec.c frame.c math.c tables.c tone.c

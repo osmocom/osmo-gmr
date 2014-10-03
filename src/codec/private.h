@@ -31,8 +31,6 @@
 
 #include <stdint.h>
 
-#include "mbelib.h"
-
 
 #define AMBE_RATE 8000		/*!< \brief AMBE sample rate (Hz) */
 
@@ -82,8 +80,6 @@ struct ambe_decoder
 	float tone_phase_f2;	/*!< \brief Phase frequency 2 for tone frames */
 
 	struct ambe_subframe sf_prev;	/*!< \brief Previous subframe */
-
-	mbe_parms mp_prev;	/*!< \brief mbelib previous frame */
 };
 
 /* From ambe.c */
