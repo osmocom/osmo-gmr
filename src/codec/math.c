@@ -89,7 +89,6 @@ ambe_fdct(float *out, float *in, int N, int M)
 	}
 }
 
-
 /*! \brief Inverse Discrete Cosine Transform (iDCT)
  *  \param[out] out iDCT result buffer (time domain, N elements)
  *  \param[in] in iDCT input buffer (freq domain, M elements)
