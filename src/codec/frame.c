@@ -305,7 +305,7 @@ ambe_subframe0_compute_mag(struct ambe_subframe *sf,
  *  \param[in] sf_prev Previous subframe 1 data
  *  \param[in] rp Encoded frame raw parameters
  */
-int
+void
 ambe_frame_decode_params(struct ambe_subframe *sf,
                          struct ambe_subframe *sf_prev,
                          struct ambe_raw_params *rp)
@@ -348,8 +348,6 @@ ambe_frame_decode_params(struct ambe_subframe *sf,
 
 	/* Subframe 0 spectral magnitudes */
 	ambe_subframe0_compute_mag(&sf[0], sf_prev, &sf[1], rp);
-
-	return 0;
 }
 
 /*! @} */

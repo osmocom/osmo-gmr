@@ -98,7 +98,7 @@ int ambe_decode_dtx(struct ambe_decoder *dec,
 
 /* From frame.c */
 void ambe_frame_unpack_raw(struct ambe_raw_params *rp, const uint8_t *frame);
-int  ambe_frame_decode_params(struct ambe_subframe *sf,
+void ambe_frame_decode_params(struct ambe_subframe *sf,
                               struct ambe_subframe *sf_prev,
                               struct ambe_raw_params *rp);
 
