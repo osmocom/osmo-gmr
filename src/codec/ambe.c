@@ -40,6 +40,12 @@ void
 ambe_decode_init(struct ambe_decoder *dec)
 {
 	memset(dec, 0x00, sizeof(struct ambe_decoder));
+
+	ambe_synth_init(&dec->synth);
+
+	dec->sf_prev.w0 = 0.09378;
+	dec->sf_prev.f0 = dec->sf_prev.w0 / (2 * M_PIf);
+	dec->sf_prev.L  = 30;
 }
 
 /*! \brief Release all resources associated with a decoder
@@ -92,6 +98,14 @@ ambe_decode_speech(struct ambe_decoder *dec,
 
 	/* Decode subframe parameters */
 	ambe_frame_decode_params(sf, &dec->sf_prev, &rp);
+
+	/* Expand parameters for synthesis */
+	ambe_subframe_expand(&sf[0]);
+	ambe_subframe_expand(&sf[1]);
+
+	/* Perform the actual audio synthesis */
+	ambe_synth_audio(&dec->synth, audio,      &sf[0], &dec->sf_prev);
+	ambe_synth_audio(&dec->synth, audio + 80, &sf[1], &sf[0]);
 
 	/* Save subframe */
 	memcpy(&dec->sf_prev, &sf[1], sizeof(struct ambe_subframe));

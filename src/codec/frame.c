@@ -350,4 +350,26 @@ ambe_frame_decode_params(struct ambe_subframe *sf,
 	ambe_subframe0_compute_mag(&sf[0], sf_prev, &sf[1], rp);
 }
 
+/*! \brief Expands the decoded subframe params to prepare for synthesis
+ *  \param[in] sf The subframe to expand
+ */
+void
+ambe_subframe_expand(struct ambe_subframe *sf)
+{
+	float unvc;
+	int i;
+
+	sf->w0 = sf->f0 * (2.0f * M_PIf);
+
+	unvc = 0.2046f / sqrtf(sf->w0); /* ??? */
+
+	for (i=0; i<sf->L; i++) {
+		int j = (int)(i * 16.0f * sf->f0);
+		sf->Vl[i] = sf->v_uv[j];
+		sf->Ml[i] = powf(2.0, sf->Mlog[i]) / 6.0f;
+		if (!sf->Vl[i])
+			sf->Ml[i] *= unvc;
+	}
+}
+
 /*! @} */

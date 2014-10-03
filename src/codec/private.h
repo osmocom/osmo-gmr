@@ -66,11 +66,23 @@ struct ambe_subframe
 {
 	float f0;               /*!< \brief fundamental normalized frequency */
 	float f0log;		/*!< \brief log2(f0) */
+	float w0;		/*!< \brief fundamental frequency (rad/samp) */
 	int L;                  /*!< \brief Number of harmonics */
 	int Lb[4];              /*!< \brief Harmonics per block */
 	int v_uv[8];            /*!< \brief Voicing state */
+	int Vl[56];		/*!< \brief Per-harmonic voicing state */
 	float gain;		/*!< \brief Gain */
 	float Mlog[56];         /*!< \brief log spectral magnitudes */
+	float Ml[56];		/*!< \brief spectral magnitudes */
+};
+
+/*! \brief AMBE synthesizer state */
+struct ambe_synth
+{
+	int16_t u_prev;		/*!< \brief Last 'u' of previous subframe */
+	float uw_prev[121];	/*!< \brief Unvoiced data from previous subframe */
+	float psi1;		/*!< \brief Current PSI angle for fundamental */
+	float phi[56];		/*!< \brief Current phase for each harmonic */
 };
 
 /*! \brief AMBE decoder state */
@@ -80,6 +92,8 @@ struct ambe_decoder
 	float tone_phase_f2;	/*!< \brief Phase frequency 2 for tone frames */
 
 	struct ambe_subframe sf_prev;	/*!< \brief Previous subframe */
+
+	struct ambe_synth synth;	/*!< \brief Synthesizer state */
 };
 
 /* From ambe.c */
@@ -97,6 +111,7 @@ void ambe_frame_unpack_raw(struct ambe_raw_params *rp, const uint8_t *frame);
 void ambe_frame_decode_params(struct ambe_subframe *sf,
                               struct ambe_subframe *sf_prev,
                               struct ambe_raw_params *rp);
+void ambe_subframe_expand(struct ambe_subframe *sf);
 
 /* From math.c */
 #define M_PIf (3.141592653589793f)	/*!< \brief Value of pi as a float */
@@ -107,6 +122,12 @@ void ambe_fdct(float *out, float *in, int N, int M);
 void ambe_idct(float *out, float *in, int N, int M);
 void ambe_fdft_fc(float *out_i, float *out_q, float *in, int N, int M);
 void ambe_idft_cf(float *out, float *in_i, float *in_q, int N, int M);
+
+/* From synth.c */
+void ambe_synth_init(struct ambe_synth *synth);
+void ambe_synth_audio(struct ambe_synth *synth, int16_t *audio,
+                      struct ambe_subframe *sf,
+                      struct ambe_subframe *sf_prev);
 
 /* From tables.c */
 extern const uint8_t ambe_hpg_tbl[48][4];
