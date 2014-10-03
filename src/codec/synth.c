@@ -300,6 +300,74 @@ ambe_synth_init(struct ambe_synth *synth)
 	synth->u_prev = 3147;
 }
 
+/*! \brief Apply the spectral magnitude enhancement on the subframe
+ *  \param[in] synth Synthesizer state structure
+ *  \param[in] sf Expanded subframe data for subframe to enhance
+ */
+void
+ambe_synth_enhance(struct ambe_synth *synth, struct ambe_subframe *sf)
+{
+	float rm0, rm1;
+	float k1, k2, k3;
+	float gamma;
+	int l;
+
+	/* Compute RM0 and RM1 */
+	rm0 = 0.0f;
+	rm1 = 0.0f;
+
+	for (l=0; l<sf->L; l++)
+	{
+		float sq = sf->Ml[l] * sf->Ml[l];
+		rm0 += sq;
+		rm1 += sq * cosf_fast(sf->w0 * (l+1));
+	}
+
+	/* Pre compute some constants */
+	k1 = 0.96f * M_PIf / (sf->w0 * rm0 * (rm0 * rm0 - rm1 * rm1));
+	k2 = rm0 * rm0 + rm1 * rm1;
+	k3 = 2.0f * rm0 * rm1;
+
+	/* Apply to the amplitudes */
+	gamma = 0.0f;
+
+	for (l=0; l<sf->L; l++)
+	{
+		float w;
+
+		if ( (l+1)*8 <= sf->L ) {
+			w = 1.0f;
+		} else {
+			w = sqrtf(sf->Ml[l]) * powf(
+				k1 * (k2 - k3 * cosf_fast(sf->w0 * (l+1))),
+				0.25f
+			);
+
+			if (w > 1.2f)
+				w = 1.2f;
+			else if (w < 0.5f)
+				w = 0.5f;
+		}
+
+		sf->Ml[l] *= w;
+
+		gamma += sf->Ml[l] * sf->Ml[l];
+	}
+
+	/* Compute final gamma and apply it */
+	gamma = sqrtf(rm0 / gamma);
+
+	for (l=0; l<sf->L; l++)
+	{
+		sf->Ml[l] *= gamma;
+	}
+
+	/* Update SE */
+	synth->SE = 0.95f * synth->SE + 0.05f * rm0;
+	if (synth->SE < 1e4f)
+		synth->SE = 1e4f;
+}
+
 /*! \brief Generate audio for a given subframe
  *  \param[in] synth Synthesizer state structure
  *  \param[out] audio Result buffer (80 samples)

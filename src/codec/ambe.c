@@ -104,7 +104,10 @@ ambe_decode_speech(struct ambe_decoder *dec,
 	ambe_subframe_expand(&sf[1]);
 
 	/* Perform the actual audio synthesis */
+	ambe_synth_enhance(&dec->synth, &sf[0]);
 	ambe_synth_audio(&dec->synth, audio,      &sf[0], &dec->sf_prev);
+
+	ambe_synth_enhance(&dec->synth, &sf[1]);
 	ambe_synth_audio(&dec->synth, audio + 80, &sf[1], &sf[0]);
 
 	/* Save subframe */

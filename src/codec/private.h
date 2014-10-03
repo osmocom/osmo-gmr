@@ -83,6 +83,7 @@ struct ambe_synth
 	float uw_prev[121];	/*!< \brief Unvoiced data from previous subframe */
 	float psi1;		/*!< \brief Current PSI angle for fundamental */
 	float phi[56];		/*!< \brief Current phase for each harmonic */
+	float SE;		/*!< \brief Current energy parameter */
 };
 
 /*! \brief AMBE decoder state */
@@ -125,6 +126,7 @@ void ambe_idft_cf(float *out, float *in_i, float *in_q, int N, int M);
 
 /* From synth.c */
 void ambe_synth_init(struct ambe_synth *synth);
+void ambe_synth_enhance(struct ambe_synth *synth, struct ambe_subframe *sf);
 void ambe_synth_audio(struct ambe_synth *synth, int16_t *audio,
                       struct ambe_subframe *sf,
                       struct ambe_subframe *sf_prev);
