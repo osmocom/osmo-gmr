@@ -31,7 +31,7 @@
 #define M_PIf ((float)M_PI)	/*!< \brief Value of pi as a float */
 
 
-/*! \brief Table for \ref cosf_fast */
+/*! \brief Table for \ref cosf_fast and \ref sinf_fast */
 static float cos_tbl[1024];
 
 /*! \brief Initializes \ref cos_tbl for \ref cosf_fast */
@@ -55,6 +55,16 @@ cosf_fast(float angle)
 	return cos_tbl[(int)(angle*f) & 1023];
 }
 
+/*! \brief Fast Sinus approximation using a simple table
+ *  \param[in] angle The angle value
+ *  \returns The sinus of the angle
+ */
+float
+sinf_fast(float angle)
+{
+	const float f = 512.0f / M_PIf;
+	return cos_tbl[((int)(angle*f) + 768) & 1023];
+}
 
 /*! \brief Forward Discrete Cosine Transform (fDCT)
  *  \param[out] out fDCT result buffer (freq domain, M elements)

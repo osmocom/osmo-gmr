@@ -104,6 +104,7 @@ int  ambe_frame_decode_params(struct ambe_subframe *sf,
 
 /* From math.c */
 float cosf_fast(float angle);
+float sinf_fast(float angle);
 void ambe_fdct(float *out, float *in, int N, int M);
 void ambe_idct(float *out, float *in, int N, int M);
 
