@@ -103,10 +103,14 @@ int  ambe_frame_decode_params(struct ambe_subframe *sf,
                               struct ambe_raw_params *rp);
 
 /* From math.c */
+#define M_PIf (3.141592653589793f)	/*!< \brief Value of pi as a float */
+
 float cosf_fast(float angle);
 float sinf_fast(float angle);
 void ambe_fdct(float *out, float *in, int N, int M);
 void ambe_idct(float *out, float *in, int N, int M);
+void ambe_fdft_fc(float *out_i, float *out_q, float *in, int N, int M);
+void ambe_idft_cf(float *out, float *in_i, float *in_q, int N, int M);
 
 /* From tables.c */
 extern const uint8_t ambe_hpg_tbl[48][4];

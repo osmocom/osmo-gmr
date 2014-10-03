@@ -27,8 +27,7 @@
 
 #include <math.h>
 
-
-#define M_PIf ((float)M_PI)	/*!< \brief Value of pi as a float */
+#include "private.h"
 
 
 /*! \brief Table for \ref cosf_fast and \ref sinf_fast */
@@ -112,6 +111,67 @@ ambe_idct(float *out, float *in, int N, int M)
 		}
 
 		out[i] = v;
+	}
+}
+
+/*! \brief Forward Discrete Fourrier Transform (float->complex)
+ *  \param[out] out_i Real component result buffer (freq domain, N/2+1 elements)
+ *  \param[out] out_q Imag component result buffer (freq domain, N/2+1 elements)
+ *  \param[in] in Input buffer (time domain, M elements)
+ *  \param[in] N Number of points of the DFT
+ *  \param[in] M Limit to to the number of available time domain elements
+ *
+ *  Since the input is float, the result is symmetric and so only one side
+ *  is computed. The output index 0 is DC.
+ */
+void
+ambe_fdft_fc(float *out_i, float *out_q, float *in, int N, int M)
+{
+	int fb, ts;
+
+	for (fb=0; fb<=(N/2); fb++)
+	{
+		float i=0.0f, q=0.0f;
+
+		for (ts=0; ts<M; ts++)
+		{
+			float angle = (- 2.0f * M_PIf / N) * fb * ts;
+			i += in[ts] * cosf_fast(angle);
+			q += in[ts] * sinf_fast(angle);
+		}
+
+		out_i[fb] = i;
+		out_q[fb] = q;
+	}
+}
+
+/*! \brief Inverse Discret Fourrier Transform (complex->float)
+ *  \param[out] out Result buffer (time domain, M
+ *  \param[in] in_i Real component input buffer (freq domain, N/2+1 elements)
+ *  \param[in] in_q Imag component input buffer (freq domain, N/2+1 elements)
+ *  \param[in] N Number of points of the DFT
+ *  \param[in] M Limit to the number of time domain elements to generate
+ *
+ *  The input is assumed to be symmetric and so only N/2+1 inputs are
+ *  needed. DC component must be input index 0.
+ */
+void
+ambe_idft_cf(float *out, float *in_i, float *in_q, int N, int M)
+{
+	int fb, ts;
+
+	for (ts=0; ts<M; ts++)
+	{
+		float r=0.0f;
+
+		for (fb=0; fb<=(N/2); fb++)
+		{
+			float angle = (- 2.0f * M_PIf / N) * fb * ts;
+			float m = (fb == 0 || fb == (N/2)) ? 1.0f : 2.0f;
+			r += m * (in_i[fb] * cosf_fast(angle) + in_q[fb] * sinf_fast(angle));
+		}
+
+		out[ts] = r / N;
 	}
 }
 
