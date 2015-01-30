@@ -22,6 +22,7 @@
 ########################################################################
 install(FILES
     api.h
+    burst_to_tagged_stream.h
     gsmtap_sink.h
     rach_demod.h
     rach_detect_fft.h

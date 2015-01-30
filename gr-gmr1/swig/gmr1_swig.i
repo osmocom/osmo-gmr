@@ -9,10 +9,14 @@
 
 
 %{
+#include "gnuradio/gmr1/burst_to_tagged_stream.h"
 #include "gnuradio/gmr1/gsmtap_sink.h"
 #include "gnuradio/gmr1/rach_demod.h"
 #include "gnuradio/gmr1/rach_detect_fft.h"
 %}
+
+%include "gnuradio/gmr1/burst_to_tagged_stream.h"
+GR_SWIG_BLOCK_MAGIC2(gmr1, burst_to_tagged_stream);
 
 %include "gnuradio/gmr1/gsmtap_sink.h"
 GR_SWIG_BLOCK_MAGIC2(gmr1, gsmtap_sink);

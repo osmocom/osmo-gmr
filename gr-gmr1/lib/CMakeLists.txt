@@ -42,6 +42,7 @@ list(APPEND gmr1_sources
 	../../src/l1/tch3.c
 	../../src/l1/tch9.c
 	../../src/gsmtap.c
+	burst_to_tagged_stream_impl.cc
 	gsmtap_sink_impl.cc
 	rach_demod_impl.cc
 	rach_detect_fft_impl.cc

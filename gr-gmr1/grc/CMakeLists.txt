@@ -18,6 +18,7 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
+    burst_to_tagged_stream.xml
     gsmtap_sink.xml
     rach_demod.xml
     rach_detect_fft.xml
