@@ -34,6 +34,11 @@
 namespace gr {
   namespace gmr1 {
 
+	/* FIXME: Those should be in a common include */
+static const pmt::pmt_t SOB_KEY = pmt::string_to_symbol("sob");
+static const pmt::pmt_t EOB_KEY = pmt::string_to_symbol("eob");
+
+
 rach_detect_fft::sptr
 rach_detect_fft::make(
 	int fft_size, int overlap_ratio, float threshold,
@@ -242,6 +247,14 @@ rach_detect_fft_impl::general_work(
 				this->d_burst_length_pmt
 			);
 
+			/* Burst SOB marker */
+			add_item_tag(
+				0,
+				this->nitems_written(0),
+				SOB_KEY,
+				pmt::PMT_NIL
+			);
+
 			/* Burst angular frequency */
 			add_item_tag(
 				0,
@@ -261,6 +274,15 @@ rach_detect_fft_impl::general_work(
 
 		if (this->d_out_pos == this->d_burst_length)
 		{
+			/* Burst EOB marker */
+			add_item_tag(
+				0,
+				this->nitems_written(0) + to_copy - 1,
+				EOB_KEY,
+				pmt::PMT_NIL
+			);
+
+			/* Reset for next */
 			this->d_peaks_pending.pop_back();
 			this->d_out_pos = 0;
 		}
