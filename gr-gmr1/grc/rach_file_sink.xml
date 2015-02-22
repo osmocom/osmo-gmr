@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<block>
+ <name>RACH File Sink</name>
+ <key>rach_file_sink</key>
+ <category>GMR-1</category>
+ <import>from gnuradio import gmr1</import>
+ <make>gmr1.rach_file_sink($filename, $center_freq, $sample_rate)</make>
+ <param>
+   <name>Filename</name>
+   <key>filename</key>
+   <type>string</type>
+ </param>
+ <param>
+   <name>Center Frequency</name>
+   <key>center_freq</key>
+   <value>0</value>
+   <type>float</type>
+ </param>
+ <param>
+   <name>Sample Rate</name>
+   <key>sample_rate</key>
+   <value>0</value>
+   <type>float</type>
+ </param>
+ <sink>
+   <name>pdus</name>
+   <type>message</type>
+ </sink>
+</block>

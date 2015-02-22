@@ -46,6 +46,7 @@ list(APPEND gmr1_sources
 	gsmtap_sink_impl.cc
 	rach_demod_impl.cc
 	rach_detect_fft_impl.cc
+	rach_file_sink_impl.cc
 )
 
 add_library(gnuradio-gmr1 SHARED ${gmr1_sources})

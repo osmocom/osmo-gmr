@@ -26,5 +26,6 @@ install(FILES
     gsmtap_sink.h
     rach_demod.h
     rach_detect_fft.h
+    rach_file_sink.h
     DESTINATION include/gnuradio/gmr1
 )

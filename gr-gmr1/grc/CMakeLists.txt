@@ -22,5 +22,6 @@ install(FILES
     gsmtap_sink.xml
     rach_demod.xml
     rach_detect_fft.xml
+    rach_file_sink.xml
     DESTINATION share/gnuradio/grc/blocks
 )

@@ -13,6 +13,7 @@
 #include "gnuradio/gmr1/gsmtap_sink.h"
 #include "gnuradio/gmr1/rach_demod.h"
 #include "gnuradio/gmr1/rach_detect_fft.h"
+#include "gnuradio/gmr1/rach_file_sink.h"
 %}
 
 %include "gnuradio/gmr1/burst_to_tagged_stream.h"
@@ -26,3 +27,6 @@ GR_SWIG_BLOCK_MAGIC2(gmr1, rach_demod);
 
 %include "gnuradio/gmr1/rach_detect_fft.h"
 GR_SWIG_BLOCK_MAGIC2(gmr1, rach_detect_fft);
+
+%include "gnuradio/gmr1/rach_file_sink.h"
+GR_SWIG_BLOCK_MAGIC2(gmr1, rach_file_sink);
