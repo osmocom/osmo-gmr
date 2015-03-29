@@ -236,7 +236,7 @@ rach_detect_fft_impl::general_work(
 				) - (float)(this->d_fft_size / 2)
 			);
 
-			phase_inc += this->d_freq_offset;
+			phase_inc -= this->d_freq_offset;
 
 			this->d_r.set_phase_incr( exp(gr_complex(0, phase_inc)) );
 
