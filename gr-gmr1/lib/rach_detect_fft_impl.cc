@@ -35,8 +35,9 @@ namespace gr {
   namespace gmr1 {
 
 	/* FIXME: Those should be in a common include */
-static const pmt::pmt_t SOB_KEY = pmt::string_to_symbol("sob");
-static const pmt::pmt_t EOB_KEY = pmt::string_to_symbol("eob");
+static const pmt::pmt_t SOB_KEY  = pmt::string_to_symbol("sob");
+static const pmt::pmt_t EOB_KEY  = pmt::string_to_symbol("eob");
+static const pmt::pmt_t FREQ_KEY = pmt::string_to_symbol("freq");
 
 
 rach_detect_fft::sptr
@@ -65,7 +66,6 @@ rach_detect_fft_impl::rach_detect_fft_impl(
       d_threshold(threshold),
       d_burst_length(burst_length), d_burst_offset(burst_offset),
       d_freq_offset(freq_offset),
-      d_freq_tag_key(pmt::string_to_symbol("freq")),
       d_len_tag_key(pmt::string_to_symbol(len_tag_key)),
       d_burst_length_pmt(pmt::from_long(burst_length))
 {
@@ -259,7 +259,7 @@ rach_detect_fft_impl::general_work(
 			add_item_tag(
 				0,
 				this->nitems_written(0),
-				this->d_freq_tag_key,
+				FREQ_KEY,
 				pmt::from_double(phase_inc)
 			);
 		}

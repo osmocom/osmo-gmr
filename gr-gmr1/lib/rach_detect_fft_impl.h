@@ -59,7 +59,6 @@ namespace gr {
       int d_burst_offset;
       float d_freq_offset;
 
-      pmt::pmt_t d_freq_tag_key;
       pmt::pmt_t d_len_tag_key;
       pmt::pmt_t d_burst_length_pmt;
 
