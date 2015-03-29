@@ -85,7 +85,7 @@ rach_demod_impl::etoa() const
 float
 rach_demod_impl::estimate(struct osmo_cxvec *burst, int etoa, float *cw_freq)
 {
-	const int guard = 2 * this->d_sps;
+	const int guard = 8 * this->d_sps;
 	struct osmo_cxvec _cw1, *cw1 = &_cw1;
 	struct osmo_cxvec _cw2, *cw2 = &_cw2;
 	float complex c1, c2;
@@ -103,16 +103,55 @@ rach_demod_impl::estimate(struct osmo_cxvec *burst, int etoa, float *cw_freq)
 		this->d_sps * 32
 	);
 
-	/* Compute the average rotation speed per sample of cw1 & cw2 */
-	r = 0.0f;
-
-	for (i=guard; i<(cw1->len-1-guard); i++)
+	/* Coarse (average phase change during the CW1 & CW2) */
 	{
-		r += cargf(cw1->data[i+1] * conjf(cw1->data[i]));
-		r += cargf(cw2->data[i+1] * conjf(cw2->data[i]));
+		float complex a[2] = { 0.0f, 0.0f };
+		float complex b[2];
+		r = 0.0f;
+
+		for (i=guard; i<guard+5; i++)
+		{
+			float complex e = cexpf(I * i * -M_PIf / (4*this->d_sps));
+
+			a[0] += cw1->data[i] * e;
+			a[1] += cw2->data[i] * e;
+		}
+
+		for (i=guard; i<cw1->len-guard-5; i++)
+		{
+			float complex e = cexpf(I * i     * -M_PIf / (4*this->d_sps));
+			float complex f = cexpf(I * (i+5) * -M_PIf / (4*this->d_sps));
+
+			b[0] = a[0] + cw1->data[i+5] * f - cw1->data[i] * e;
+			b[1] = a[1] + cw2->data[i+5] * f - cw2->data[i] * e;
+
+			r += cargf(b[0] * conjf(a[0]));
+			r += cargf(b[1] * conjf(a[1]));
+
+			a[0] = b[0];
+			a[1] = b[1];
+		}
+
+		r /= 2.0f * (cw1->len-2*guard-5);
+
+		r += M_PIf / (4*this->d_sps);
 	}
 
-	r /= 2.0f * (cw1->len-1-2*guard);
+	/* Fine (looking at phase different between CW1 and CW2) */
+	{
+		float complex a[2] = { 0.0f, 0.0f };
+		float complex eo = cexpf(I * 64.0f * this->d_sps * -r);
+
+		for (i=guard; i<(cw1->len-guard); i++)
+		{
+			float complex e = cexpf(I * i * -r);
+
+			a[0] += cw1->data[i] * e;
+			a[1] += cw2->data[i] * e * eo;
+		}
+
+		r += cargf(a[1] * conjf(a[0])) / (64.0f * this->d_sps);
+	}
 
 	/* Compute the correlation value using that speed to revert rotation */
 	c1 = c2 = 0.0f;
