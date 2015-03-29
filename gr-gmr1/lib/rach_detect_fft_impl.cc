@@ -38,6 +38,7 @@ namespace gr {
 static const pmt::pmt_t SOB_KEY  = pmt::string_to_symbol("sob");
 static const pmt::pmt_t EOB_KEY  = pmt::string_to_symbol("eob");
 static const pmt::pmt_t FREQ_KEY = pmt::string_to_symbol("freq");
+static const pmt::pmt_t TIME_KEY = pmt::string_to_symbol("time");
 
 
 rach_detect_fft::sptr
@@ -261,6 +262,14 @@ rach_detect_fft_impl::general_work(
 				this->nitems_written(0),
 				FREQ_KEY,
 				pmt::from_double(phase_inc)
+			);
+
+			/* Burst first sample index */
+			add_item_tag(
+				0,
+				this->nitems_written(0),
+				TIME_KEY,
+				pmt::from_uint64(nitems_read(0))
 			);
 		}
 

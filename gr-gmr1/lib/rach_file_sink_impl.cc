@@ -22,6 +22,7 @@
 #include "config.h"
 #endif
 
+#include <inttypes.h>
 #include <string.h>
 #include <cstdio>
 
@@ -114,6 +115,7 @@ rach_file_sink_impl::send_pdu(pmt::pmt_t pdu)
 {
 	static const pmt::pmt_t key_sb_mask = pmt::string_to_symbol("sb_mask");
 	static const pmt::pmt_t key_freq = pmt::string_to_symbol("freq");
+	static const pmt::pmt_t key_time = pmt::string_to_symbol("time");
 
 	pmt::pmt_t meta = pmt::car(pdu);
 	pmt::pmt_t vector = pmt::cdr(pdu);
@@ -126,6 +128,13 @@ rach_file_sink_impl::send_pdu(pmt::pmt_t pdu)
 	    !dict_has_key(meta, key_sb_mask) ||
 	    !dict_has_key(meta, key_freq))
 		throw std::runtime_error("Invalid RACH PDU");
+
+	/* If we have time, start with it */
+	if (dict_has_key(meta, key_freq))
+	{
+		uint64_t time = pmt::to_uint64(pmt::dict_ref(meta, key_time, pmt::PMT_NIL));
+		fprintf(this->d_fh, "%" PRIu64 " ", time);
+	}
 
 	/* Grab SB_Mask & freq */
 	uint8_t sb_mask = pmt::to_long(pmt::dict_ref(meta, key_sb_mask, pmt::PMT_NIL));
