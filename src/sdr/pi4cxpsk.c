@@ -67,7 +67,7 @@
  */
 
 /*! \brief pi4-CBPSK symbols descriptions */
-static struct gmr1_pi4cxpsk_symbol gmr1_pi4cbpsk_syms[] = {
+static struct gmr1_pi4cxpsk_symbol gmr1_pi4cbpsk_syms_bits[] = {
 	{ 0, {0}, 0*M_PIf/2,  1+0*I },
 	{ 1, {1}, 2*M_PIf/2, -1+0*I },
 };
@@ -75,11 +75,12 @@ static struct gmr1_pi4cxpsk_symbol gmr1_pi4cbpsk_syms[] = {
 /*! \brief pi4-CBPSK modulation description */
 struct gmr1_pi4cxpsk_modulation gmr1_pi4cbpsk = {
 	.nbits = 1,
-	.syms = gmr1_pi4cbpsk_syms,
+	.syms = gmr1_pi4cbpsk_syms_bits,
+	.bits = gmr1_pi4cbpsk_syms_bits,
 };
 
 
-/*! \brief pi4-CQPSK symbols descriptions */
+/*! \brief pi4-CQPSK symbols descriptions in symbol order */
 static struct gmr1_pi4cxpsk_symbol gmr1_pi4cqpsk_syms[] = {
 	{ 0, {0,0}, 0*M_PIf/2,  1+0*I },
 	{ 1, {0,1}, 1*M_PIf/2,  0+1*I },
@@ -87,10 +88,19 @@ static struct gmr1_pi4cxpsk_symbol gmr1_pi4cqpsk_syms[] = {
 	{ 3, {1,0}, 3*M_PIf/2,  0-1*I },
 };
 
+/*! \brief pi4-CQPSK symbols descriptions in bits order */
+static struct gmr1_pi4cxpsk_symbol gmr1_pi4cqpsk_bits[] = {
+	{ 0, {0,0}, 0*M_PIf/2,  1+0*I },
+	{ 1, {0,1}, 1*M_PIf/2,  0+1*I },
+	{ 3, {1,0}, 3*M_PIf/2,  0-1*I },
+	{ 2, {1,1}, 2*M_PIf/2, -1+0*I },
+};
+
 /*! \brief pi4-CQPSK modulation description */
 struct gmr1_pi4cxpsk_modulation gmr1_pi4cqpsk = {
 	.nbits = 2,
 	.syms = gmr1_pi4cqpsk_syms,
+	.bits = gmr1_pi4cqpsk_bits,
 };
 
 
@@ -701,6 +711,76 @@ gmr1_pi4cxpsk_mod_order(struct osmo_cxvec *burst_in, int sps, float freq_shift)
 err:
 	osmo_cxvec_free(burst);
 
+	return rv;
+}
+
+/*! \brief Modulates (currently at 1 sps)
+ *  \param[in] burst_type Burst format description
+ *  \param[in] ebits Encoded hard bits to pack in the burst
+ *  \param[in] sync_id The sequence id to use (0 if burst_type only has one)
+ *  \param[out] burst_out Complex signal to fill with modulated symbols
+ *  \returns 0 for success. -errno for errors
+ *
+ *  burst_out is expected to be long enough to contains the resulting symbols
+ *  see the burst_type structure for how long that is.
+ */
+int
+gmr1_pi4cxpsk_mod(struct gmr1_pi4cxpsk_burst *burst_type,
+                  ubit_t *ebits, int sync_id, struct osmo_cxvec *burst_out)
+{
+	struct gmr1_pi4cxpsk_modulation *mod = burst_type->mod;
+	struct gmr1_pi4cxpsk_sync *sync;
+	struct gmr1_pi4cxpsk_data *data;
+	int rv, i, j, k;
+
+	/* Check the output vector is long enough */
+	if (burst_out->max_len < burst_type->len) {
+		rv = -ENOMEM;
+		goto err;
+	}
+
+	burst_out->len = burst_type->len;
+
+	/* Generate reference sync bursts */
+	rv = _gmr1_pi4cxpsk_sync_gen_ref(burst_type);
+	if (rv)
+		goto err;
+
+	/* Fill guard */
+	for (i=0; i<burst_type->guard_pre; i++)
+		burst_out->data[i] = 0.0f;
+	for (i=0; i<burst_type->guard_post; i++)
+		burst_out->data[burst_out->len - i - 1] = 0.0f;
+
+	/* Fill training sequence */
+	for (sync=burst_type->sync[sync_id]; sync->len; sync++)
+	{
+		for (i=0; i<sync->len; i++)
+			burst_out->data[sync->pos+i] = sync->_ref->data[i];
+	}
+
+	/* Fill ebits */
+	k = 0;
+
+	for (data=burst_type->data; data->len; data++)
+	{
+		for (i=0; i<data->len; i++)
+		{
+			int sym = 0;
+
+			for (j=0; j<mod->nbits; j++)
+				sym = (sym << 1) | ebits[k++];
+
+			burst_out->data[data->pos+i] = burst_type->mod->bits[sym].mod_val;
+		}
+	}
+
+	/* Apply the final pi/4 rotation */
+	osmo_cxvec_rotate(burst_out, M_PIf / 4.0f, burst_out);
+
+	rv = 0;
+
+err:
 	return rv;
 }
 

@@ -51,7 +51,8 @@ struct gmr1_pi4cxpsk_symbol {
 /*! \brief pi4-CxPSK modulation description */
 struct gmr1_pi4cxpsk_modulation {
 	int nbits;				/*!< \brief ebits/sym      */
-	struct gmr1_pi4cxpsk_symbol *syms;	/*!< \brief Symbols        */
+	struct gmr1_pi4cxpsk_symbol *syms;	/*!< \brief Symbols (sym order) */
+	struct gmr1_pi4cxpsk_symbol *bits;	/*!< \brief Symbols (bit order) */
 };
 
 
@@ -108,6 +109,11 @@ gmr1_pi4cxpsk_detect(struct gmr1_pi4cxpsk_burst **burst_types, float e_toa,
 
 int
 gmr1_pi4cxpsk_mod_order(struct osmo_cxvec *burst_in, int sps, float freq_shift);
+
+int
+gmr1_pi4cxpsk_mod(struct gmr1_pi4cxpsk_burst *burst_type,
+                  ubit_t *ebits, int sync_id, struct osmo_cxvec *burst_out);
+
 
 /*! @} */
 
