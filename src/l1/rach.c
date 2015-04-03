@@ -93,7 +93,7 @@ gmr1_rach_encode(ubit_t *bits_e, const uint8_t *rach, uint8_t sb_mask)
 
 	/* d -> u : CRC addition */
 	osmo_crc8gen_set_bits (&gmr1_crc8,  bits_u1,  16, bits_u1+16);
-	osmo_crc16gen_set_bits(&gmr1_crc16, bits_u2, 123, bits_u2+123);
+	osmo_crc16gen_set_bits(&gmr1_crc12, bits_u2, 123, bits_u2+123);
 
 	/* u -> u' : masking */
 	for (i=0; i<8; i++)
@@ -103,8 +103,8 @@ gmr1_rach_encode(ubit_t *bits_e, const uint8_t *rach, uint8_t sb_mask)
 	osmo_conv_encode(&gmr1_conv_rach, bits_u, bits_c);
 
 	/* c -> e' : interleaving */
-	gmr1_deinterleave_intra(bits_e1p, bits_c+270, 14);
-	gmr1_deinterleave_intra(bits_e2p, bits_c,     33);
+	gmr1_interleave_intra(bits_e1p, bits_c+270, 14);
+	gmr1_interleave_intra(bits_e2p, bits_c,     33);
 
 	memcpy(bits_e2p+264, bits_c+264, 6);
 
