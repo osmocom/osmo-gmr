@@ -42,6 +42,11 @@ extern "C" {
 namespace gr {
   namespace gmr1 {
 
+	/* FIXME: Those should be in a common include */
+static const pmt::pmt_t FREQ_KEY = pmt::string_to_symbol("freq");
+static const pmt::pmt_t SB_MASK_KEY = pmt::string_to_symbol("sb_mask");
+
+
 rach_demod::sptr
 rach_demod::make(int sps, int etoa, const std::string& len_tag_key)
 {
@@ -246,6 +251,7 @@ rach_demod_impl::work(int noutput_items,
 		std::vector<tag_t> tags;
 		std::vector<tag_t>::iterator tags_itr;
 		pmt::pmt_t pdu_meta, pdu_vector, msg;
+		double freq = 0.0;
 
 		/* Grab the tags into a dict */
 		get_tags_in_range(tags, 0,
@@ -255,13 +261,29 @@ rach_demod_impl::work(int noutput_items,
 
 		pdu_meta = pmt::make_dict();
 		for (tags_itr = tags.begin(); tags_itr != tags.end(); tags_itr++) {
+			/* Intercept freq */
+			if (pmt::eqv((*tags_itr).key, FREQ_KEY))
+			{
+				freq = pmt::to_double((*tags_itr).value);
+				continue;
+			}
+
+			/* Add it */
 			pdu_meta = dict_add(pdu_meta, (*tags_itr).key, (*tags_itr).value);
 		}
 
 		/* Add the guessed SB_Mask */
 		pdu_meta = dict_add(pdu_meta,
-			pmt::string_to_symbol("sb_mask"),
+			SB_MASK_KEY,
 			pmt::from_long(sb_mask)
+		);
+
+		/* Add the freq */
+		freq += ((d_sps * peak_cw_freq) - (M_PIf / 4.0f)) * 23400.0f / (2.0f * M_PIf);
+
+		pdu_meta = dict_add(pdu_meta,
+			FREQ_KEY,
+			pmt::from_double(freq)
 		);
 
 		/* Build vector with the data bytes */
