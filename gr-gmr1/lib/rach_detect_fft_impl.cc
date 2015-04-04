@@ -46,7 +46,7 @@ rach_detect_fft::make(
 	const double sample_rate,
 	const int overlap_ratio, const float threshold,
 	const int burst_length, const int burst_offset,
-	const float freq_offset,
+	const float peak_freq,
 	const std::string& len_tag_key)
 {
 	return gnuradio::get_initial_sptr(
@@ -54,7 +54,7 @@ rach_detect_fft::make(
 			sample_rate,
 			overlap_ratio, threshold,
 			burst_length, burst_offset,
-			freq_offset,
+			peak_freq,
 			len_tag_key
 		)
 	);
@@ -64,7 +64,7 @@ rach_detect_fft_impl::rach_detect_fft_impl(
 	const double sample_rate,
 	const int overlap_ratio, const float threshold,
 	const int burst_length, const int burst_offset,
-	const float freq_offset,
+	const float peak_freq,
 	const std::string& len_tag_key)
     : gr::block("rach_detect_fft",
                 io_signature::make(1, 1, sizeof(gr_complex)),
@@ -72,7 +72,7 @@ rach_detect_fft_impl::rach_detect_fft_impl(
       d_sample_rate(sample_rate),
       d_overlap_ratio(overlap_ratio), d_threshold(threshold),
       d_burst_length(burst_length), d_burst_offset(burst_offset),
-      d_freq_offset(freq_offset),
+      d_peak_freq(peak_freq),
       d_len_tag_key(pmt::string_to_symbol(len_tag_key)),
       d_burst_length_pmt(pmt::from_long(burst_length))
 {
@@ -243,7 +243,7 @@ rach_detect_fft_impl::general_work(
 				) - (float)(this->d_fft_size / 2)
 			);
 
-			phase_inc -= this->d_freq_offset;
+			phase_inc += this->d_peak_freq;
 
 			this->d_r.set_phase_incr( exp(gr_complex(0, phase_inc)) );
 

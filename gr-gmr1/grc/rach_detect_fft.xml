@@ -5,7 +5,7 @@
  <category>GMR-1</category>
  <import>import math</import>
  <import>from gnuradio import gmr1</import>
- <make>gmr1.rach_detect_fft($samp_rate, $overlap_ratio, $threshold, $burst_length, $burst_offset, $freq_offset, $len_tag_key)</make>
+ <make>gmr1.rach_detect_fft($samp_rate, $overlap_ratio, $threshold, $burst_length, $burst_offset, $peak_freq, $len_tag_key)</make>
  <param>
    <name>Sample Rate</name>
    <key>samp_rate</key>
@@ -37,9 +37,9 @@
    <type>int</type>
  </param>
  <param>
-   <name>Frequency offset</name>
-   <key>freq_offset</key>
-   <value>- (math.pi / 4.0) * (23400.0 / samp_rate)</value>
+   <name>Peak Frequency</name>
+   <key>peak_freq</key>
+   <value>(math.pi / 4.0) * (23400.0 / samp_rate)</value>
    <type>float</type>
  </param>
  <param>

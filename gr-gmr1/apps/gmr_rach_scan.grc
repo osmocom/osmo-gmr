@@ -303,8 +303,8 @@
       <value>0</value>
     </param>
     <param>
-      <key>freq_offset</key>
-      <value>- (math.pi / 4.0) * (23400.0 / samp_rate)</value>
+      <key>peak_freq</key>
+      <value>(math.pi / 4.0) * (23400.0 / samp_rate)</value>
     </param>
     <param>
       <key>len_tag_key</key>

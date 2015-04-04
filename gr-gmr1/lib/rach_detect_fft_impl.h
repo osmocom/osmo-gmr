@@ -58,7 +58,7 @@ namespace gr {
       float d_threshold;
       int d_burst_length;
       int d_burst_offset;
-      float d_freq_offset;
+      float d_peak_freq;
 
       pmt::pmt_t d_len_tag_key;
       pmt::pmt_t d_burst_length_pmt;
@@ -83,7 +83,7 @@ namespace gr {
       rach_detect_fft_impl(const double sample_rate,
                            const int overlap_ratio, const float threshold,
                            const int burst_length, const int burst_offset,
-                           const float freq_offset,
+                           const float peak_freq,
                            const std::string& len_tag_key);
       virtual ~rach_detect_fft_impl();
 

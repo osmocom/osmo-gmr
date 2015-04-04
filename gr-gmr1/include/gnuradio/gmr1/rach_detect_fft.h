@@ -40,7 +40,7 @@ namespace gr {
       static sptr make(const double sample_rate,
                        const int overlap_ratio, const float threshold,
                        const int burst_length, const int burst_offset,
-                       const float freq_offset,
+                       const float peak_freq,
                        const std::string& len_tag_key);
     };
 
