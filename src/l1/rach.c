@@ -187,6 +187,8 @@ gmr1_rach_decode(uint8_t *rach, const sbit_t *bits_e, uint8_t sb_mask,
 	}
 
 	/* CRC removal & packing */
+	rach[17] = 0x00;
+
 	osmo_ubit2pbit_ext(rach,  0, bits_u1, 0,  16, 1);
 	osmo_ubit2pbit_ext(rach, 16, bits_u2, 0, 123, 1);
 
