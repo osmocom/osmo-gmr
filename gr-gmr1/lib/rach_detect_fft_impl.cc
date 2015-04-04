@@ -268,7 +268,7 @@ rach_detect_fft_impl::general_work(
 				0,
 				this->nitems_written(0),
 				FREQ_KEY,
-				pmt::from_double(phase_inc)
+				pmt::from_double(- this->d_sample_rate * phase_inc / (2.0 * M_PI))
 			);
 
 			/* Burst first sample index */

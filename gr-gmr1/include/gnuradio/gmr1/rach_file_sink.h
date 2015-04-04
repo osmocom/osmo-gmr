@@ -39,15 +39,15 @@ namespace gr {
       typedef boost::shared_ptr<rach_file_sink> sptr;
 
       static sptr make(const std::string &filename,
-                       const double center_freq, const double sample_rate);
+                       const double center_freq, const bool invert_freq);
 
       virtual std::string filename() const = 0;
 
       virtual double center_freq() const = 0;
-      virtual double sample_rate() const = 0;
+      virtual bool invert_freq() const = 0;
 
       virtual void set_center_freq(const double center_freq) = 0;
-      virtual void set_sample_rate(const double sample_rate) = 0;
+      virtual void set_invert_freq(const bool invert_freq) = 0;
     };
 
   } // namespace gmr1

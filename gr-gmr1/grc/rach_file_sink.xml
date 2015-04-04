@@ -4,7 +4,7 @@
  <key>rach_file_sink</key>
  <category>GMR-1</category>
  <import>from gnuradio import gmr1</import>
- <make>gmr1.rach_file_sink($filename, $center_freq, $sample_rate)</make>
+ <make>gmr1.rach_file_sink($filename, $center_freq, $invert_freq)</make>
  <param>
    <name>Filename</name>
    <key>filename</key>
@@ -17,10 +17,10 @@
    <type>float</type>
  </param>
  <param>
-   <name>Sample Rate</name>
-   <key>sample_rate</key>
-   <value>0</value>
-   <type>float</type>
+   <name>Inverted Spectrum</name>
+   <key>invert_freq</key>
+   <value>False</value>
+   <type>bool</type>
  </param>
  <sink>
    <name>pdus</name>

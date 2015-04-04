@@ -38,7 +38,7 @@ namespace gr {
      private:
       std::string d_filename;
       double d_center_freq;
-      double d_sample_rate;
+      bool d_invert_freq;
 
       FILE *d_fh;
 
@@ -46,15 +46,15 @@ namespace gr {
 
      public:
       rach_file_sink_impl(const std::string &filename,
-                          const double center_freq, const double sample_rate);
+                          const double center_freq, const bool invert_freq);
       virtual ~rach_file_sink_impl();
 
       std::string filename() const;
       double center_freq() const;
-      double sample_rate() const;
+      bool invert_freq() const;
 
       void set_center_freq(const double center_freq);
-      void set_sample_rate(const double sample_rate);
+      void set_invert_freq(const bool invert_freq);
 
       bool start();
       bool stop();

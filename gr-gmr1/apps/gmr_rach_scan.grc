@@ -604,8 +604,8 @@
       <value>0</value>
     </param>
     <param>
-      <key>sample_rate</key>
-      <value>samp_rate</value>
+      <key>invert_freq</key>
+      <value>True</value>
     </param>
     <param>
       <key>alias</key>

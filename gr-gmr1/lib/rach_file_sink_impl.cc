@@ -36,21 +36,21 @@ namespace gr {
 
 rach_file_sink::sptr
 rach_file_sink::make(const std::string &filename,
-                     const double center_freq, const double sample_rate)
+                     const double center_freq, const bool invert_freq)
 {
 	return gnuradio::get_initial_sptr(
-		new rach_file_sink_impl(filename, center_freq, sample_rate)
+		new rach_file_sink_impl(filename, center_freq, invert_freq)
 	);
 }
 
 rach_file_sink_impl::rach_file_sink_impl(const std::string &filename,
                                          const double center_freq,
-                                         const double sample_rate)
+                                         const bool invert_freq)
     : gr::block("rach_file_sink",
                 io_signature::make(0, 0, 0),
                 io_signature::make(0, 0, 0)),
       d_filename(filename),
-      d_center_freq(center_freq), d_sample_rate(sample_rate)
+      d_center_freq(center_freq), d_invert_freq(invert_freq)
 {
 	message_port_register_in(PDU_PORT_ID);
 	set_msg_handler(PDU_PORT_ID, boost::bind(&rach_file_sink_impl::send_pdu, this, _1));
@@ -78,10 +78,10 @@ rach_file_sink_impl::center_freq() const
 	return this->d_center_freq;
 }
 
-double
-rach_file_sink_impl::sample_rate() const
+bool
+rach_file_sink_impl::invert_freq() const
 {
-	return this->d_sample_rate;
+	return this->d_invert_freq;
 }
 
 void
@@ -91,9 +91,9 @@ rach_file_sink_impl::set_center_freq(const double center_freq)
 }
 
 void
-rach_file_sink_impl::set_sample_rate(const double sample_rate)
+rach_file_sink_impl::set_invert_freq(const bool invert_freq)
 {
-	this->d_sample_rate = sample_rate;
+	this->d_invert_freq = invert_freq;
 }
 
 
@@ -140,10 +140,13 @@ rach_file_sink_impl::send_pdu(pmt::pmt_t pdu)
 	uint8_t sb_mask = pmt::to_long(pmt::dict_ref(meta, key_sb_mask, pmt::PMT_NIL));
 	double freq = pmt::to_double(pmt::dict_ref(meta, key_freq, pmt::PMT_NIL));
 
+	if (this->d_invert_freq)
+		freq = -freq;
+
 	fprintf(this->d_fh, "%02hhx %.17g %.17g ",
 		sb_mask,
 		freq,
-		this->d_center_freq + (this->d_sample_rate * freq / (2.0 * M_PI))
+		this->d_center_freq + freq
 	);
 
 	/* Raw bytes */
