@@ -5,12 +5,12 @@
  <category>GMR-1</category>
  <import>import math</import>
  <import>from gnuradio import gmr1</import>
- <make>gmr1.rach_detect_fft($fft_size, $overlap_ratio, $threshold, $burst_length, $burst_offset, $freq_offset, $len_tag_key)</make>
+ <make>gmr1.rach_detect_fft($samp_rate, $overlap_ratio, $threshold, $burst_length, $burst_offset, $freq_offset, $len_tag_key)</make>
  <param>
-   <name>FFT size</name>
-   <key>fft_size</key>
-   <value>1 &lt;&lt; int(round(math.log(samp_rate / 1e3) / math.log(2)))</value>
-   <type>int</type>
+   <name>Sample Rate</name>
+   <key>samp_rate</key>
+   <value>samp_rate</value>
+   <type>real</type>
  </param>
  <param>
    <name>Overlap ratio</name>

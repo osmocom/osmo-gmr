@@ -283,8 +283,8 @@
       <value>True</value>
     </param>
     <param>
-      <key>fft_size</key>
-      <value>1 &lt;&lt; int(round(math.log(samp_rate / 1e3) / math.log(2)))</value>
+      <key>samp_rate</key>
+      <value>samp_rate</value>
     </param>
     <param>
       <key>overlap_ratio</key>

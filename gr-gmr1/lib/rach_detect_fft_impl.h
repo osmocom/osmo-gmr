@@ -52,6 +52,7 @@ namespace gr {
         float bin() const;
       };
 
+      double d_sample_rate;
       int d_fft_size;
       int d_overlap_ratio;
       float d_threshold;
@@ -79,8 +80,10 @@ namespace gr {
       void peak_detect(uint64_t position);
 
      public:
-      rach_detect_fft_impl(int fft_size, int overlap_ratio, float threshold,
-                           int burst_length, int burst_offset, float freq_offset,
+      rach_detect_fft_impl(const double sample_rate,
+                           const int overlap_ratio, const float threshold,
+                           const int burst_length, const int burst_offset,
+                           const float freq_offset,
                            const std::string& len_tag_key);
       virtual ~rach_detect_fft_impl();
 

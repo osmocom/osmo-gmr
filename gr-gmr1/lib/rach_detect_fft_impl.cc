@@ -43,33 +43,40 @@ static const pmt::pmt_t TIME_KEY = pmt::string_to_symbol("time");
 
 rach_detect_fft::sptr
 rach_detect_fft::make(
-	int fft_size, int overlap_ratio, float threshold,
-	int burst_length, int burst_offset, float freq_offset,
+	const double sample_rate,
+	const int overlap_ratio, const float threshold,
+	const int burst_length, const int burst_offset,
+	const float freq_offset,
 	const std::string& len_tag_key)
 {
 	return gnuradio::get_initial_sptr(
 		new rach_detect_fft_impl(
-			fft_size, overlap_ratio, threshold,
-			burst_length, burst_offset, freq_offset,
+			sample_rate,
+			overlap_ratio, threshold,
+			burst_length, burst_offset,
+			freq_offset,
 			len_tag_key
 		)
 	);
 }
 
 rach_detect_fft_impl::rach_detect_fft_impl(
-	int fft_size, int overlap_ratio, float threshold,
-	int burst_length, int burst_offset, float freq_offset,
+	const double sample_rate,
+	const int overlap_ratio, const float threshold,
+	const int burst_length, const int burst_offset,
+	const float freq_offset,
 	const std::string& len_tag_key)
     : gr::block("rach_detect_fft",
                 io_signature::make(1, 1, sizeof(gr_complex)),
                 io_signature::make(1, 1, sizeof(gr_complex))),
-      d_fft_size(fft_size), d_overlap_ratio(overlap_ratio),
-      d_threshold(threshold),
+      d_sample_rate(sample_rate),
+      d_overlap_ratio(overlap_ratio), d_threshold(threshold),
       d_burst_length(burst_length), d_burst_offset(burst_offset),
       d_freq_offset(freq_offset),
       d_len_tag_key(pmt::string_to_symbol(len_tag_key)),
       d_burst_length_pmt(pmt::from_long(burst_length))
 {
+	this->d_fft_size = 1 << (int)(round(log2(sample_rate / 1e3)));
 	this->d_fft = new gr::fft::fft_complex(this->d_fft_size, true, 1);
 
 	this->d_buf = (gr_complex *) volk_malloc(this->d_fft_size * sizeof(gr_complex), 128);
