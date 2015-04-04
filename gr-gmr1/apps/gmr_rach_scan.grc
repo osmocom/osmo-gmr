@@ -644,7 +644,7 @@
     </param>
     <param>
       <key>taps</key>
-      <value>firdes.low_pass(1.0, 32 * samp_rate, 17e3, 2e3)</value>
+      <value>firdes.low_pass(1.0, 32 * samp_rate, 15e3, 2e3)</value>
     </param>
     <param>
       <key>nfilts</key>
