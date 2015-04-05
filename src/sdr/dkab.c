@@ -160,10 +160,10 @@ _gmr1_dkab_soft_bits(struct osmo_cxvec *burst, int sps, int p, float toa,
 
 	toa_i = (int)roundf(toa);
 	ofs[0] = toa_i + sps * (2 + p);		/* First DKAB */
-	ofs[1] = toa_i + sps * (2 + p + 159);	/* Second DKAB */
+	ofs[1] = toa_i + sps * (2 + p + 59);	/* Second DKAB */
 
 	for (i=0; i<8; i++) {
-		o = ofs[i>>2] + (i&3);
+		o = ofs[i>>2] + sps * (i&3);
 		pd = cargf(burst->data[o] * conjf(burst->data[o+sps]));
 		ebits[i] = (sbit_t)roundf((0.5f - (fabsf(pd) / M_PIf)) * 254.0f);
 	}
