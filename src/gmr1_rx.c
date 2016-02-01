@@ -54,6 +54,8 @@
 
 static struct gsmtap_inst *g_gti;
 
+static const struct gmr1_fcch_burst *fcch_type = &gmr1_fcch_burst;
+
 
 struct tch3_state {
 	/* Status */
@@ -606,7 +608,7 @@ fcch_single_init(struct chan_desc *cd)
 		return rv;
 	}
 
-	rv = gmr1_fcch_rough(win, cd->sps, 0.0f, &toa);
+	rv = gmr1_fcch_rough(fcch_type, win, cd->sps, 0.0f, &toa);
 	if (rv) {
 		fprintf(stderr, "[!] Error during FCCH rough acquisition (%d)\n", rv);
 		return rv;
@@ -615,9 +617,9 @@ fcch_single_init(struct chan_desc *cd)
 	cd->align += toa;
 
 	/* Fine FCCH detection*/
-	win_map(win, cd->bcch, cd->align, GMR1_FCCH_SYMS * cd->sps);
+	win_map(win, cd->bcch, cd->align, fcch_type->len * cd->sps);
 
-	rv = gmr1_fcch_fine(win, cd->sps, 0.0f, &toa, &cd->freq_err);
+	rv = gmr1_fcch_fine(fcch_type, win, cd->sps, 0.0f, &toa, &cd->freq_err);
 	if (rv) {
 		fprintf(stderr, "[!] Error during FCCH fine acquisition (%d)\n", rv);
 		return rv;
@@ -642,7 +644,7 @@ fcch_multi_process(struct chan_desc *cd, fcch_multi_cb_t cb)
 	fprintf(stderr, "[+] FCCH multi acquisition\n");
 
 	/* Multi FCCH detection (need 650 ms of signals) */
-	base_align = cd->align - GMR1_FCCH_SYMS * cd->sps;
+	base_align = cd->align - fcch_type->len * cd->sps;
 	if (base_align < 0)
 		base_align = 0;
 
@@ -652,7 +654,7 @@ fcch_multi_process(struct chan_desc *cd, fcch_multi_cb_t cb)
 		return rv;
 	}
 
-	rv = gmr1_fcch_rough_multi(win, cd->sps, -cd->freq_err, mtoa, 16);
+	rv = gmr1_fcch_rough_multi(fcch_type, win, cd->sps, -cd->freq_err, mtoa, 16);
 	if (rv < 0) {
 		fprintf(stderr, "[!] Error during FCCH rough mutli-acquisition (%d)\n", rv);
 		return rv;
@@ -668,9 +670,9 @@ fcch_multi_process(struct chan_desc *cd, fcch_multi_cb_t cb)
 		int toa;
 
 		/* Perform fine acquisition */
-		win_map(win, cd->bcch, base_align + mtoa[i], GMR1_FCCH_SYMS * cd->sps);
+		win_map(win, cd->bcch, base_align + mtoa[i], fcch_type->len * cd->sps);
 
-		rv = gmr1_fcch_fine(win, cd->sps, -cd->freq_err, &toa, &freq_err);
+		rv = gmr1_fcch_fine(fcch_type, win, cd->sps, -cd->freq_err, &toa, &freq_err);
 		if (rv) {
 			fprintf(stderr, "[!] Error during FCCH fine acquisition (%d)\n", rv);
 			return rv;

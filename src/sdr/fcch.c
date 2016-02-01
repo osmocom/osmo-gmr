@@ -1,5 +1,5 @@
 /* GMR-1 SDR - FCCH bursts */
-/* See GMR-1 05.004 (ETSI TS 101 376-5-4 V1.2.1) - Section 8.1 */
+/* See GMR-1 05.004 (ETSI TS 101 376-5-4 V3.1.1) - Section 8 */
 
 /* (C) 2011-2019 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
@@ -41,30 +41,63 @@
 
 
 /* ------------------------------------------------------------------------ */
+/* Burst format data                                                        */
+/* ------------------------------------------------------------------------ */
+
+/*! \brief FCCH burst (GMR-1 version)
+ *  See GMR-1 05.004 (ETSI TS 101 376-5-2 V3.1.1) - Section 8.1
+ */
+const struct gmr1_fcch_burst gmr1_fcch_burst = {
+	.freq = 0.32f,
+	.len  = 3 * 39,
+};
+
+
+/*! \brief FCCH3 L-band burst (GMR-1 3G version for L-band)
+ *  See GMR-1 05.004 (ETSI TS 101 376-5-2 V3.1.1) - Section 8.2.1
+ */
+const struct gmr1_fcch_burst gmr1_fcch3_lband_burst = {
+	.freq = 0.32f,
+	.len  = 12 * 39,
+};
+
+/*! \brief FCCH3 S-band burst (GMR-1 3G version for S-band)
+ *  See GMR-1 05.004 (ETSI TS 101 376-5-2 V3.1.1) - Section 8.2.2
+ */
+const struct gmr1_fcch_burst gmr1_fcch3_sband_burst = {
+	.freq = 0.16f,
+	.len  = 12 * 39,
+};
+
+
+/* ------------------------------------------------------------------------ */
 /* Reference waveform generation                                            */
 /* ------------------------------------------------------------------------ */
 
 /*! \brief Generate FCCH reference up or down chirp at a given oversampling
+ *  \param[in] burst_type FCCH burst format description
  *  \param[in] sps Oversampling rate
  *  \param[in] up_down Selects chirp direction (0=down 1=up)
  *  \returns A newly allocated complex vector containing the chirp
  *
  * Up-Chirp: \f$\frac{\sqrt{2}}{2}\cdot e^{j\left(
- * 0.64\pi\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
+ * 2\pi f\cdot\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
  *
  * Down-Chirp: \f$\frac{\sqrt{2}}{2}\cdot e^{-j\left(
- * 0.64\pi\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
+ * 2\pi f\cdot\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
  *
- * The length will be 117 * sps
+ * The resulting length will either be 117 * sps or 468 * sps depending on the
+ * type of FCCH burst
  */
 static struct osmo_cxvec *
-gmr1_sdr_fcch_gen_up_down_chirp(int sps, int up_down)
+gmr1_sdr_fcch_gen_up_down_chirp(const struct gmr1_fcch_burst *burst_type,
+                                int sps, int up_down)
 {
 	struct osmo_cxvec *cv;
 	int i, l;
 	float sq2d2, phase_base, pos, halfpos;
 
-	l = GMR1_FCCH_SYMS * sps;
+	l = burst_type->len * sps;
 
 	cv = osmo_cxvec_alloc(l);
 	if (!cv)
@@ -73,8 +106,8 @@ gmr1_sdr_fcch_gen_up_down_chirp(int sps, int up_down)
 	cv->len = l;
 
 	sq2d2 = sqrtf(2.0f) / 2.0f;
-	phase_base = 0.64f * M_PIf / (float)(GMR1_FCCH_SYMS);
-	halfpos = ((float)(GMR1_FCCH_SYMS)) / 2.0f;
+	phase_base = burst_type->freq * 2.0f * M_PIf / (float)(burst_type->len);
+	halfpos = ((float)(burst_type->len)) / 2.0f;
 
 	if (up_down)
 		phase_base *= -1.0f;
@@ -88,51 +121,57 @@ gmr1_sdr_fcch_gen_up_down_chirp(int sps, int up_down)
 }
 
 /*! \brief Generate FCCH reference up chirp at a given oversampling
+ *  \param[in] burst_type FCCH burst format description
  *  \param[in] sps Oversampling rate
  *  \returns A newly allocated complex vector containing the chirp
  *
  * \f$\frac{\sqrt{2}}{2}\cdot e^{j\left(
- * 0.64\pi\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
+ * 2\pi f\cdot\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
  *
- * The length will be 117 * sps
+ * The resulting length will either be 117 * sps or 468 * sps depending on the
+ * type of FCCH burst
  */
 static struct osmo_cxvec *
-gmr1_sdr_fcch_gen_up_chirp(int sps)
+gmr1_sdr_fcch_gen_up_chirp(const struct gmr1_fcch_burst *burst_type, int sps)
 {
-	return gmr1_sdr_fcch_gen_up_down_chirp(sps, 0);
+	return gmr1_sdr_fcch_gen_up_down_chirp(burst_type, sps, 0);
 }
 
 /*! \brief Generate FCCH reference down chirp at a given oversampling
+ *  \param[in] burst_type FCCH burst format description
  *  \param[in] sps Oversampling rate
  *  \returns A newly allocated complex vector containing the chirp
  *
  * \f$\frac{\sqrt{2}}{2}\cdot e^{-j\left(
- * 0.64\pi\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
+ * 2\pi f\cdot\left(t-\frac{T}{2}\right)^2/T^2\right)}\f$
  *
- * The length will be 117 * sps
+ * The resulting length will either be 117 * sps or 468 * sps depending on the
+ * type of FCCH burst
  */
 static struct osmo_cxvec *
-gmr1_sdr_fcch_gen_down_chirp(int sps)
+gmr1_sdr_fcch_gen_down_chirp(const struct gmr1_fcch_burst *burst_type, int sps)
 {
-	return gmr1_sdr_fcch_gen_up_down_chirp(sps, 1);
+	return gmr1_sdr_fcch_gen_up_down_chirp(burst_type, sps, 1);
 }
 
 /*! \brief Generate FCCH reference dual chirp at a given oversampling
+ *  \param[in] burst_type FCCH burst format description
  *  \param[in] sps Oversampling rate
  *  \returns A newly allocated complex vector containing the dual chirp
  *
- * \f$\sqrt{2}\cdot\cos\left(0.64\pi\left(t-\frac{T}{2}\right)^2/\;T^2\right)\f$
+ * \f$\sqrt{2}\cdot\cos\left(2\pi f\cdot\left(t-\frac{T}{2}\right)^2/\;T^2\right)\f$
  *
- * The length will be 117 * sps. The vector is also 'real only'.
+ * The resulting length will either be 117 * sps or 468 * sps depending on the
+ * type of FCCH burst. The vector is also 'real only'.
  */
 static struct osmo_cxvec *
-gmr1_sdr_fcch_gen_dual_chirp(int sps)
+gmr1_sdr_fcch_gen_dual_chirp(const struct gmr1_fcch_burst *burst_type, int sps)
 {
 	struct osmo_cxvec *cv;
 	int i, l;
 	float sq2, phase_base, pos, halfpos;
 
-	l = GMR1_FCCH_SYMS * sps;
+	l = burst_type->len * sps;
 
 	cv = osmo_cxvec_alloc(l);
 	if (!cv)
@@ -142,8 +181,8 @@ gmr1_sdr_fcch_gen_dual_chirp(int sps)
 	cv->flags |= CXVEC_FLG_REAL_ONLY;
 
 	sq2 = sqrtf(2.0f);
-	phase_base = 0.64f * M_PIf / (float)(GMR1_FCCH_SYMS);
-	halfpos = ((float)(GMR1_FCCH_SYMS)) / 2.0f;
+	phase_base = burst_type->freq * 2.0f * M_PIf / (float)(burst_type->len);
+	halfpos = ((float)(burst_type->len)) / 2.0f;
 
 	for (i=0; i<l; i++) {
 		pos = ((float)i / (float)sps) - halfpos;
@@ -159,6 +198,7 @@ gmr1_sdr_fcch_gen_dual_chirp(int sps)
 /* ------------------------------------------------------------------------ */
 
 /*! \brief Rough FCCH timing acquisition
+ *  \param[in] burst_type FCCH burst format description
  *  \param[in] search_win_in Complex signal where to search for FCCH
  *  \param[in] sps Oversampling used in the input complex signal
  *  \param[in] freq_shift Frequency shift to pre-apply to search_win_in (rad/sym)
@@ -169,7 +209,8 @@ gmr1_sdr_fcch_gen_dual_chirp(int sps)
  * (so more than 320 ms of signal, plus the fcch length itself)
  */
 int
-gmr1_fcch_rough(struct osmo_cxvec *search_win_in, int sps, float freq_shift,
+gmr1_fcch_rough(const struct gmr1_fcch_burst *burst_type,
+                struct osmo_cxvec *search_win_in, int sps, float freq_shift,
                 int *toa)
 {
 	struct osmo_cxvec *ref = NULL;
@@ -179,7 +220,7 @@ gmr1_fcch_rough(struct osmo_cxvec *search_win_in, int sps, float freq_shift,
 	int rv = 0;
 
 	/* Generate reference dual chirp */
-	ref = gmr1_sdr_fcch_gen_dual_chirp(1);
+	ref = gmr1_sdr_fcch_gen_dual_chirp(burst_type, 1);
 	if (!ref) {
 		rv = -ENOMEM;
 		goto err;
@@ -210,6 +251,7 @@ err:
 
 
 /*! \brief Internal method to record peaks in order or power and remove dupes
+ *  \param[in] burst_type FCCH burst format description
  *  \param[in,out] toa Array of TOA already recorded
  *  \param[in,out] pwr Array of pwr already recorded
  *  \param[in,out] n Number of peaks already recorded
@@ -220,17 +262,18 @@ err:
  *  \param[in] peak_pwr New peak power
  */
 static inline void
-_peak_record(int *toa, float *pwr, int *n, int N, int Lp, int sps,
+_peak_record(const struct gmr1_fcch_burst *burst_type,
+             int *toa, float *pwr, int *n, int N, int Lp, int sps,
              int peak_toa, float peak_pwr)
 {
 	int i,j;
 	int has_dupe = 0;
 
 	/* Make sure it's not a duplicate at Lp interval */
-	/* (with a GMR1_FCCH_SYMS / 2 window) */
+	/* (with a window of half burst length) */
 	for (i=0; i<*n; i++) {
 		/* Compute params */
-		int th = (GMR1_FCCH_SYMS * sps) >> 1;	/* threshold */
+		int th = (burst_type->len * sps) >> 1;	/* threshold */
 		int d = (toa[i] % Lp) - (peak_toa % Lp);/* wrapped toa diff */
 
 		/* If not a dupe, continue */
@@ -283,6 +326,7 @@ _peak_record(int *toa, float *pwr, int *n, int N, int Lp, int sps,
 }
 
 /*! \brief Rough FCCH timing acquisition w/ multiple FCCH detection
+ *  \param[in] burst_type FCCH burst format description
  *  \param[in] search_win_in Complex signal where to search for FCCH
  *  \param[in] sps Oversampling used in the input complex signal
  *  \param[in] freq_shift Frequency shift to pre-apply to search_win_in (rad/sym)
@@ -295,7 +339,8 @@ _peak_record(int *toa, float *pwr, int *n, int N, int Lp, int sps,
  * plus some margin).
  */
 int
-gmr1_fcch_rough_multi(struct osmo_cxvec *search_win_in, int sps, float freq_shift,
+gmr1_fcch_rough_multi(const struct gmr1_fcch_burst *burst_type,
+                      struct osmo_cxvec *search_win_in, int sps, float freq_shift,
                       int *peaks_toa, int N)
 {
 	struct osmo_cxvec *ref = NULL;
@@ -311,7 +356,7 @@ gmr1_fcch_rough_multi(struct osmo_cxvec *search_win_in, int sps, float freq_shif
 		return -EINVAL;
 
 	/* Generate reference dual chirp */
-	ref = gmr1_sdr_fcch_gen_dual_chirp(1);
+	ref = gmr1_sdr_fcch_gen_dual_chirp(burst_type, 1);
 	if (!ref) {
 		rv = -ENOMEM;
 		goto err;
@@ -333,7 +378,7 @@ gmr1_fcch_rough_multi(struct osmo_cxvec *search_win_in, int sps, float freq_shif
 	}
 
 	Lw = (320 * GMR1_SYM_RATE) / 1000;	/* Len window */
-	Lw += GMR1_FCCH_SYMS;
+	Lw += burst_type->len;
 
 	Lp = (320 * GMR1_SYM_RATE) / 1000;	/* Len period */
 
@@ -427,7 +472,7 @@ gmr1_fcch_rough_multi(struct osmo_cxvec *search_win_in, int sps, float freq_shif
 			p_pos = (int)round((i + p_fpos) * sps);
 
 			/* Record the peak */
-			_peak_record(
+			_peak_record(burst_type,
 				peaks_toa, peaks_pwr, &peaks_cnt, N, Lp, sps,
 				p_pos, p_pwr
 			);
@@ -452,6 +497,7 @@ err:
 
 
 /*! \brief Fine FCCH timing & frequency acquisition
+ *  \param[in] burst_type FCCH burst format description
  *  \param[in] burst_in Complex signal of the FCCH burst
  *  \param[in] sps Oversampling used in the input complex signal
  *  \param[in] freq_shift Frequency shift to pre-apply to burst_in (rad/sym)
@@ -459,26 +505,28 @@ err:
  *  \param[out] freq_error Pointer to the frequency error return variable (rad/sym)
  *  \returns 0 in case of success. -errno for errors.
  *
- * The input vector must be GMR1_FCCH_SYMS * sps samples long.
+ * The input vector must be burst_type->len * sps samples long.
  * The frequency error is doesn't include any correction done with
  * freq_shift.
  */
 int
-gmr1_fcch_fine(struct osmo_cxvec *burst_in, int sps, float freq_shift,
+gmr1_fcch_fine(const struct gmr1_fcch_burst *burst_type,
+               struct osmo_cxvec *burst_in, int sps, float freq_shift,
                int *toa, float *freq_error)
 {
 	struct osmo_cxvec *ref_up = NULL, *ref_down = NULL;
 	struct osmo_cxvec *mix_up = NULL, *mix_down = NULL;
 	struct osmo_cxvec *burst = NULL;
 	fftwf_plan fft_plan;
-	float peak_up, peak_down;
-	float freq_err_hz, freq_err_rps, toa_ms, toa_samples;
+	float bin_hz, peak_up, peak_down;
+	float freq_err_hz, freq_err_rps;
+	float chirp_rate, toa_ms, toa_samples;
 	int len, mid, i;
 	int rv = 0;
 
 	/* Generate reference up & down chirp */
-	ref_up   = gmr1_sdr_fcch_gen_up_chirp(1);
-	ref_down = gmr1_sdr_fcch_gen_down_chirp(1);
+	ref_up   = gmr1_sdr_fcch_gen_up_chirp(burst_type, 1);
+	ref_down = gmr1_sdr_fcch_gen_down_chirp(burst_type, 1);
 
 	if (!ref_up || !ref_down) {
 		rv = -ENOMEM;
@@ -493,7 +541,7 @@ gmr1_fcch_fine(struct osmo_cxvec *burst_in, int sps, float freq_shift,
 	}
 
 	/* Sanity check */
-	len = GMR1_FCCH_SYMS;
+	len = burst_type->len;
 
 	if ((len != burst->len) ||
 	    (len != ref_up->len) ||
@@ -523,7 +571,7 @@ gmr1_fcch_fine(struct osmo_cxvec *burst_in, int sps, float freq_shift,
 	DEBUG_SIGNAL("fcch_mix_down", mix_down);
 
 	/* Compute the FFT */
-		/* Shift the frequency to center the FFT on x[58] */
+		/* Shift the frequency to center the FFT on x[len >> 1] */
 	mid = (float)(len >> 1);
 	for (i=0; i<len; i++) {
 		float complex fs = cexp(I * 2.0f * M_PIf * mid / (float)(len) * i);
@@ -545,22 +593,23 @@ gmr1_fcch_fine(struct osmo_cxvec *burst_in, int sps, float freq_shift,
 	DEBUG_SIGNAL("fcch_fft_down", mix_down);
 
 	/* Find peaks position */
-	peak_up   = osmo_cxvec_peak_energy_find(mix_up, 5, PEAK_WEIGH_WIN, NULL);
+	peak_up   = osmo_cxvec_peak_energy_find(mix_up,   5, PEAK_WEIGH_WIN, NULL);
 	peak_down = osmo_cxvec_peak_energy_find(mix_down, 5, PEAK_WEIGH_WIN, NULL);
 
 	/* Convert to frequencies */
-	peak_up   = (peak_up   - mid) * 200.0f;	/* 200 Hz bin size */
-	peak_down = (peak_down - mid) * 200.0f;
+	bin_hz = (float)GMR1_SYM_RATE / (float)len;
+	peak_up   = (peak_up   - mid) * bin_hz;
+	peak_down = (peak_down - mid) * bin_hz;
 
 	/* Frequency error */
-	freq_err_hz = (peak_up + peak_down) / 2;
-	freq_err_rps = (2 * M_PIf * freq_err_hz) / GMR1_SYM_RATE;
+	freq_err_hz = (peak_up + peak_down) / 2.0f;
+	freq_err_rps = (2.0f * M_PIf * freq_err_hz) / GMR1_SYM_RATE;
 
 	*freq_error = freq_err_rps;
 
 	/* Time of arrival */
-		/* 3 kHz / ms chrip ramp rate */
-	toa_ms = ((peak_up - peak_down) / 2) / 3000.0f;
+	chirp_rate = (2.0f * burst_type->freq * GMR1_SYM_RATE * GMR1_SYM_RATE) / (float)(burst_type->len * 1000);
+	toa_ms = ((peak_up - peak_down) / 2.0f) / chirp_rate;
 	toa_samples = (toa_ms * GMR1_SYM_RATE * sps) / 1000.0f;
 
 	*toa = (int)round(toa_samples);
@@ -580,18 +629,21 @@ err:
 
 
 /*! \brief SNR estimation on a FCCH burst
+ *  \param[in] burst_type FCCH burst format description
  *  \param[in] burst_in Complex signal of the FCCH burst
  *  \param[in] sps Oversampling used in the input complex signal
  *  \param[in] freq_shift Frequency shift to pre-apply to burst_in (rad/sym)
  *  \param[out] snr Pointer to the SNR return variable
  *  \returns 0 in case of success. -errno for errors.
  *
- * The input vector must be GMR1_FCCH_SYMS * sps samples long.
+ * The input vector must be burst_type->len * sps samples long.
  * This method estimated the FFT peak energy over the FFT average energy
  * to estimate SNR.
  */
 int
-gmr1_fcch_snr(struct osmo_cxvec *burst_in, int sps, float freq_shift, float *snr)
+gmr1_fcch_snr(const struct gmr1_fcch_burst *burst_type,
+              struct osmo_cxvec *burst_in, int sps, float freq_shift,
+              float *snr)
 {
 	struct osmo_cxvec *ref = NULL;
 	struct osmo_cxvec *burst = NULL;
@@ -601,7 +653,7 @@ gmr1_fcch_snr(struct osmo_cxvec *burst_in, int sps, float freq_shift, float *snr
 	int rv = 0;
 
 	/* Generate reference dual chirp */
-	ref = gmr1_sdr_fcch_gen_dual_chirp(1);
+	ref = gmr1_sdr_fcch_gen_dual_chirp(burst_type, 1);
 	if (!ref) {
 		rv = -ENOMEM;
 		goto err;
@@ -615,7 +667,7 @@ gmr1_fcch_snr(struct osmo_cxvec *burst_in, int sps, float freq_shift, float *snr
 	}
 
 	/* Sanity check */
-	len = GMR1_FCCH_SYMS;
+	len = burst_type->len;
 
 	if ((len != burst->len) ||
 	    (len != ref->len)) {
