@@ -43,7 +43,7 @@ ambe_decode_init(struct ambe_decoder *dec)
 
 	ambe_synth_init(&dec->synth);
 
-	dec->sf_prev.w0 = 0.09378;
+	dec->sf_prev.w0 = 0.09378f;
 	dec->sf_prev.f0 = dec->sf_prev.w0 / (2 * M_PIf);
 	dec->sf_prev.L  = 30;
 }

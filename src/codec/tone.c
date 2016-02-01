@@ -103,7 +103,7 @@ tone_gen(int16_t *audio, int N, int ampl, int freq_hz, float *phase_p)
 	int i;
 
 	phase = *phase_p;
-	phase_step = (2.0f * M_PI * freq_hz) / AMBE_RATE;
+	phase_step = (2.0f * M_PIf * freq_hz) / AMBE_RATE;
 
 	for (i=0; i<N; i++)
 	{
