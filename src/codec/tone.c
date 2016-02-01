@@ -173,7 +173,7 @@ ambe_decode_tone(struct ambe_decoder *dec,
 	}
 	else if ((p_freq >= 0x90) && (p_freq <= 0x9f))
 	{
-		/* Call progress tone */
+		/* Knox tone */
 		int ki = p_freq & 0xf;
 
 		tone_gen(&audio[start], stop-start+1, amplitude >> 1,
@@ -183,7 +183,7 @@ ambe_decode_tone(struct ambe_decoder *dec,
 	}
 	else if ((p_freq >= 0x80) && (p_freq <= 0x8f))
 	{
-		/* Call progress tone */
+		/* DTMF tone */
 		int di = p_freq & 0xf;
 
 		tone_gen(&audio[start], stop-start+1, amplitude >> 1,
