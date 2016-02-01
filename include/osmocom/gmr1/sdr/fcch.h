@@ -1,5 +1,5 @@
-/* GMR-1 SDR - FCCH burst */
-/* See GMR-1 05.004 (ETSI TS 101 376-5-4 V1.2.1) - Section 8.1 */
+/* GMR-1 SDR - FCCH bursts */
+/* See GMR-1 05.004 (ETSI TS 101 376-5-4 V3.1.1) - Section 8 */
 
 /* (C) 2011-2016 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
@@ -33,19 +33,31 @@
 #include <osmocom/dsp/cxvec.h>
 
 
-#define GMR1_FCCH_SYMS	(39*3)	/*!< \brief FCCH burst duration in symbols */
+struct gmr1_fcch_burst
+{
+	float freq;	/*!< \brief Frequency sweep range */
+	int len;	/*!< \brief Burst duration in symbols */
+};
+
+extern const struct gmr1_fcch_burst gmr1_fcch_burst;
+extern const struct gmr1_fcch_burst gmr1_fcch3_lband_burst;
+extern const struct gmr1_fcch_burst gmr1_fcch3_sband_burst;
 
 
-int gmr1_fcch_rough(struct osmo_cxvec *search_win_in, int sps, float freq_shift,
+int gmr1_fcch_rough(const struct gmr1_fcch_burst *burst_type,
+                    struct osmo_cxvec *search_win_in, int sps, float freq_shift,
                     int *toa);
 
-int gmr1_fcch_rough_multi(struct osmo_cxvec *search_win_in, int sps, float freq_shift,
+int gmr1_fcch_rough_multi(const struct gmr1_fcch_burst *burst_type,
+                          struct osmo_cxvec *search_win_in, int sps, float freq_shift,
                           int *toa, int N);
 
-int gmr1_fcch_fine(struct osmo_cxvec *burst_in, int sps, float freq_shift,
+int gmr1_fcch_fine(const struct gmr1_fcch_burst *burst_type,
+                   struct osmo_cxvec *burst_in, int sps, float freq_shift,
                    int *toa, float *freq_error);
 
-int gmr1_fcch_snr(struct osmo_cxvec *burst_in, int sps, float freq_shift,
+int gmr1_fcch_snr(const struct gmr1_fcch_burst *burst_type,
+                  struct osmo_cxvec *burst_in, int sps, float freq_shift,
                   float *snr);
 
 
