@@ -56,21 +56,21 @@ static void __attribute__ ((constructor))
 gmr1_tch9_init(void)
 {
 	/* Init convolutional coders */
-	memcpy(&gmr1_conv_tch9_24, &gmr1_conv_15, sizeof(struct osmo_conv_code));
+	memcpy(&gmr1_conv_tch9_24, &gmr1_conv_k5_15, sizeof(struct osmo_conv_code));
 	gmr1_conv_tch9_24.len = 144;
 	gmr1_puncturer_generate(
 		&gmr1_conv_tch9_24,
 		&gmr1_punct15_P53, &gmr1_punct15_P23, &gmr1_punct15_Ps53, 41
 	);
 
-	memcpy(&gmr1_conv_tch9_48, &gmr1_conv_13, sizeof(struct osmo_conv_code));
+	memcpy(&gmr1_conv_tch9_48, &gmr1_conv_k5_13, sizeof(struct osmo_conv_code));
 	gmr1_conv_tch9_48.len = 240;
 	gmr1_puncturer_generate(
 		&gmr1_conv_tch9_48,
 		&gmr1_punct13_P15, &gmr1_punct13_P25, &gmr1_punct13_Ps15, 41
 	);
 
-	memcpy(&gmr1_conv_tch9_96, &gmr1_conv_12, sizeof(struct osmo_conv_code));
+	memcpy(&gmr1_conv_tch9_96, &gmr1_conv_k5_12, sizeof(struct osmo_conv_code));
 	gmr1_conv_tch9_96.len = 480;
 	gmr1_puncturer_generate(
 		&gmr1_conv_tch9_96,

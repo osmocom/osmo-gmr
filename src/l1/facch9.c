@@ -45,7 +45,7 @@ static void __attribute__ ((constructor))
 gmr1_facch9_init(void)
 {
 	/* Init convolutional coder */
-	memcpy(&gmr1_conv_facch9, &gmr1_conv_12, sizeof(struct osmo_conv_code));
+	memcpy(&gmr1_conv_facch9, &gmr1_conv_k5_12, sizeof(struct osmo_conv_code));
 	gmr1_conv_facch9.len = 316;
 }
 
