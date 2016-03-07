@@ -1,4 +1,4 @@
-/* GMR-1 SDR - pi4-CBPSK and pi4-CQPSK modulation support */
+/* GMR-1 SDR - pi2-CBPSK, pi4-CBPSK & pi4-CQPSK modulation support */
 /* See GMR-1 05.004 (ETSI TS 101 376-5-4 V1.2.1) - Section 5.1 & 5.2 */
 
 /* (C) 2011-2016 by Sylvain Munaut <tnt@246tNt.com>
@@ -23,7 +23,7 @@
  */
 
 /*! \file sdr/pi4cxpsk.c
- *  \brief Osmocom GMR-1 pi4-CBPSK and pi4-CQPSK modulation support implementation
+ *  \brief Osmocom GMR-1 pi2-CBPSK, pi4-CBPSK and pi4-CQPSK modulation support implementation
  */
 
 #include <complex.h>
@@ -66,17 +66,26 @@
  *                      continuous rotation)
  */
 
-/*! \brief pi4-CBPSK symbols descriptions */
-static struct gmr1_pi4cxpsk_symbol gmr1_pi4cbpsk_syms_bits[] = {
+/*! \brief pi{2,4}-CBPSK symbols descriptions */
+static struct gmr1_pi4cxpsk_symbol gmr1_piNcbpsk_syms_bits[] = {
 	{ 0, {0}, 0*M_PIf/2,  1+0*I },
 	{ 1, {1}, 2*M_PIf/2, -1+0*I },
 };
 
+/*! \brief pi2-CBPSK modulation description */
+struct gmr1_pi4cxpsk_modulation gmr1_pi2cbpsk = {
+	.rotation = M_PIf/2,
+	.nbits = 1,
+	.syms = gmr1_piNcbpsk_syms_bits,
+	.bits = gmr1_piNcbpsk_syms_bits,
+};
+
 /*! \brief pi4-CBPSK modulation description */
 struct gmr1_pi4cxpsk_modulation gmr1_pi4cbpsk = {
+	.rotation = M_PIf/4,
 	.nbits = 1,
-	.syms = gmr1_pi4cbpsk_syms_bits,
-	.bits = gmr1_pi4cbpsk_syms_bits,
+	.syms = gmr1_piNcbpsk_syms_bits,
+	.bits = gmr1_piNcbpsk_syms_bits,
 };
 
 
@@ -98,6 +107,7 @@ static struct gmr1_pi4cxpsk_symbol gmr1_pi4cqpsk_bits[] = {
 
 /*! \brief pi4-CQPSK modulation description */
 struct gmr1_pi4cxpsk_modulation gmr1_pi4cqpsk = {
+	.rotation = M_PIf/4,
 	.nbits = 2,
 	.syms = gmr1_pi4cqpsk_syms,
 	.bits = gmr1_pi4cqpsk_bits,
@@ -525,7 +535,7 @@ gmr1_pi4cxpsk_demod(struct gmr1_pi4cxpsk_burst *burst_type,
 		goto err;
 
 	/* Normalize the burst and counter rotate by pi/4 */
-	burst = osmo_cxvec_sig_normalize(burst_in, 1, (freq_shift - (M_PIf/4)) / sps, NULL);
+	burst = osmo_cxvec_sig_normalize(burst_in, 1, (freq_shift - burst_type->mod->rotation) / sps, NULL);
 	if (!burst) {
 		rv = -ENOMEM;
 		goto err;
@@ -601,7 +611,7 @@ err:
  *  \param[out] toa_p Pointer to TOA return variable
  *  \returns -errno for errors, 0 for success
  *
- * The various burst types must be compatible in length.
+ * The various burst types must be compatible in length and modulation !
  */
 int
 gmr1_pi4cxpsk_detect(struct gmr1_pi4cxpsk_burst **burst_types, float e_toa,
@@ -614,8 +624,8 @@ gmr1_pi4cxpsk_detect(struct gmr1_pi4cxpsk_burst **burst_types, float e_toa,
 	float p_toa=0.0f, p_pwr=0.0f;
 	int rv = 0;
 
-	/* Normalize the burst and counter rotate by pi/4 */
-	burst = osmo_cxvec_sig_normalize(burst_in, 1, (freq_shift - (M_PIf/4)) / sps, NULL);
+	/* Normalize the burst and counter rotate */
+	burst = osmo_cxvec_sig_normalize(burst_in, 1, (freq_shift - burst_types[0]->mod->rotation) / sps, NULL);
 	if (!burst) {
 		rv = -ENOMEM;
 		goto err;
@@ -675,6 +685,9 @@ err:
  *  \param[in] sps Oversampling used in the input complex signal
  *  \param[in] freq_shift Frequency shift to pre-apply to burst_in (rad/sym)
  *  \returns <0 for error. 2 for BPSK, 4 for QPSK.
+ *
+ *  Since x^4 only make sense for pi/4 variant, the pi/4 counter rotation is
+ *  always applied.
  */
 int
 gmr1_pi4cxpsk_mod_order(struct osmo_cxvec *burst_in, int sps, float freq_shift)
@@ -776,7 +789,7 @@ gmr1_pi4cxpsk_mod(struct gmr1_pi4cxpsk_burst *burst_type,
 	}
 
 	/* Apply the final pi/4 rotation */
-	osmo_cxvec_rotate(burst_out, M_PIf / 4.0f, burst_out);
+	osmo_cxvec_rotate(burst_out, burst_type->mod->rotation, burst_out);
 
 	rv = 0;
 
