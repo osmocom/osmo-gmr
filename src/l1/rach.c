@@ -47,7 +47,7 @@ gmr1_rach_init(void)
 	int i, *p;
 
 	/* Init convolutional coder */
-	memcpy(&gmr1_conv_rach, &gmr1_conv_14, sizeof(struct osmo_conv_code));
+	memcpy(&gmr1_conv_rach, &gmr1_conv_k5_14, sizeof(struct osmo_conv_code));
 	gmr1_conv_rach.len = 159;
 
 	/* Generate puncturer (only b[0] .. b[539] punctured) */

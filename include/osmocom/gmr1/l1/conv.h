@@ -1,5 +1,5 @@
 /* GMR-1 convolutional coding */
-/* See GMR-1 05.003 (ETSI TS 101 376-5-3 V1.2.1) - Section 4.4 */
+/* See GMR-1 05.003 (ETSI TS 101 376-5-3 V3.3.1) - Section 4.4 */
 
 /* (C) 2011-2016 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
@@ -33,10 +33,14 @@
 #include <osmocom/core/conv.h>
 
 
-extern const struct osmo_conv_code gmr1_conv_12;
-extern const struct osmo_conv_code gmr1_conv_13;
-extern const struct osmo_conv_code gmr1_conv_14;
-extern const struct osmo_conv_code gmr1_conv_15;
+extern const struct osmo_conv_code gmr1_conv_k5_12;
+extern const struct osmo_conv_code gmr1_conv_k5_13;
+extern const struct osmo_conv_code gmr1_conv_k5_14;
+extern const struct osmo_conv_code gmr1_conv_k5_15;
+extern const struct osmo_conv_code gmr1_conv_k6_14;
+extern const struct osmo_conv_code gmr1_conv_k9_12;
+extern const struct osmo_conv_code gmr1_conv_k9_13;
+extern const struct osmo_conv_code gmr1_conv_k9_14;
 extern const struct osmo_conv_code gmr1_conv_tch3;
 
 
