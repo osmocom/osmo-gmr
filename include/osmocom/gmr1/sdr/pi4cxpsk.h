@@ -1,4 +1,4 @@
-/* GMR-1 SDR - pi4-CBPSK and pi4-CQPSK modulation support */
+/* GMR-1 SDR - pi2-CBPSK, pi4-CBPSK and pi4-CQPSK modulation support */
 /* See GMR-1 05.004 (ETSI TS 101 376-5-4 V1.2.1) - Section 5.1 & 5.2 */
 
 /* (C) 2011-2019 by Sylvain Munaut <tnt@246tNt.com>
@@ -21,13 +21,13 @@
 #ifndef __OSMO_GMR1_SDR_PI4CXPSK_H__
 #define __OSMO_GMR1_SDR_PI4CXPSK_H__
 
-/*! \defgroup pi4cxpsk pi4-CBPSK and pi4-CQPSK modulation
+/*! \defgroup pi4cxpsk pi2-CBPSK, pi4-CBPSK and pi4-CQPSK modulation
  *  \ingroup sdr
  *  @{
  */
 
 /*! \file sdr/pi4cxpsk.h
- *  \brief Osmocom GMR-1 pi4-CBPSK and pi4-CQPSK modulation support header
+ *  \brief Osmocom GMR-1 pi2-CBPSK, pi4-CBPSK and pi4-CQPSK modulation support header
  */
 
 #include <stdint.h>
@@ -50,14 +50,16 @@ struct gmr1_pi4cxpsk_symbol {
 
 /*! \brief pi4-CxPSK modulation description */
 struct gmr1_pi4cxpsk_modulation {
-	int nbits;				/*!< \brief ebits/sym      */
+	float rotation;				/*!< \brief rotation per symbol */
+	int nbits;				/*!< \brief ebits/sym           */
 	struct gmr1_pi4cxpsk_symbol *syms;	/*!< \brief Symbols (sym order) */
 	struct gmr1_pi4cxpsk_symbol *bits;	/*!< \brief Symbols (bit order) */
 };
 
 
-extern struct gmr1_pi4cxpsk_modulation gmr1_pi4cqpsk;
+extern struct gmr1_pi4cxpsk_modulation gmr1_pi2cbpsk;
 extern struct gmr1_pi4cxpsk_modulation gmr1_pi4cbpsk;
+extern struct gmr1_pi4cxpsk_modulation gmr1_pi4cqpsk;
 
 
 /*! \brief pi4-CxPSK Synchronization sequence segment description */
