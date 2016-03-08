@@ -1,6 +1,6 @@
 /* GMR-1 AMBE vocoder - internal API */
 
-/* (C) 2013 by Sylvain Munaut <tnt@246tNt.com>
+/* (C) 2011-2016 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify

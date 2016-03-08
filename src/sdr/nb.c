@@ -1,7 +1,7 @@
 /* GMR-1 SDR - Normal bursts */
 /* See GMR-1 05.002 (ETSI TS 101 376-5-2 V1.1.1) */
 
-/* (C) 2011 by Sylvain Munaut <tnt@246tNt.com>
+/* (C) 2011-2016 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify

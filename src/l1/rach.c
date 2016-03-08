@@ -1,7 +1,7 @@
 /* GMR-1 RACH channel coding */
 /* See GMR-1 05.003 (ETSI TS 101 376-5-3 V1.2.1) - Section 6.5 */
 
-/* (C) 2011 by Sylvain Munaut <tnt@246tNt.com>
+/* (C) 2011-2016 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
