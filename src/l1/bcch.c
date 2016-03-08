@@ -77,7 +77,7 @@ gmr1_bcch_encode(ubit_t *bits_e, const uint8_t *l2)
  *  \param[out] conv_rv Return of the convolutional decode (can be NULL)
  *  \return 0 if CRC check pass, any other value for fail.
  *
- * L2 data is 24 byte long, and bits_e is a 424 hard bit array
+ * L2 data is 24 byte long, and bits_e is a 424 soft bit array
  * unmapped from a burst.
  */
 int
