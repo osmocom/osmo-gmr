@@ -1,6 +1,6 @@
 /* GMR-1 AMBE vocoder - Speech synthesis */
 
-/* (C) 2014 by Sylvain Munaut <tnt@246tNt.com>
+/* (C) 2011-2019 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify

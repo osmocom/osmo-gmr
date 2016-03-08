@@ -1,6 +1,6 @@
 /* GMR-1 GSMtap helpers */
 
-/* (C) 2011 by Sylvain Munaut <tnt@246tNt.com>
+/* (C) 2011-2019 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify

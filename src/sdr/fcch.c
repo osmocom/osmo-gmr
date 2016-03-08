@@ -1,7 +1,7 @@
 /* GMR-1 SDR - FCCH bursts */
 /* See GMR-1 05.004 (ETSI TS 101 376-5-4 V1.2.1) - Section 8.1 */
 
-/* (C) 2011 by Sylvain Munaut <tnt@246tNt.com>
+/* (C) 2011-2019 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
