@@ -1,5 +1,5 @@
 /* GMR-1 puncturing */
-/* See GMR-1 05.003 (ETSI TS 101 376-5-3 V1.2.1) - Section 4.5 */
+/* See GMR-1 05.003 (ETSI TS 101 376-5-3 V3.3.1) - Section 4.5 */
 
 /* (C) 2011-2016 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
@@ -133,19 +133,8 @@ gmr1_puncturer_generate(struct osmo_conv_code *code,
 }
 
 
-/*! \brief GMR-1 P(1;2) puncturing code for the rate 1/2 conv coder */
-const struct gmr1_puncturer gmr1_punct12_P12 = {
-	.r = 1,
-	.L = 2,
-	.N = 2,
-	.mask = {
-		1, 1,
-		1, 0,
-	},
-};
-
-/*! \brief GMR-1 P(2;3) puncturing code for the rate 1/2 conv coder */
-const struct gmr1_puncturer gmr1_punct12_P23 = {
+/*! \brief GMR-1 P(2;3) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_P23 = {
 	.r = 2,
 	.L = 3,
 	.N = 2,
@@ -156,8 +145,8 @@ const struct gmr1_puncturer gmr1_punct12_P23 = {
 	},
 };
 
-/*! \brief GMR-1 P(2;5) puncturing code for the rate 1/2 conv coder */
-const struct gmr1_puncturer gmr1_punct12_P25 = {
+/*! \brief GMR-1 P(2;5) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_P25 = {
 	.r = 2,
 	.L = 5,
 	.N = 2,
@@ -170,8 +159,8 @@ const struct gmr1_puncturer gmr1_punct12_P25 = {
 	},
 };
 
-/*! \brief GMR-1 P*(2;5) puncturing code for the rate 1/2 conv coder */
-const struct gmr1_puncturer gmr1_punct12_Ps25 = {
+/*! \brief GMR-1 Ps(2;5) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_Ps25 = {
 	.r = 2,
 	.L = 5,
 	.N = 2,
@@ -184,8 +173,8 @@ const struct gmr1_puncturer gmr1_punct12_Ps25 = {
 	},
 };
 
-/*! \brief GMR-1 P(3;11) puncturing code for the rate 1/2 conv coder */
-const struct gmr1_puncturer gmr1_punct12_P311 = {
+/*! \brief GMR-1 P(3;11) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_P311 = {
 	.r = 3,
 	.L = 11,
 	.N = 2,
@@ -204,8 +193,8 @@ const struct gmr1_puncturer gmr1_punct12_P311 = {
 	},
 };
 
-/*! \brief GMR-1 P(4;12) puncturing code for the rate 1/2 conv coder */
-const struct gmr1_puncturer gmr1_punct12_P412 = {
+/*! \brief GMR-1 P(4;12) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_P412 = {
 	.r = 4,
 	.L = 12,
 	.N = 2,
@@ -225,8 +214,8 @@ const struct gmr1_puncturer gmr1_punct12_P412 = {
 	},
 };
 
-/*! \brief GMR-1 P*(4;12) puncturing code for the rate 1/2 conv coder */
-const struct gmr1_puncturer gmr1_punct12_Ps412 = {
+/*! \brief GMR-1 Ps(4;12) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_Ps412 = {
 	.r = 4,
 	.L = 12,
 	.N = 2,
@@ -246,50 +235,143 @@ const struct gmr1_puncturer gmr1_punct12_Ps412 = {
 	},
 };
 
-/*! \brief GMR-1 P(2;5) puncturing code for the rate 1/3 conv coder */
-const struct gmr1_puncturer gmr1_punct13_P25 = {
+/*! \brief GMR-1 P(1;2) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_P12 = {
+	.r = 1,
+	.L = 2,
+	.N = 2,
+	.mask = {
+		1, 1,
+		1, 0,
+	},
+};
+
+/*! \brief GMR-1 Ps(1;2) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_Ps12 = {
+	.r = 1,
+	.L = 2,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 A puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_A = {
+	.r = 0,
+	.L = 4,
+	.N = 2,
+	.mask = {
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 B puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_B = {
+	.r = 1,
+	.L = 4,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 C puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_C = {
 	.r = 2,
-	.L = 5,
-	.N = 3,
+	.L = 4,
+	.N = 2,
 	.mask = {
-		1, 1, 1,
-		1, 1, 1,
-		1, 0, 1,
-		1, 1, 1,
-		1, 0, 1,
+		1, 0,
+		1, 1,
+		1, 0,
+		1, 1,
 	},
 };
 
-/*! \brief GMR-1 P(1;5) puncturing code for the rate 1/3 conv coder */
-const struct gmr1_puncturer gmr1_punct13_P15 = {
+/*! \brief GMR-1 D puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_D = {
+	.r = 3,
+	.L = 4,
+	.N = 2,
+	.mask = {
+		0, 1,
+		1, 0,
+		0, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 E puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_E = {
 	.r = 1,
-	.L = 5,
-	.N = 3,
+	.L = 4,
+	.N = 2,
 	.mask = {
-		1, 0, 1,
-		1, 1, 1,
-		1, 1, 1,
-		1, 1, 1,
-		1, 1, 1,
+		1, 2,
+		1, 1,
+		1, 1,
+		1, 1,
 	},
 };
 
-/*! \brief GMR-1 P*(1;5) puncturing code for the rate 1/3 conv coder */
-const struct gmr1_puncturer gmr1_punct13_Ps15 = {
-	.r = 1,
-	.L = 5,
-	.N = 3,
+/*! \brief GMR-1 P(3;8) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_P38 = {
+	.r = 3,
+	.L = 8,
+	.N = 2,
 	.mask = {
-		1, 1, 1,
-		1, 1, 1,
-		1, 1, 1,
-		1, 1, 1,
-		1, 0, 1,
+		0, 1,
+		1, 1,
+		0, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 0,
+		1, 1,
 	},
 };
 
-/*! \brief GMR-1 P(1;6) puncturing code for the rate 1/3 conv coder */
-const struct gmr1_puncturer gmr1_punct13_P16 = {
+/*! \brief GMR-1 P(2;6) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_P26 = {
+	.r = 2,
+	.L = 6,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(3;7) puncturing code for the K=5 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_12_P37 = {
+	.r = 3,
+	.L = 7,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;6) puncturing code for the K=5 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_13_P16 = {
 	.r = 1,
 	.L = 6,
 	.N = 3,
@@ -303,8 +385,67 @@ const struct gmr1_puncturer gmr1_punct13_P16 = {
 	},
 };
 
-/*! \brief GMR-1 P(2;3) puncturing code for the rate 1/5 conv coder */
-const struct gmr1_puncturer gmr1_punct15_P23 = {
+/*! \brief GMR-1 P(2;5) puncturing code for the K=5 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_13_P25 = {
+	.r = 2,
+	.L = 5,
+	.N = 3,
+	.mask = {
+		1, 1, 1,
+		1, 1, 1,
+		1, 0, 1,
+		1, 1, 1,
+		1, 0, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;5) puncturing code for the K=5 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_13_P15 = {
+	.r = 1,
+	.L = 5,
+	.N = 3,
+	.mask = {
+		1, 0, 1,
+		1, 1, 1,
+		1, 1, 1,
+		1, 1, 1,
+		1, 1, 1,
+	},
+};
+
+/*! \brief GMR-1 Ps(1;5) puncturing code for the K=5 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_13_Ps15 = {
+	.r = 1,
+	.L = 5,
+	.N = 3,
+	.mask = {
+		1, 1, 1,
+		1, 1, 1,
+		1, 1, 1,
+		1, 1, 1,
+		1, 0, 1,
+	},
+};
+
+/*! \brief GMR-1 P(7;8) puncturing code for the K=5 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_13_P78 = {
+	.r = 7,
+	.L = 8,
+	.N = 3,
+	.mask = {
+		0, 0, 1,
+		1, 1, 0,
+		1, 1, 1,
+		0, 1, 1,
+		1, 1, 1,
+		1, 1, 0,
+		1, 0, 1,
+		1, 0, 1,
+	},
+};
+
+/*! \brief GMR-1 P(2;3) puncturing code for the K=5 rate 1/5 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_15_P23 = {
 	.r = 2,
 	.L = 3,
 	.N = 5,
@@ -315,8 +456,8 @@ const struct gmr1_puncturer gmr1_punct15_P23 = {
 	},
 };
 
-/*! \brief GMR-1 P(5;3) puncturing code for the rate 1/5 conv coder */
-const struct gmr1_puncturer gmr1_punct15_P53 = {
+/*! \brief GMR-1 P(5;3) puncturing code for the K=5 rate 1/5 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_15_P53 = {
 	.r = 5,
 	.L = 3,
 	.N = 5,
@@ -327,8 +468,8 @@ const struct gmr1_puncturer gmr1_punct15_P53 = {
 	},
 };
 
-/*! \brief GMR-1 P*(5;3) puncturing code for the rate 1/5 conv coder */
-const struct gmr1_puncturer gmr1_punct15_Ps53 = {
+/*! \brief GMR-1 Ps(5;3) puncturing code for the K=5 rate 1/5 conv coder */
+const struct gmr1_puncturer gmr1_punct_k5_15_Ps53 = {
 	.r = 5,
 	.L = 3,
 	.N = 5,
@@ -338,5 +479,688 @@ const struct gmr1_puncturer gmr1_punct15_Ps53 = {
 		1, 1, 1, 0, 1,
 	},
 };
+
+/*! \brief GMR-1 P(2;3) puncturing code for the K=7 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k7_12_P23 = {
+	.r = 2,
+	.L = 3,
+	.N = 2,
+	.mask = {
+		1, 1,
+		1, 0,
+		0, 1,
+	},
+};
+
+/*! \brief GMR-1 P(4;10) puncturing code for the K=7 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k7_12_P410 = {
+	.r = 4,
+	.L = 10,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 0,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(5;12) puncturing code for the K=7 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k7_12_P512 = {
+	.r = 5,
+	.L = 12,
+	.N = 2,
+	.mask = {
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 0,
+	},
+};
+
+/*! \brief GMR-1 P(1;16) puncturing code for the K=7 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k7_12_P116 = {
+	.r = 1,
+	.L = 16,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;48) puncturing code for the K=7 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k7_12_P148 = {
+	.r = 1,
+	.L = 48,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;84) puncturing code for the K=7 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k7_12_P184 = {
+	.r = 1,
+	.L = 84,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;152) puncturing code for the K=7 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k7_12_P1152 = {
+	.r = 1,
+	.L = 152,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(4;5) puncturing code for the K=7 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k7_12_P45 = {
+	.r = 4,
+	.L = 5,
+	.N = 2,
+	.mask = {
+		0, 1,
+		1, 1,
+		1, 0,
+		0, 1,
+		1, 0,
+	},
+};
+
+/*! \brief GMR-1 P2(4;5) puncturing code for the K=7 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k7_12_P245 = {
+	.r = 4,
+	.L = 5,
+	.N = 2,
+	.mask = {
+		1, 0,
+		0, 1,
+		1, 0,
+		0, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;3) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P13 = {
+	.r = 1,
+	.L = 3,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(4;7) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P47 = {
+	.r = 4,
+	.L = 7,
+	.N = 2,
+	.mask = {
+		0, 1,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 0,
+	},
+};
+
+/*! \brief GMR-1 P(3;4) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P34 = {
+	.r = 3,
+	.L = 4,
+	.N = 2,
+	.mask = {
+		1, 1,
+		1, 0,
+		0, 1,
+		1, 0,
+	},
+};
+
+/*! \brief GMR-1 P(1;7) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P17 = {
+	.r = 1,
+	.L = 7,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;9) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P19 = {
+	.r = 1,
+	.L = 9,
+	.N = 2,
+	.mask = {
+		0, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(2;6) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P26 = {
+	.r = 2,
+	.L = 6,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 0,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;10) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P110 = {
+	.r = 1,
+	.L = 10,
+	.N = 2,
+	.mask = {
+		0, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;4) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P14 = {
+	.r = 1,
+	.L = 4,
+	.N = 2,
+	.mask = {
+		1, 0,
+		1, 1,
+		1, 1,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(4;5) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P45 = {
+	.r = 4,
+	.L = 5,
+	.N = 2,
+	.mask = {
+		0, 1,
+		1, 1,
+		0, 1,
+		1, 0,
+		1, 0,
+	},
+};
+
+/*! \brief GMR-1 P2(3;4) puncturing code for the K=9 rate 1/2 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_12_P234 = {
+	.r = 3,
+	.L = 4,
+	.N = 2,
+	.mask = {
+		1, 0,
+		0, 1,
+		1, 0,
+		1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(4;5) puncturing code for the K=6 rate 1/4 conv coder */
+const struct gmr1_puncturer gmr1_punct_k6_14_P45 = {
+	.r = 4,
+	.L = 5,
+	.N = 4,
+	.mask = {
+		1, 0, 1, 1,
+		1, 0, 1, 1,
+		1, 1, 1, 0,
+		1, 1, 1, 1,
+		1, 1, 1, 0,
+	},
+};
+
+/*! \brief GMR-1 P(14;8) puncturing code for the K=9 rate 1/4 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_14_P148 = {
+	.r = 14,
+	.L = 8,
+	.N = 4,
+	.mask = {
+		1, 0, 0, 1,
+		1, 0, 1, 0,
+		1, 0, 1, 0,
+		1, 0, 0, 1,
+		1, 1, 0, 1,
+		1, 0, 0, 1,
+		1, 0, 0, 1,
+		1, 1, 0, 1,
+	},
+};
+
+/*! \brief GMR-1 P(6;5) puncturing code for the K=9 rate 1/4 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_14_P65 = {
+	.r = 6,
+	.L = 5,
+	.N = 4,
+	.mask = {
+		0, 1, 1, 1,
+		1, 0, 1, 1,
+		1, 1, 1, 1,
+		0, 0, 1, 0,
+		1, 0, 1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(1;2) puncturing code for the K=9 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_13_P12 = {
+	.r = 1,
+	.L = 2,
+	.N = 3,
+	.mask = {
+		1, 1, 1,
+		0, 1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(12;13) puncturing code for the K=9 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_13_P1213 = {
+	.r = 12,
+	.L = 13,
+	.N = 3,
+	.mask = {
+		1, 1, 0,
+		1, 0, 1,
+		0, 1, 1,
+		1, 1, 0,
+		1, 0, 1,
+		0, 1, 1,
+		1, 1, 0,
+		1, 0, 1,
+		0, 1, 1,
+		1, 1, 0,
+		1, 0, 1,
+		0, 1, 1,
+		1, 1, 1,
+	},
+};
+
+/*! \brief GMR-1 P(4;4) puncturing code for the K=9 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_13_P44 = {
+	.r = 4,
+	.L = 4,
+	.N = 3,
+	.mask = {
+		1, 1, 0,
+		0, 1, 1,
+		1, 0, 1,
+		1, 1, 0,
+	},
+};
+
+/*! \brief GMR-1 P(3;3) puncturing code for the K=9 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_13_P33 = {
+	.r = 3,
+	.L = 3,
+	.N = 3,
+	.mask = {
+		0, 1, 1,
+		1, 0, 1,
+		1, 1, 0,
+	},
+};
+
+/*! \brief GMR-1 P(6;5) puncturing code for the K=9 rate 1/3 conv coder */
+const struct gmr1_puncturer gmr1_punct_k9_13_P65 = {
+	.r = 6,
+	.L = 5,
+	.N = 3,
+	.mask = {
+		1, 0, 1,
+		0, 1, 1,
+		1, 0, 0,
+		0, 1, 1,
+		1, 1, 0,
+	},
+};
+
 
 /*! @} */
