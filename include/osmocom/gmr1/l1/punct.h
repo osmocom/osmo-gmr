@@ -1,5 +1,5 @@
 /* GMR-1 puncturing */
-/* See GMR-1 05.003 (ETSI TS 101 376-5-3 V1.2.1) - Section 4.5 */
+/* See GMR-1 05.003 (ETSI TS 101 376-5-3 V3.3.1) - Section 4.5 */
 
 /* (C) 2011-2019 by Sylvain Munaut <tnt@246tNt.com>
  * All Rights Reserved
@@ -53,20 +53,57 @@ int gmr1_puncturer_generate(struct osmo_conv_code *code,
 
 /* Various puncturing codes used in GMR-1 */
 
-extern const struct gmr1_puncturer gmr1_punct12_P12;
-extern const struct gmr1_puncturer gmr1_punct12_P23;
-extern const struct gmr1_puncturer gmr1_punct12_P25;
-extern const struct gmr1_puncturer gmr1_punct12_Ps25;
-extern const struct gmr1_puncturer gmr1_punct12_P311;
-extern const struct gmr1_puncturer gmr1_punct12_P412;
-extern const struct gmr1_puncturer gmr1_punct12_Ps412;
-extern const struct gmr1_puncturer gmr1_punct13_P25;
-extern const struct gmr1_puncturer gmr1_punct13_P15;
-extern const struct gmr1_puncturer gmr1_punct13_Ps15;
-extern const struct gmr1_puncturer gmr1_punct13_P16;
-extern const struct gmr1_puncturer gmr1_punct15_P23;
-extern const struct gmr1_puncturer gmr1_punct15_P53;
-extern const struct gmr1_puncturer gmr1_punct15_Ps53;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_P23;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_P25;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_Ps25;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_P311;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_P412;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_Ps412;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_P12;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_Ps12;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_A;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_B;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_C;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_D;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_E;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_P38;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_P26;
+extern const struct gmr1_puncturer gmr1_punct_k5_12_P37;
+extern const struct gmr1_puncturer gmr1_punct_k5_13_P16;
+extern const struct gmr1_puncturer gmr1_punct_k5_13_P25;
+extern const struct gmr1_puncturer gmr1_punct_k5_13_P15;
+extern const struct gmr1_puncturer gmr1_punct_k5_13_Ps15;
+extern const struct gmr1_puncturer gmr1_punct_k5_13_P78;
+extern const struct gmr1_puncturer gmr1_punct_k5_15_P23;
+extern const struct gmr1_puncturer gmr1_punct_k5_15_P53;
+extern const struct gmr1_puncturer gmr1_punct_k5_15_Ps53;
+extern const struct gmr1_puncturer gmr1_punct_k7_12_P23;
+extern const struct gmr1_puncturer gmr1_punct_k7_12_P410;
+extern const struct gmr1_puncturer gmr1_punct_k7_12_P512;
+extern const struct gmr1_puncturer gmr1_punct_k7_12_P116;
+extern const struct gmr1_puncturer gmr1_punct_k7_12_P148;
+extern const struct gmr1_puncturer gmr1_punct_k7_12_P184;
+extern const struct gmr1_puncturer gmr1_punct_k7_12_P1152;
+extern const struct gmr1_puncturer gmr1_punct_k7_12_P45;
+extern const struct gmr1_puncturer gmr1_punct_k7_12_P245;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P13;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P47;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P34;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P17;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P19;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P26;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P110;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P14;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P45;
+extern const struct gmr1_puncturer gmr1_punct_k9_12_P234;
+extern const struct gmr1_puncturer gmr1_punct_k6_14_P45;
+extern const struct gmr1_puncturer gmr1_punct_k9_14_P148;
+extern const struct gmr1_puncturer gmr1_punct_k9_14_P65;
+extern const struct gmr1_puncturer gmr1_punct_k9_13_P12;
+extern const struct gmr1_puncturer gmr1_punct_k9_13_P1213;
+extern const struct gmr1_puncturer gmr1_punct_k9_13_P44;
+extern const struct gmr1_puncturer gmr1_punct_k9_13_P33;
+extern const struct gmr1_puncturer gmr1_punct_k9_13_P65;
 
 
 /*! @} */
