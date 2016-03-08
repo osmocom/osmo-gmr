@@ -120,6 +120,37 @@ struct gmr1_pi4cxpsk_burst gmr1_dc6_burst = {
 };
 
 
+/* DC12 ------------------------------------------------------------------- */
+
+static struct gmr1_pi4cxpsk_sync _dc12_sync[] = {
+	{  10, 10, { 0, 0, 1, 0, 0, 0, 1, 1, 1, 1 } },
+	{ 228, 11, { 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1 } },
+	{ 447, 10, { 0, 0, 1, 0, 0, 0, 1, 1, 1, 1 } },
+	{ -1 },
+};
+
+static struct gmr1_pi4cxpsk_data _dc12_data[] = {
+	{   2,   8 },	/* e0   ... e7   */
+	{  20, 208 },	/* e8   ... e215 */
+	{ 239, 208 },	/* e216 ... e423 */
+	{ 457,   8 },	/* e424 ... e431 */
+	{ -1 },
+};
+
+/*! \brief DC12 bursts
+ *  See GMR-1 05.002 (ETSI TS 101 376-5-2 V3.1.1) - Section 7.4.16
+ */
+struct gmr1_pi4cxpsk_burst gmr1_dc12_burst = {
+	.mod = &gmr1_pi2cbpsk,
+	.guard_pre = 2,
+	.guard_post = 3,
+	.len = 39 * 12,
+	.ebits = 432,
+	.sync = { _dc12_sync, NULL },
+	.data = _dc12_data,
+};
+
+
 /* NT3 Speech ------------------------------------------------------------- */
 
 static struct gmr1_pi4cxpsk_sync _nt3_speech_sync[] = {

@@ -37,6 +37,7 @@ struct gmr1_pi4cxpsk_burst;
 extern struct gmr1_pi4cxpsk_burst gmr1_bcch_burst;
 extern struct gmr1_pi4cxpsk_burst gmr1_dc2_burst;
 extern struct gmr1_pi4cxpsk_burst gmr1_dc6_burst;
+extern struct gmr1_pi4cxpsk_burst gmr1_dc12_burst;
 extern struct gmr1_pi4cxpsk_burst gmr1_nt3_speech_burst;
 extern struct gmr1_pi4cxpsk_burst gmr1_nt3_facch_burst;
 extern struct gmr1_pi4cxpsk_burst gmr1_nt6_burst;
