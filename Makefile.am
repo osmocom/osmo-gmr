@@ -25,12 +25,12 @@ $(top_builddir)/doc/html/index.html: $(SOURCES) Doxyfile
 	$(DOXYGEN) Doxyfile
 
 install-data-hook:
-	cd $(DESTDIR)$(htmldir) && tar xf html.tar --strip-components 1 && rm -f html.tar
+	cd $(DESTDIR)$(htmldir) && tar xf html.tar && rm -f html.tar
 
 uninstall-hook:
 	rm -rf $(DESTDIR)$(htmldir)
 
-DX_CLEAN = doc/html/search/* doc/{html,latex}/* doc/html.tar
+DX_CLEAN = doc/html/search/* doc/{html,latex}/* doc/html.tar doc/*.tag
 
 endif
 
