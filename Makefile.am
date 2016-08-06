@@ -30,7 +30,7 @@ install-data-hook:
 uninstall-hook:
 	rm -rf $(DESTDIR)$(htmldir)
 
-DX_CLEAN = doc/html/search/* doc/{html,latex}/* doc/html.tar doc/*.tag
+DX_CLEAN = doc/html/search/* doc/{html,latex}/* doc/html.tar doc/*.tag doc/doxygen_sqlite3.db
 
 endif
 
