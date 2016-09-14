@@ -87,7 +87,7 @@ sbuf_alloc(int n_chans)
 	struct sample_buf *sbuf;
 	int i;
 
-	sbuf = calloc(1, sizeof(struct sample_buf));
+	sbuf = calloc(1, sizeof(struct sample_buf) + n_chans * sizeof(sbuf->chans[0]));
 	if (!sbuf)
 		return NULL;
 
@@ -95,10 +95,10 @@ sbuf_alloc(int n_chans)
 
 	for (i=0; i<n_chans; i++)
 	{
-		INIT_LLIST_HEAD(&sbuf->consumers[i]);
+		INIT_LLIST_HEAD(&sbuf->chans[i].consumers);
 
-		sbuf->rb[i] = osmo_rb_alloc(RB_LEN);
-		if (!sbuf->rb[i]) {
+		sbuf->chans[i].rb = osmo_rb_alloc(RB_LEN);
+		if (!sbuf->chans[i].rb) {
 			sbuf_free(sbuf);
 			return NULL;
 		}
@@ -117,11 +117,11 @@ sbuf_free(struct sample_buf *sbuf)
 
 	for (i=0; i<sbuf->n_chans; i++)
 	{
-		sact_free(sbuf->producer[i]);
+		sact_free(sbuf->chans[i].producer);
 
 		/* FIXME release consumers */
 
-		osmo_rb_free(sbuf->rb[i]);
+		osmo_rb_free(sbuf->chans[i].rb);
 	}
 
 	free(sbuf);
@@ -134,17 +134,17 @@ sbuf_set_producer(struct sample_buf *sbuf, int chan_id,
 {
 	struct sample_actor *sact = NULL;
 
-	sact_free(sbuf->producer[chan_id]);
+	sact_free(sbuf->chans[chan_id].producer);
 
 	if (desc) {
 		sact = sact_alloc(desc, params);
 		if (!sact)
 			return NULL;
 
-		sact->time = sbuf->chan_wtime[chan_id];
+		sact->time = sbuf->chans[chan_id].wtime;
 	}
 
-	sbuf->producer[chan_id] = sact;
+	sbuf->chans[chan_id].producer = sact;
 
 	return sact;
 }
@@ -159,9 +159,9 @@ sbuf_add_consumer(struct sample_buf *sbuf, int chan_id,
 	if (!sact)
 		return NULL;
 
-	sact->time = sbuf->chan_rtime[chan_id];
+	sact->time = sbuf->chans[chan_id].rtime;
 
-	llist_add(&sact->list, &sbuf->consumers[chan_id]);
+	llist_add(&sact->list, &sbuf->chans[chan_id].consumers);
 
 	return sact;
 }
@@ -177,17 +177,17 @@ _sbuf_chan_produce(struct sample_buf *sbuf, int chan_id)
 	int rv, free;
 
 	/* Check free space */
-	free = osmo_rb_free_bytes(sbuf->rb[chan_id]) / sizeof(float complex);
+	free = osmo_rb_free_bytes(sbuf->chans[chan_id].rb) / sizeof(float complex);
 	if (free < WORK_CHUNK)
 		return 0;
 
 	/* Get producer */
-	sact = sbuf->producer[chan_id];
+	sact = sbuf->chans[chan_id].producer;
 	if (!sact)
 		return 0;
 
 	/* Get where to write */
-	data = osmo_rb_write_ptr(sbuf->rb[chan_id]);
+	data = osmo_rb_write_ptr(sbuf->chans[chan_id].rb);
 
 	/* Do some work */
 	rv = sact->desc->work(sact, data, WORK_CHUNK);
@@ -203,10 +203,10 @@ _sbuf_chan_produce(struct sample_buf *sbuf, int chan_id)
 	}
 
 	/* Update state */
-	osmo_rb_write_advance(sbuf->rb[chan_id], sizeof(float complex) * rv);
+	osmo_rb_write_advance(sbuf->chans[chan_id].rb, sizeof(float complex) * rv);
 
 	sact->time += rv;
-	sbuf->chan_wtime[chan_id] += rv;
+	sbuf->chans[chan_id].wtime += rv;
 
 	return 1;
 }
@@ -233,14 +233,14 @@ _sbuf_chan_consume(struct sample_buf *sbuf, int chan_id)
 	int work_done = 0;
 
 	/* Check available data */
-	used = osmo_rb_used_bytes(sbuf->rb[chan_id]) / sizeof(float complex);
+	used = osmo_rb_used_bytes(sbuf->chans[chan_id].rb) / sizeof(float complex);
 
 	/* Get where to write & matchine timestamp */
-	data = osmo_rb_read_ptr(sbuf->rb[chan_id]);
-	rtime = sbuf->chan_rtime[chan_id];
+	data = osmo_rb_read_ptr(sbuf->chans[chan_id].rb);
+	rtime = sbuf->chans[chan_id].rtime;
 
 	/* Scan all consumers */
-	llist_for_each_entry_safe(sact, tmp, &sbuf->consumers[chan_id], list)
+	llist_for_each_entry_safe(sact, tmp, &sbuf->chans[chan_id].consumers, list)
 	{
 		int adv = sact->time - rtime;
 
@@ -269,8 +269,8 @@ _sbuf_chan_consume(struct sample_buf *sbuf, int chan_id)
 	}
 
 	/* If we did no work and no producer left, we remove all consumers */
-	if (!work_done && !sbuf->producer[chan_id]) {
-		llist_for_each_entry_safe(sact, tmp, &sbuf->consumers[chan_id], list)
+	if (!work_done && !sbuf->chans[chan_id].producer) {
+		llist_for_each_entry_safe(sact, tmp, &sbuf->chans[chan_id].consumers, list)
 		{
 			llist_del(&sact->list);
 			sact_free(sact);
@@ -298,7 +298,7 @@ _sbuf_consume(struct sample_buf *sbuf)
 	{
 		struct sample_actor *sact, *tmp;
 
-		llist_for_each_entry_safe(sact, tmp, &sbuf->consumers[i], list)
+		llist_for_each_entry_safe(sact, tmp, &sbuf->chans[i].consumers, list)
 		{
 			if (!found || (rtime > sact->time)) {
 				rtime = sact->time;
@@ -312,12 +312,12 @@ _sbuf_consume(struct sample_buf *sbuf)
 
 	/* Actually discard */
 	for (i=0; i<sbuf->n_chans; i++) {
-		int discard_bytes = (rtime - sbuf->chan_rtime[i]) * sizeof(float complex);
-		if (osmo_rb_used_bytes(sbuf->rb[i]) >= discard_bytes)
-			osmo_rb_read_advance(sbuf->rb[i], discard_bytes);
+		int discard_bytes = (rtime - sbuf->chans[i].rtime) * sizeof(float complex);
+		if (osmo_rb_used_bytes(sbuf->chans[i].rb) >= discard_bytes)
+			osmo_rb_read_advance(sbuf->chans[i].rb, discard_bytes);
 		else
-			osmo_rb_clear(sbuf->rb[i]);
-		sbuf->chan_rtime[i] = rtime;
+			osmo_rb_clear(sbuf->chans[i].rb);
+		sbuf->chans[i].rtime = rtime;
 	}
 
 	return work_done;
@@ -343,11 +343,11 @@ sbuf_work(struct sample_buf *sbuf)
 		/* Check if there is any producers left */
 		has_producers = 0;
 		for (i=0; i<sbuf->n_chans; i++)
-			has_producers |= (sbuf->producer[i] != NULL);
+			has_producers |= (sbuf->chans[i].producer != NULL);
 
 		/* Check if there is any consumer left */
 		for (i=0; i<sbuf->n_chans; i++)
-			if (!llist_empty(&sbuf->consumers[i]))
+			if (!llist_empty(&sbuf->chans[i].consumers))
 				break;
 		has_consumers = (i != sbuf->n_chans);
 

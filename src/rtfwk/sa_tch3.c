@@ -191,7 +191,7 @@ _rx_tch3_facch_flush(struct sample_actor *sa)
 	if (!crc)
 		gsmtap_sendmsg(priv->as->gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_TCH3 | GSMTAP_GMR1_FACCH,
-			priv->as->arfcn[priv->chan_id],
+			priv->as->chans[priv->chan_id].arfcn,
 			priv->fn-3, priv->tn, l2, 10));
 
 	/* Parse for assignement */
@@ -211,7 +211,7 @@ _rx_tch3_facch_flush(struct sample_actor *sa)
 
 		/* Find matching channel ID */
 		for (i=0; i<priv->as->n_chans; i++)
-			if (priv->as->arfcn[i] == arfcn)
+			if (priv->as->chans[i].arfcn == arfcn)
 				break;
 
 		if (i == priv->as->n_chans) {
@@ -327,7 +327,7 @@ _rx_tch3_speech(struct sample_actor *sa, struct osmo_cxvec *burst, float *toa)
 	{
 		if (!priv->data) {
 			char fname[256];
-			sprintf(fname, "/tmp/gmr1_speech_%d_%d_%d.dat", priv->as->arfcn[priv->chan_id], priv->tn, priv->fn);
+			sprintf(fname, "/tmp/gmr1_speech_%d_%d_%d.dat", priv->as->chans[priv->chan_id].arfcn, priv->tn, priv->fn);
 			priv->data = fopen(fname, "wb");
 		}
 		fwrite(frame0, 10, 1, priv->data);

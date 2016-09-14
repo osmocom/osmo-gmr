@@ -190,7 +190,7 @@ tch9_sink_work(struct sample_actor *sa,
 		if (!crc)
 			gsmtap_sendmsg(priv->as->gti, gmr1_gsmtap_makemsg(
 				GSMTAP_GMR1_TCH9 | GSMTAP_GMR1_FACCH,
-				priv->as->arfcn[priv->chan_id],
+				priv->as->chans[priv->chan_id].arfcn,
 				priv->fn, priv->tn, l2, 38));
 
 		/* Detect end */
@@ -215,14 +215,14 @@ tch9_sink_work(struct sample_actor *sa,
 		/* Forward to GSMTap (no CRC to validate :( ) */
 		gsmtap_sendmsg(priv->as->gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_TCH9,
-			priv->as->arfcn[priv->chan_id],
+			priv->as->chans[priv->chan_id].arfcn,
 			priv->fn, priv->tn, l2, 60));
 
 		/* Save to file */
 		{
 			if (!priv->data) {
 				char fname[256];
-				sprintf(fname, "/tmp/gmr1_csd_%d_%d_%d.dat", priv->as->arfcn[priv->chan_id], priv->tn, priv->fn);
+				sprintf(fname, "/tmp/gmr1_csd_%d_%d_%d.dat", priv->as->chans[priv->chan_id].arfcn, priv->tn, priv->fn);
 				priv->data = fopen(fname, "wb");
 			}
 			fwrite(l2, 60, 1, priv->data);

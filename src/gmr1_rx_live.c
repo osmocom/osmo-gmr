@@ -37,11 +37,8 @@
 
 int main(int argc, char *argv[])
 {
-	struct app_state _as, *as = &_as;
+	struct app_state *as;
 	int rv = 0, i;
-
-	/* Init app state */
-	memset(as, 0x00, sizeof(struct app_state));
 
 	/* Args */
 	if (argc < 3) {
@@ -49,7 +46,11 @@ int main(int argc, char *argv[])
 		return -EINVAL;
 	}
 
-	as->n_chans = argc - 2;
+	/* Init app state */
+	i = argc - 2;
+
+	as = calloc(1, sizeof(struct app_state) + i * sizeof(as->chans[0]));
+	as->n_chans = i;
 
 	as->sps = atoi(argv[1]);
 	if (as->sps < 1 || as->sps > 16) {
@@ -82,14 +83,14 @@ int main(int argc, char *argv[])
 
 		*d = '\0';
 
-		as->arfcn[i] = atoi(argv[i+2]);
-		as->filename[i] = d+1;
+		as->chans[i].arfcn = atoi(argv[i+2]);
+		as->chans[i].filename = d+1;
 	}
 
 	/* Create all the sources */
 	for (i=0; i<as->n_chans; i++) {
 		struct sample_actor *sa;
-		sa = sbuf_set_producer(as->buf, i, &sa_file_src, as->filename[i]);
+		sa = sbuf_set_producer(as->buf, i, &sa_file_src, as->chans[i].filename);
 		if (!sa) {
 			fprintf(stderr, "[!] Failed to create source for stream #%d\n", i);
 			rv = -EIO;

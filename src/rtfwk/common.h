@@ -39,15 +39,18 @@ struct app_state
 	/* Sample source */
 	struct sample_buf *buf;
 
-	int arfcn[MAX_CHANS];
-	char *filename[MAX_CHANS];
-
 	/* Params */
 	int n_chans;
 	int sps;
 
 	/* GSMTap */
 	struct gsmtap_inst *gti;
+
+	/* Per-Channel data */
+	struct {
+		int arfcn;
+		char *filename;
+	} chans[0];
 };
 
 

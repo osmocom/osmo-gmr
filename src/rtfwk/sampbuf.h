@@ -68,24 +68,26 @@ sact_free(struct sample_actor *sact);
 /* ------------- */
 
 #define RB_LEN		(1 << 24)	/* 16 Mb */
-#define MAX_CHANS	10
 
 struct sample_buf {
 	/* Channels */
 	int n_chans;
 
-	/* Underlying storage */
-	struct osmo_ringbuf *rb[MAX_CHANS];
+	/* Per-Channel data */
+	struct {
+		/* Underlying storage */
+		struct osmo_ringbuf *rb;
 
-	/* Time/Sample tracking */
-	uint64_t chan_wtime[MAX_CHANS];
-	uint64_t chan_rtime[MAX_CHANS];
+		/* Time/Sample tracking */
+		uint64_t wtime;
+		uint64_t rtime;
 
-	/* Producer */
-	struct sample_actor *producer[MAX_CHANS];
+		/* Producer */
+		struct sample_actor *producer;
 
-	/* Consumers */
-	struct llist_head consumers[MAX_CHANS];
+		/* Consumers */
+		struct llist_head consumers;
+	} chans[0];
 };
 
 

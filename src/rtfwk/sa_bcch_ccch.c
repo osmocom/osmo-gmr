@@ -191,7 +191,7 @@ _rx_bcch(struct sample_actor *sa,
 	if (!crc)
 		gsmtap_sendmsg(priv->as->gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_BCCH,
-			priv->as->arfcn[priv->chan_id],
+			priv->as->chans[priv->chan_id].arfcn,
 			priv->fn, priv->sa_bcch_stn, l2, 24));
 
 	return 0;
@@ -280,7 +280,7 @@ _rx_ccch(struct sample_actor *sa,
 
 		/* Find matching channel ID */
 		for (i=0; i<priv->as->n_chans; i++)
-			if (priv->as->arfcn[i] == arfcn)
+			if (priv->as->chans[i].arfcn == arfcn)
 				break;
 
 		if (i == priv->as->n_chans) {
@@ -310,7 +310,7 @@ nofollow:
 	if (!crc)
 		gsmtap_sendmsg(priv->as->gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_CCCH,
-			priv->as->arfcn[priv->chan_id],
+			priv->as->chans[priv->chan_id].arfcn,
 			priv->fn, priv->sa_bcch_stn, l2, 24));
 
 	return 0;
