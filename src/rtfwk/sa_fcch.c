@@ -77,6 +77,7 @@ _fcch_sink_work_single(struct sample_actor *sa,
 	struct fcch_sink_priv *priv = sa->priv;
 	struct osmo_cxvec _win, *win = &_win;
 	int sps, win_len, base_align, toa;
+	float snr;
 	int rv;
 
 	/* Params */
@@ -97,9 +98,22 @@ _fcch_sink_work_single(struct sample_actor *sa,
 		return rv;
 	}
 
-	/* Fine FCCH detection */
+	/* Map the burst */
 	win_map(win, data, data_len, base_align + toa, priv->burst_type->len * sps);
 
+	/* Check power */
+	rv = gmr1_fcch_snr(priv->burst_type, win, sps, 0.0f, &snr);
+	if (rv < 0) {
+		fprintf(stderr, "[!] Error during FCCH SNR estimation (%d)\n", rv);
+		return rv;
+	}
+
+	if (snr < 2.0f) {
+		/* Done, there is nothing */
+		return -ENOENT;
+	}
+
+	/* Fine FCCH detection */
 	rv = gmr1_fcch_fine(priv->burst_type, win, sps, 0.0f, &toa, &priv->freq_err);
 	if (rv < 0) {
 		fprintf(stderr, "[!] Error during FCCH fine acquisition (%d)\n", rv);
@@ -132,6 +146,7 @@ _fcch_sink_work_multi(struct sample_actor *sa,
 	struct osmo_cxvec _win, *win = &_win;
 	int win_len, sps, mtoa[16], n_fcch;
 	float ref_snr = 0.0f, ref_freq_err = 0.0f;
+	float mfe[16];
 	int rv, i, j;
 
 	/* Params */
@@ -155,7 +170,7 @@ _fcch_sink_work_multi(struct sample_actor *sa,
 
 	/* Check each of them for validity */
 	for (i=0, j=0; i<n_fcch; i++) {
-		float freq_err, e_fcch, e_cich, snr;
+		float freq_err, snr;
 		int toa;
 
 		/* Perform fine acquisition */
@@ -168,22 +183,17 @@ _fcch_sink_work_multi(struct sample_actor *sa,
 			return rv;
 		}
 
-		/* Compute SNR (comparing energy with neighboring CICH) */
+		/* Compute SNR */
 		win_map(win, data, len,
-		        mtoa[i] + toa + 5 * sps,
-		        (117 - 10) * sps);
+			mtoa[i] + toa, priv->burst_type->len * sps);
 
-		e_fcch = burst_energy(win);
+		rv = gmr1_fcch_snr(priv->burst_type, win, sps, -(priv->freq_err + freq_err), &snr);
+		if (rv) {
+			fprintf(stderr, "[!] Error during FCCH SNR estimation (%d)\n", rv);
+			return rv;
+		}
 
-		win_map(win, data, len,
-		        mtoa[i] + toa + (5 + 117) * sps,
-		        (117 - 10) * sps);
-
-		e_cich = burst_energy(win);
-
-		snr = e_fcch / e_cich;
-
-                /* Check against strongest */
+		/* Check against strongest */
 		if (i==0) {
 			/* This _is_ the reference */
 			ref_snr = snr;
@@ -210,7 +220,9 @@ _fcch_sink_work_multi(struct sample_actor *sa,
 		);
 
 		/* Save it */
-		mtoa[j++] = mtoa[i] + toa;
+		mtoa[j] = mtoa[i] + toa;
+		mfe[j]  = priv->freq_err + freq_err;
+		j++;
 	}
 
 	n_fcch = j;
@@ -221,7 +233,7 @@ _fcch_sink_work_multi(struct sample_actor *sa,
 			.as = priv->as,
 			.chan_id = priv->chan_id,
 			.align = sa->time + mtoa[i],
-			.freq_err = priv->freq_err,
+			.freq_err = mfe[i],
 		};
 		sa = sbuf_add_consumer(priv->as->buf, priv->chan_id, &bcch_sink, &p);
 		if (!sa) {
