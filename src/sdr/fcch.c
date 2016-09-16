@@ -648,8 +648,7 @@ gmr1_fcch_snr(const struct gmr1_fcch_burst *burst_type,
 	struct osmo_cxvec *ref = NULL;
 	struct osmo_cxvec *burst = NULL;
 	fftwf_plan fft_plan;
-	float avg;
-	int len, i;
+	int peaks[6], len, i;
 	int rv = 0;
 
 	/* Generate reference dual chirp */
@@ -689,13 +688,16 @@ gmr1_fcch_snr(const struct gmr1_fcch_burst *burst_type,
 	DEBUG_SIGNAL("fcch_snr_fft", burst);
 
 	/* Evaluate SNR */
-	avg = 0.0f;
+		/* Find 6 strongest peaks */
+		/* With time/freq error, there will be 2 peaks after the mix,
+		 * and they might not be bin-aligned and so the 4 first peaks
+		 * are "signal". We then use the two next as an upper limit
+		 * for "noise" */
+	osmo_cxvec_peaks_scan(burst, peaks, 6);
 
-	for (i=0; i<burst->len-3; i++)
-		avg += osmo_normsqf(burst->data[2+i]);
-	avg /= (burst->len-3);
-
-	*snr = osmo_normsqf(burst->data[0]) / avg;
+		/* Among the top 6, top 2 over bottom 2 */
+	*snr =	(osmo_normsqf(burst->data[peaks[0]]) + osmo_normsqf(burst->data[peaks[1]])) /
+		(osmo_normsqf(burst->data[peaks[4]]) + osmo_normsqf(burst->data[peaks[5]]));
 
 	/* Cleanup */
 err:
