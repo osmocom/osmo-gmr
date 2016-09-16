@@ -30,6 +30,7 @@
 #include <osmocom/gmr1/gsmtap.h>
 #include <osmocom/gmr1/l1/bcch.h>
 #include <osmocom/gmr1/l1/ccch.h>
+#include <osmocom/gmr1/l1/xch_dc12.h>
 #include <osmocom/gmr1/sdr/defs.h>
 #include <osmocom/gmr1/sdr/pi4cxpsk.h>
 #include <osmocom/gmr1/sdr/metadata.h>
@@ -141,7 +142,7 @@ _rx_bcch(struct sample_actor *sa,
 	struct osmo_cxvec _burst, *burst = &_burst;
 	struct gmr1_metadata *md;
 	struct gmr1_md_annotation *mda;
-	sbit_t ebits[424];
+	sbit_t ebits[432];
 	uint8_t l2[24];
 	float freq_err, toa;
 	int sps, base_align;
@@ -160,12 +161,12 @@ _rx_bcch(struct sample_actor *sa,
 
 	/* Demodulate burst */
 	e_toa = burst_map(burst, data, data_len, base_align, sps,
-	                  &gmr1_bcch_burst, priv->sa_bcch_stn, 20 * sps, mda);
+	                  &gmr1_dc12_burst, priv->sa_bcch_stn, 20 * sps, mda);
 	if (e_toa < 0)
 		return e_toa;
 
 	rv = gmr1_pi4cxpsk_demod(
-		&gmr1_bcch_burst,
+		&gmr1_dc12_burst,
 		burst, sps, -priv->freq_err,
 		ebits, NULL, &toa, &freq_err
 	);
@@ -177,7 +178,7 @@ _rx_bcch(struct sample_actor *sa,
 	priv->bcch_energy = burst_energy(burst);
 
 	/* Decode burst */
-	crc = gmr1_bcch_decode(l2, ebits, &conv);
+	crc = gmr1_xch_dc12_decode(l2, ebits, &conv);
 
 	fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
 
@@ -253,7 +254,7 @@ _rx_ccch(struct sample_actor *sa,
 
 	/* Map potential burst */
 	e_toa = burst_map(burst, data, data_len, base_align, sps,
-	                  &gmr1_dc6_burst, priv->sa_bcch_stn, 10 * sps, mda);
+	                  &gmr1_dc12_burst, priv->sa_bcch_stn, 10 * sps, mda);
 	if (e_toa < 0)
 		return e_toa;
 
@@ -266,7 +267,7 @@ _rx_ccch(struct sample_actor *sa,
 
 	/* Demodulate burst */
 	rv = gmr1_pi4cxpsk_demod(
-		&gmr1_dc6_burst,
+		&gmr1_dc12_burst,
 		burst, sps, -priv->freq_err,
 		ebits, NULL, NULL, NULL
 	);
@@ -275,7 +276,7 @@ _rx_ccch(struct sample_actor *sa,
 		return rv;
 
 	/* Decode burst */
-	crc = gmr1_ccch_decode(l2, ebits, &conv);
+	crc = gmr1_xch_dc12_decode(l2, ebits, &conv);
 
 	fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
 
@@ -402,7 +403,7 @@ bcch_sink_work(struct sample_actor *sa,
 		return -1;
 
 	/* CCCH */
-	if ((sirfn % 8 != 0) && (sirfn % 8 != 2))
+	if (sirfn % 8 == 3)
 		_rx_ccch(sa, data, data_len);
 
 	/* Next frame */

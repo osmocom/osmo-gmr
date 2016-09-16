@@ -42,6 +42,7 @@
 #include <osmocom/gmr1/l1/interleave.h>
 #include <osmocom/gmr1/l1/tch3.h>
 #include <osmocom/gmr1/l1/tch9.h>
+#include <osmocom/gmr1/l1/xch_dc12.h>
 #include <osmocom/gmr1/sdr/defs.h>
 #include <osmocom/gmr1/sdr/dkab.h>
 #include <osmocom/gmr1/sdr/fcch.h>
@@ -54,7 +55,7 @@
 
 static struct gsmtap_inst *g_gti;
 
-static const struct gmr1_fcch_burst *fcch_type = &gmr1_fcch_burst;
+static const struct gmr1_fcch_burst *fcch_type = &gmr1_fcch3_lband_burst;
 
 
 struct tch3_state {
@@ -740,7 +741,7 @@ static int
 rx_bcch(struct chan_desc *cd, float *energy)
 {
 	struct osmo_cxvec _burst, *burst = &_burst;
-	sbit_t ebits[424];
+	sbit_t ebits[432];
 	uint8_t l2[24];
 	float freq_err, toa;
 	int rv, crc, conv, e_toa;
@@ -749,12 +750,14 @@ rx_bcch(struct chan_desc *cd, float *energy)
 	fprintf(stderr, "[.]   BCCH\n");
 
 	/* Demodulate burst */
-	e_toa = burst_map(burst, cd, &gmr1_bcch_burst, cd->sa_bcch_stn, 20 * cd->sps, 0);
+	e_toa = burst_map(burst, cd, &gmr1_dc12_burst, cd->sa_bcch_stn, 20 * cd->sps, 0);
 	if (e_toa < 0)
 		return e_toa;
 
+	osmo_cxvec_dbg_dump(burst, "/tmp/dbg_burst.cfile");
+
 	rv = gmr1_pi4cxpsk_demod(
-		&gmr1_bcch_burst,
+		&gmr1_dc12_burst,
 		burst, cd->sps, -cd->freq_err,
 		ebits, NULL, &toa, &freq_err
 	);
@@ -767,7 +770,7 @@ rx_bcch(struct chan_desc *cd, float *energy)
 		*energy = burst_energy(burst);
 
 	/* Decode burst */
-	crc = gmr1_bcch_decode(l2, ebits, &conv);
+	crc = gmr1_xch_dc12_decode(l2, ebits, &conv);
 
 	fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
 
@@ -799,7 +802,7 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 	int rv, crc, conv, e_toa;
 
 	/* Map potential burst */
-	e_toa = burst_map(burst, cd, &gmr1_dc6_burst, cd->sa_bcch_stn, 10 * cd->sps, 0);
+	e_toa = burst_map(burst, cd, &gmr1_dc12_burst, cd->sa_bcch_stn, 10 * cd->sps, 0);
 	if (e_toa < 0)
 		return e_toa;
 
@@ -812,7 +815,7 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 
 	/* Demodulate burst */
 	rv = gmr1_pi4cxpsk_demod(
-		&gmr1_dc6_burst,
+		&gmr1_dc12_burst,
 		burst, cd->sps, -cd->freq_err,
 		ebits, NULL, NULL, NULL
 	);
@@ -821,7 +824,7 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 		return rv;
 
 	/* Decode burst */
-	crc = gmr1_ccch_decode(l2, ebits, &conv);
+	crc = gmr1_xch_dc12_decode(l2, ebits, &conv);
 
 	fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
 
@@ -838,6 +841,64 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_CCCH,
 			0, cd->fn, cd->sa_bcch_stn, l2, 24));
+
+	return 0;
+}
+
+static int
+rx_cbch(struct chan_desc *cd, float min_energy)
+{
+	struct osmo_cxvec _burst, *burst = &_burst;
+	sbit_t ebits[432];
+	uint8_t l2[24];
+	int rv, crc, conv, e_toa;
+
+	/* Map potential burst */
+	e_toa = burst_map(burst, cd, &gmr1_dc12_burst, cd->sa_bcch_stn + 12, 10 * cd->sps, 0);
+	if (e_toa < 0)
+		return e_toa;
+
+	/* Energy detection */
+	if (burst_energy(burst) < min_energy)
+		return 0; /* Nothing to do */
+
+	/* Debug */
+	fprintf(stderr, "[.]   CBCH\n");
+
+	/* Demodulate burst */
+	rv = gmr1_pi4cxpsk_demod(
+		&gmr1_dc12_burst,
+		burst, cd->sps, -cd->freq_err,
+		ebits, NULL, NULL, NULL
+	);
+
+	if (rv)
+		return rv;
+
+	/* Decode burst */
+	crc = gmr1_xch_dc12_decode(l2, ebits, &conv);
+
+	fprintf(stderr, "crc=%d, conv=%d\n", crc, conv);
+
+	/* Send to GSMTap if correct */
+//	if (!crc)
+//		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+//			GSMTAP_GMR1_CCCH,
+//			0, cd->fn, cd->sa_bcch_stn, l2, 24));
+
+	l2[0] |= 0x20;
+
+		gsmtap_sendmsg(g_gti, gsmtap_makemsg_ex(
+			GSMTAP_TYPE_UM,	/* type */
+			0,		/* arfcn */
+			12,		/* ts */
+			GSMTAP_CHANNEL_CBCH51,	/* chan_type */
+			0,		/* ss */
+			cd->fn,		/* fn */
+			0,		/* signal_dbm */
+			0,		/* snr */
+			l2, 23
+		));
 
 	return 0;
 }
@@ -867,8 +928,11 @@ process_bcch(struct chan_desc *cd)
 			rx_bcch(cd, &bcch_energy);
 
 		/* CCCH */
-		if ((sirfn % 8 != 0) && (sirfn % 8 != 2))
+		if (sirfn % 8 == 3)
 			rx_ccch(cd, bcch_energy / 2.0f);
+
+		/* CBCH */
+		//rx_cbch(cd, bcch_energy / 2.0f);
 
 		/* TCH */
 		rx_tch3(cd);
