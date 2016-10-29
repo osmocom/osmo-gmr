@@ -261,6 +261,7 @@ fcch_sink_work(struct sample_actor *sa,
 }
 
 const struct sample_actor_desc fcch_sink = {
+	.name = "FCCH",
 	.init = fcch_sink_init,
 	.fini = fcch_sink_fini,
 	.work = fcch_sink_work,

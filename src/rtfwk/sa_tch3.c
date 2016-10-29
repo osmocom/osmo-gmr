@@ -464,6 +464,7 @@ done:
 }
 
 const struct sample_actor_desc tch3_sink = {
+	.name = "TCH3",
 	.init = tch3_sink_init,
 	.fini = tch3_sink_fini,
 	.work = tch3_sink_work,

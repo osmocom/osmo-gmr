@@ -101,6 +101,7 @@ sa_file_sink_work(struct sample_actor *sc,
 
 
 const struct sample_actor_desc sa_file_src = {
+	.name = "File Source",
 	.init = sa_file_src_init,
 	.fini = sa_file_fini,
 	.work = sa_file_src_work,
@@ -108,6 +109,7 @@ const struct sample_actor_desc sa_file_src = {
 };
 
 const struct sample_actor_desc sa_file_sink = {
+	.name = "File Sink",
 	.init = sa_file_sink_init,
 	.fini = sa_file_fini,
 	.work = sa_file_sink_work,

@@ -22,6 +22,7 @@
 
 
 #include <complex.h>
+#include <stdio.h>
 #include <stdint.h>
 
 #include <osmocom/core/linuxlist.h>
@@ -35,10 +36,14 @@
 struct sample_actor;
 
 struct sample_actor_desc {
+	const char *name;
+
 	int  (*init)(struct sample_actor *sc, void *params);
 	void (*fini)(struct sample_actor *sc);
 	int  (*work)(struct sample_actor *sc,
 	             float complex *data, unsigned int len);
+	void (*stat)(struct sample_actor *sc, FILE *fh);
+
 	int priv_size;
 };
 
@@ -107,7 +112,7 @@ sbuf_add_consumer(struct sample_buf *sbuf, int chan_id,
                   const struct sample_actor_desc *desc, void *params);
 
 
-void sbuf_work(struct sample_buf *sbuf);
+int sbuf_work(struct sample_buf *sbuf);
 
 
 #endif /* __RTFWK_SAMPBUF_H__ */

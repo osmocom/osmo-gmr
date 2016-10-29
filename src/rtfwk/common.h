@@ -21,6 +21,7 @@
 #define __RTFWK_COMMON_H__
 
 #include <math.h>
+#include <stdio.h>
 
 #include <osmocom/dsp/cxvec.h>
 #include <osmocom/dsp/cxvec_math.h>
@@ -45,6 +46,9 @@ struct app_state
 
 	/* GSMTap */
 	struct gsmtap_inst *gti;
+
+	/* Status */
+	FILE *status;
 
 	/* Per-Channel data */
 	struct {

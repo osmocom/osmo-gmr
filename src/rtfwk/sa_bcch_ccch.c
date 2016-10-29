@@ -57,6 +57,9 @@ struct bcch_sink_priv {
 
 	float bcch_energy;
 	int bcch_err;
+	int bcch_stat_tot;
+	int bcch_stat_err;
+	float bcch_stat_conv;
 
 	int la_arfcn;
 	int la_tn;
@@ -186,6 +189,10 @@ _rx_bcch(struct sample_actor *sa,
 		priv->bcch_err = 0;
 	else
 		priv->bcch_err++;
+
+	priv->bcch_stat_tot++;
+	priv->bcch_stat_err += (crc != 0);
+	priv->bcch_stat_conv = 0.99f * priv->bcch_stat_conv + 0.01f * conv;
 
 	/* Send to GSMTap if correct */
 	if (!crc)
@@ -384,9 +391,23 @@ bcch_sink_work(struct sample_actor *sa,
 	return frame_len;
 }
 
+static void
+bcch_sink_stat(struct sample_actor *sa,
+               FILE *out)
+{
+	struct bcch_sink_priv *priv = sa->priv;
+
+	fprintf(out, "\tbcch_tot  : %d\n", priv->bcch_stat_tot);
+	fprintf(out, "\tbcch_err  : %d (%.1f %%)\n", priv->bcch_stat_err,
+		(100.0f * (float)priv->bcch_stat_err) / (float)priv->bcch_stat_tot);
+	fprintf(out, "\tbcch_conv : %d\n", (int)priv->bcch_stat_conv);
+}
+
 const struct sample_actor_desc bcch_sink = {
+	.name = "BCCH/CCCH",
 	.init = bcch_sink_init,
 	.fini = bcch_sink_fini,
 	.work = bcch_sink_work,
+	.stat = bcch_sink_stat,
 	.priv_size = sizeof(struct bcch_sink_priv),
 };

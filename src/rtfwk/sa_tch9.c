@@ -251,6 +251,7 @@ tch9_sink_work(struct sample_actor *sa,
 }
 
 const struct sample_actor_desc tch9_sink = {
+	.name = "TCH9",
 	.init = tch9_sink_init,
 	.fini = tch9_sink_fini,
 	.work = tch9_sink_work,

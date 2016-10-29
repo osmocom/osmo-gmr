@@ -21,6 +21,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <osmocom/core/gsmtap.h>
 #include <osmocom/core/gsmtap_util.h>
@@ -38,6 +41,7 @@
 int main(int argc, char *argv[])
 {
 	struct app_state *as;
+	struct stat ss;
 	int rv = 0, i;
 
 	/* Args */
@@ -61,6 +65,11 @@ int main(int argc, char *argv[])
 	/* Init GSMTap */
 	as->gti = gsmtap_source_init("127.0.0.1", GSMTAP_UDP_PORT, 0);
 	gsmtap_source_add_sink(as->gti);
+
+	/* Open status */
+	rv = stat("/tmp/gmr_rx_status", &ss);
+	if (!rv && (ss.st_mode & S_IFIFO))
+		as->status = fopen("/tmp/gmr_rx_status", "w");
 
 	/* Buffer */
 	as->buf = sbuf_alloc(as->n_chans);
@@ -116,7 +125,42 @@ int main(int argc, char *argv[])
 	}
 
 	/* Go forth and process ! */
-	sbuf_work(as->buf);
+	int iter = 0;
+	while (sbuf_work(as->buf))
+	{
+		if (iter++ < 100)
+			continue;
+
+		iter = 0;
+
+		if (!as->status)
+			continue;
+
+		fprintf(as->status, "\033c");
+		fprintf(as->status, "GMR-1 RX status\n");
+		fprintf(as->status, "---------------\n");
+		fprintf(as->status, "\n");
+
+		for (i=0; i<as->buf->n_chans; i++)
+		{
+			struct sample_actor *sact, *tmp;
+
+			llist_for_each_entry_safe(sact, tmp, &as->buf->chans[i].consumers, list)
+			{
+				fprintf(as->status, "ARFCN %4d: Task %s (%p)\n",
+					as->chans[i].arfcn,
+					sact->desc->name,
+					sact
+				);
+				if (sact->desc->stat)
+					sact->desc->stat(sact, as->status);
+				fprintf(as->status, "\n");
+			}
+		}
+
+		fprintf(as->status, "\n");
+		fflush(as->status);
+	}
 
 	/* Done ! */
 	rv = 0;

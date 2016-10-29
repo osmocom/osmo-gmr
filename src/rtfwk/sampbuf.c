@@ -323,39 +323,39 @@ _sbuf_consume(struct sample_buf *sbuf)
 	return work_done;
 }
 
-void
+int
 sbuf_work(struct sample_buf *sbuf)
 {
 	int i, rv;
 	int has_produced, has_consumed;
 	int has_producers, has_consumers;
 
-	while (1) {
-		/* Produce / Consume */
-		has_produced = _sbuf_produce(sbuf);
+	/* Produce / Consume */
+	has_produced = _sbuf_produce(sbuf);
 
-		has_consumed = 0;
-		do {
-			rv = _sbuf_consume(sbuf);
-			has_consumed |= rv;
-		} while (rv);
+	has_consumed = 0;
+	do {
+		rv = _sbuf_consume(sbuf);
+		has_consumed |= rv;
+	} while (rv);
 
-		/* Check if there is any producers left */
-		has_producers = 0;
-		for (i=0; i<sbuf->n_chans; i++)
-			has_producers |= (sbuf->chans[i].producer != NULL);
+	/* Check if there is any producers left */
+	has_producers = 0;
+	for (i=0; i<sbuf->n_chans; i++)
+		has_producers |= (sbuf->chans[i].producer != NULL);
 
-		/* Check if there is any consumer left */
-		for (i=0; i<sbuf->n_chans; i++)
-			if (!llist_empty(&sbuf->chans[i].consumers))
-				break;
-		has_consumers = (i != sbuf->n_chans);
-
-		/* Check exit conditions */
-		if (!has_consumers)
+	/* Check if there is any consumer left */
+	for (i=0; i<sbuf->n_chans; i++)
+		if (!llist_empty(&sbuf->chans[i].consumers))
 			break;
+	has_consumers = (i != sbuf->n_chans);
 
-		if (!has_consumed && !has_producers)
-			break;
-	}
+	/* Check exit conditions */
+	if (!has_consumers)
+		return 0;
+
+	if (!has_consumed && !has_producers)
+		return 0;
+
+	return 1;
 }
