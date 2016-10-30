@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 		struct fcch_sink_params p = {
 			.as = as,
 			.chan_id = i,
-			.start_discard = 5000,
+			.start_discard = 10000,
 			.burst_type = &gmr1_fcch3_lband_burst,
 		};
 		sa = sbuf_add_consumer(as->buf, i, &fcch_sink, &p);

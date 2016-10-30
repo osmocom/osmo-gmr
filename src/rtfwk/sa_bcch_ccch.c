@@ -399,7 +399,7 @@ bcch_sink_work(struct sample_actor *sa,
 	if (sirfn % 8 == 2)
 		_rx_bcch(sa, data, data_len);
 
-	if (priv->bcch_err > 10)
+	if (priv->bcch_err > 375)
 		return -1;
 
 	/* CCCH */
