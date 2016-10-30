@@ -678,22 +678,16 @@ fcch_multi_process(struct chan_desc *cd, fcch_multi_cb_t cb)
 			return rv;
 		}
 
-		/* Compute SNR (comparing energy with neighboring CICH) */
+		/* Compute SNR */
 		win_map(win, cd->bcch,
-			base_align + mtoa[i] + toa + 5 * cd->sps,
-			(117 - 10) * cd->sps
+			base_align + mtoa[i] + toa,
+			fcch_type->len * cd->sps
 		);
 
-		e_fcch = burst_energy(win);
-
-		win_map(win, cd->bcch,
-			base_align + mtoa[i] + toa + (5 + 117) * cd->sps,
-			(117 - 10) * cd->sps
-		);
-
-		e_cich = burst_energy(win);
-
-		snr = e_fcch / e_cich;
+		rv = gmr1_fcch_snr(fcch_type, win, cd->sps, -(cd->freq_err + freq_err), &snr);
+		if (rv) {
+			fprintf(stderr, "[!] Error during FCCH SNR estimation (%d)\n", rv);
+		}
 
 		/* Check against strongest */
 		if (i==0) {
