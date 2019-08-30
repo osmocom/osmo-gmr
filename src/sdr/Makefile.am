@@ -4,4 +4,4 @@ AM_LDFLAGS = $(LIBOSMOCORE_LIBS) $(LIBOSMODSP_LIBS) $(FFTW3F_LIBS)
 
 noinst_LIBRARIES = libgmr1-sdr.a
 
-libgmr1_sdr_a_SOURCES = dkab.c fcch.c nb.c pi4cxpsk.c
+libgmr1_sdr_a_SOURCES = dkab.c fcch.c metadata.c nb.c pi4cxpsk.c
