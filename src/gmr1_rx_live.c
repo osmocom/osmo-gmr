@@ -29,6 +29,7 @@
 #include <osmocom/core/gsmtap_util.h>
 
 #include <osmocom/gmr1/sdr/fcch.h>
+#include <osmocom/gmr1/sdr/metadata.h>
 
 #include "rtfwk/common.h"
 #include "rtfwk/sampbuf.h"
@@ -94,6 +95,24 @@ int main(int argc, char *argv[])
 
 		as->chans[i].arfcn = atoi(argv[i+2]);
 		as->chans[i].filename = d+1;
+	}
+
+	/* Create meta data */
+	for (i=0; i<as->n_chans; i++)
+	{
+		char *d;
+		int l;
+
+		d = strrchr(as->chans[i].filename, '.');
+		l = d ? (d - as->chans[i].filename) : strlen(as->chans[i].filename);
+
+		d = malloc(l + 6);
+		memcpy(&d[0], as->chans[i].filename, l);
+		memcpy(&d[l], ".meta", 6);
+
+		as->chans[i].md = gmr1_md_open(d, as->chans[i].filename, as->sps * GMR1_SYM_RATE);
+
+		free(d);
 	}
 
 	/* Create all the sources */
@@ -164,6 +183,12 @@ int main(int argc, char *argv[])
 
 	/* Done ! */
 	rv = 0;
+
+	/* Flush metadata */
+	for (i=0; i<as->n_chans; i++)
+	{
+		gmr1_md_close(as->chans[i].md);
+	}
 
 	/* Clean up */
 err:

@@ -33,6 +33,7 @@
 
 struct gsmtap_inst;
 struct gmr1_pi4cxpsk_burst;
+struct gmr1_md_annotation;
 
 
 struct app_state
@@ -44,7 +45,7 @@ struct app_state
 	int n_chans;
 	int sps;
 
-	/* GSMTap */
+	/* GSMTap and metadata */
 	struct gsmtap_inst *gti;
 
 	/* Status */
@@ -54,6 +55,7 @@ struct app_state
 	struct {
 		int arfcn;
 		char *filename;
+		struct gmr1_metadata *md;
 	} chans[0];
 };
 
@@ -66,7 +68,8 @@ win_map(struct osmo_cxvec *win,
 int
 burst_map(struct osmo_cxvec *burst,
           float complex *data, int data_len, int base_align, int sps,
-          struct gmr1_pi4cxpsk_burst *burst_type, int tn, int win);
+          struct gmr1_pi4cxpsk_burst *burst_type, int tn, int win,
+          struct gmr1_md_annotation *mda);
 
 float
 burst_energy(struct osmo_cxvec *burst);

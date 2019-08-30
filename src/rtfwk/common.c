@@ -24,6 +24,7 @@
 #include <osmocom/dsp/cxvec_math.h>
 
 #include <osmocom/gmr1/sdr/defs.h>
+#include <osmocom/gmr1/sdr/metadata.h>
 #include <osmocom/gmr1/sdr/pi4cxpsk.h>
 
 #include "common.h"
@@ -45,7 +46,8 @@ win_map(struct osmo_cxvec *win,
 int
 burst_map(struct osmo_cxvec *burst,
           float complex *data, int data_len, int base_align, int sps,
-          struct gmr1_pi4cxpsk_burst *burst_type, int tn, int win)
+          struct gmr1_pi4cxpsk_burst *burst_type, int tn, int win,
+          struct gmr1_md_annotation *mda)
 {
 	int begin, len;
 	int etoa;
@@ -58,6 +60,12 @@ burst_map(struct osmo_cxvec *burst,
 		return -EIO;
 
 	osmo_cxvec_init_from_data(burst, &data[begin], len);
+
+	if (mda) {
+		gmr1_mda_add_field(mda, "core:sample_count", "%d", burst_type->len * sps);
+		gmr1_mda_add_field(mda, "core:freq_center", "%f", 31.25e3f);
+		gmr1_mda_add_field(mda, "core:freq_span", "%f", 31.25e3f);
+	}
 
 	return etoa;
 }

@@ -390,7 +390,7 @@ tch3_sink_work(struct sample_actor *sa,
 
 	/* Map potential burst (use FACCH3 as reference) */
 	e_toa = burst_map(burst, data, data_len, base_align, sps,
-	                  &gmr1_nt3_facch_burst, priv->tn, sps + sps/2);
+	                  &gmr1_nt3_facch_burst, priv->tn, sps + sps/2, NULL);
 	if (e_toa < 0)
 		return e_toa;
 

@@ -32,6 +32,7 @@
 #include <osmocom/gmr1/l1/ccch.h>
 #include <osmocom/gmr1/sdr/defs.h>
 #include <osmocom/gmr1/sdr/pi4cxpsk.h>
+#include <osmocom/gmr1/sdr/metadata.h>
 #include <osmocom/gmr1/sdr/nb.h>
 
 #include "common.h"
@@ -138,6 +139,8 @@ _rx_bcch(struct sample_actor *sa,
 {
 	struct bcch_sink_priv *priv = sa->priv;
 	struct osmo_cxvec _burst, *burst = &_burst;
+	struct gmr1_metadata *md;
+	struct gmr1_md_annotation *mda;
 	sbit_t ebits[424];
 	uint8_t l2[24];
 	float freq_err, toa;
@@ -148,12 +151,16 @@ _rx_bcch(struct sample_actor *sa,
 	sps = priv->as->sps;
 	base_align = sps * BCCH_MARGIN;
 
+	/* Annotation */
+	md  = priv->as->chans[priv->chan_id].md;
+	mda = gmr1_md_get_annotation(md);
+
 	/* Debug */
 	fprintf(stderr, "[.]   BCCH\n");
 
 	/* Demodulate burst */
 	e_toa = burst_map(burst, data, data_len, base_align, sps,
-	                  &gmr1_bcch_burst, priv->sa_bcch_stn, 20 * sps);
+	                  &gmr1_bcch_burst, priv->sa_bcch_stn, 20 * sps, mda);
 	if (e_toa < 0)
 		return e_toa;
 
@@ -201,6 +208,11 @@ _rx_bcch(struct sample_actor *sa,
 			priv->as->chans[priv->chan_id].arfcn,
 			priv->fn, priv->sa_bcch_stn, l2, 24));
 
+	/* Annotations */
+	gmr1_mda_add_field(mda, "core:title", "\"BCCH\"");
+	gmr1_mda_add_field(mda, "core:comment", "\"crc=%d, conv=%d, align_err=%d\"", crc, conv, priv->align_err);
+	gmr1_md_put_annotation(md, mda, sa->time + base_align + (sps * priv->sa_bcch_stn * 39) + e_toa);
+
 	return 0;
 }
 
@@ -224,6 +236,8 @@ _rx_ccch(struct sample_actor *sa,
 {
 	struct bcch_sink_priv *priv = sa->priv;
 	struct osmo_cxvec _burst, *burst = &_burst;
+	struct gmr1_metadata *md;
+	struct gmr1_md_annotation *mda;
 	sbit_t ebits[432];
 	uint8_t l2[24];
 	int sps, base_align;
@@ -233,9 +247,13 @@ _rx_ccch(struct sample_actor *sa,
 	sps = priv->as->sps;
 	base_align = sps * BCCH_MARGIN;
 
+	/* Annotation */
+	md  = priv->as->chans[priv->chan_id].md;
+	mda = gmr1_md_get_annotation(md);
+
 	/* Map potential burst */
 	e_toa = burst_map(burst, data, data_len, base_align, sps,
-	                  &gmr1_dc6_burst, priv->sa_bcch_stn, 10 * sps);
+	                  &gmr1_dc6_burst, priv->sa_bcch_stn, 10 * sps, mda);
 	if (e_toa < 0)
 		return e_toa;
 
@@ -319,6 +337,11 @@ nofollow:
 			GSMTAP_GMR1_CCCH,
 			priv->as->chans[priv->chan_id].arfcn,
 			priv->fn, priv->sa_bcch_stn, l2, 24));
+
+	/* Annotations */
+	gmr1_mda_add_field(mda, "core:title", "\"CCCH\"");
+	gmr1_mda_add_field(mda, "core:comment", "\"crc=%d, conv=%d, align_err=%d\"", crc, conv, priv->align_err);
+	gmr1_md_put_annotation(md, mda, sa->time + base_align + (sps * priv->sa_bcch_stn * 39) + e_toa);
 
 	return 0;
 }
