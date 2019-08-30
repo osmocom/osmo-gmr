@@ -32,6 +32,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <osmocom/core/bits.h>
 
@@ -203,13 +204,16 @@ _gmr1_pi4cxpsk_sync_find(struct gmr1_pi4cxpsk_burst *burst_type,
 		goto err;
 	}
 
+	memset(corr->data, 0x00, sizeof(float complex) * corr->max_len);
+	corr->len = w;
+
 	/* Scan all possible training sequences */
 	for (i=0; (i < GMR1_MAX_SYNC) && (burst_type->sync[i] != NULL); i++)
 	{
 		struct gmr1_pi4cxpsk_sync *csync;
 		float s_toa, s_pwr;
 		float complex s_peak;
-		int first = 1, tl = 0;
+		int tl = 0;
 
 		/* Correlate all 'chunks' */
 		for (csync=burst_type->sync[i]; csync->pos>=0; csync++)
@@ -222,14 +226,11 @@ _gmr1_pi4cxpsk_sync_find(struct gmr1_pi4cxpsk_burst *burst_type,
 			osmo_cxvec_init_from_data(win, &burst->data[b], l);
 
 			/* Correlate */
-			osmo_cxvec_correlate(csync->_ref, win, sps, first ? corr : corr_tmp);
+			osmo_cxvec_correlate(csync->_ref, win, sps, corr_tmp);
 
 			/* If not the first, then combine results */
-			if (!first)
-				for (j=0; j<w; j++)
-					corr->data[j] += corr_tmp->data[j];
-
-			first = 0;
+			for (j=0; j<w; j++)
+				corr->data[j] += cabsf(corr_tmp->data[j]);
 
 			/* Add length of this 'chunk' */
 			tl += csync->_ref->len;
@@ -390,7 +391,7 @@ _gmr1_pi4cxpsk_freq_err(struct gmr1_pi4cxpsk_burst *burst_type,
 		/* From the data points, extract a single value */
 		f = 0.0f;
 		for (i=1; i<n; i++)
-			f += cargf(corr[i] * conjf(corr[0])) / (pos[i] - pos[0]);
+			f += cargf(corr[i] * conjf(corr[i-1])) / (pos[i] - pos[i-1]);
 		f /= n - 1;
 
 		*freq_error = f;
