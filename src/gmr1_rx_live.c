@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 			.as = as,
 			.chan_id = i,
 			.start_discard = 10000,
-			.burst_type = &gmr1_fcch3_lband_burst,
+			.burst_type = &gmr1_fcch3_sband_burst,
 		};
 		sa = sbuf_add_consumer(as->buf, i, &fcch_sink, &p);
 		if (!sa) {
