@@ -150,7 +150,7 @@ class Channel(object):
 	@property
 	def subchannels(self):
 		return [
-			Channel(sa, 1)
+			Channel(sa, 1, band=self._band)
 				for sa in range(
 					self.arfcn - (self.width-1) // 2,
 					self.arfcn + (self.width+2) // 2
@@ -396,7 +396,7 @@ class PFBBase(gr.hier_block2):
 		mid_center_freq = chan_align_fn(center_freq)
 
 		if abs(mid_center_freq - center_freq) > 200:
-			self.rotation = 2.0 * math.pi * (self.center_freq - new_center_freq) / samp_rate
+			self.rotation = 2.0 * math.pi * (center_freq - mid_center_freq) / samp_rate
 		else:
 			self.rotation = 0
 
