@@ -181,6 +181,13 @@ burst_energy(struct osmo_cxvec *burst)
 	return e;
 }
 
+/* wrapper around gsmtap_sendmsg() to avoid memory leaks */
+static void _gsmtap_sendmsg(struct gsmtap_inst *gti, struct msgb *msg)
+{
+	if (gsmtap_sendmsg(gti, msg) < 0)
+		msgb_free(msg);
+}
+
 
 /* Message parsing -------------------------------------------------------- */
 
@@ -308,7 +315,7 @@ rx_tch9(struct chan_desc *cd)
 
 		/* Send to GSMTap if correct */
 		if (!crc)
-			gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+			_gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 				GSMTAP_GMR1_TCH9 | GSMTAP_GMR1_FACCH,
 				cd->fn, cd->tch9_state.tn, l2, 38));
 	} else { /* TCH9 */
@@ -327,7 +334,7 @@ rx_tch9(struct chan_desc *cd)
 		fprintf(stderr, "fn=%d, conv9=%d, avg=%d\n", cd->fn, conv, s);
 
 		/* Forward to GSMTap (no CRC to validate :( ) */
-		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+		_gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_TCH9,
 			cd->fn, cd->tch9_state.tn, l2, 60));
 
@@ -422,7 +429,7 @@ _rx_tch3_facch_flush(struct chan_desc *cd)
 
 	/* Send to GSMTap if correct */
 	if (!crc)
-		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+		_gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_TCH3 | GSMTAP_GMR1_FACCH,
 			cd->fn-3, st->tn, l2, 10));
 
@@ -783,7 +790,7 @@ rx_bcch(struct chan_desc *cd, float *energy)
 
 	/* Send to GSMTap if correct */
 	if (!crc)
-		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+		_gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_BCCH,
 			cd->fn, cd->sa_bcch_stn, l2, 24));
 
@@ -835,7 +842,7 @@ rx_ccch(struct chan_desc *cd, float min_energy)
 
 	/* Send to GSMTap if correct */
 	if (!crc)
-		gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
+		_gsmtap_sendmsg(g_gti, gmr1_gsmtap_makemsg(
 			GSMTAP_GMR1_CCCH,
 			cd->fn, cd->sa_bcch_stn, l2, 24));
 
