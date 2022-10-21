@@ -32,10 +32,10 @@ namespace gr {
      * \brief
      * \ingroup
      */
-    class GR_GMR1_API rach_detect_fft : virtual public block
+    class GMR1_API rach_detect_fft : virtual public block
     {
      public:
-      typedef boost::shared_ptr<rach_detect_fft> sptr;
+      typedef std::shared_ptr<rach_detect_fft> sptr;
 
       static sptr make(const double sample_rate,
                        const int overlap_ratio, const float threshold,

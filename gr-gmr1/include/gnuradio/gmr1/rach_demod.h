@@ -23,7 +23,7 @@
 
 #include <gnuradio/gmr1/api.h>
 
-#include <gnuradio/blocks/pdu.h>
+#include <gnuradio/pdu.h>
 #include <gnuradio/tagged_stream_block.h>
 
 namespace gr {
@@ -33,10 +33,10 @@ namespace gr {
      * \brief
      * \ingroup
      */
-    class GR_GMR1_API rach_demod : virtual public tagged_stream_block
+    class GMR1_API rach_demod : virtual public tagged_stream_block
     {
      public:
-      typedef boost::shared_ptr<rach_demod> sptr;
+      typedef std::shared_ptr<rach_demod> sptr;
 
       static sptr make(int sps, int etoa,
                        const std::string& len_tag_key);

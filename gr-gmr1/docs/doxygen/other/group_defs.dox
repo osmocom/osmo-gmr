@@ -1,6 +1,6 @@
 /*!
- * \defgroup block GNU Radio IQBALANCE C++ Signal Processing Blocks
- * \brief All C++ blocks that can be used from the IQBALANCE GNU Radio
+ * \defgroup block GNU Radio GMR1 C++ Signal Processing Blocks
+ * \brief All C++ blocks that can be used from the GMR1 GNU Radio
  *        module are listed here or in the subcategories below.
  *
  */

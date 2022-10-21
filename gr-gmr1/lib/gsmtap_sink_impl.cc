@@ -55,8 +55,8 @@ gsmtap_sink_impl::gsmtap_sink_impl(const std::string &host, uint16_t port)
 	this->d_gti = gsmtap_source_init(host.c_str(), port, 0);
 	gsmtap_source_add_sink(this->d_gti);
 
-	message_port_register_in(PDU_PORT_ID);
-	set_msg_handler(PDU_PORT_ID, boost::bind(&gsmtap_sink_impl::send_pdu, this, _1));
+        this->message_port_register_in(pmt::mp("port"));
+        this->set_msg_handler(pmt::mp("port"), [this](pmt::pmt_t msg) { this->send_pdu(msg); });
 }
 
 gsmtap_sink_impl::~gsmtap_sink_impl()
@@ -88,10 +88,7 @@ gsmtap_sink_impl::send_pdu(pmt::pmt_t pdu)
 	const uint8_t* rach = (const uint8_t*) pmt::uniform_vector_elements(vector, offset);
 
 	/* Send to GSMTap */
-	gsmtap_sendmsg(this->d_gti, gmr1_gsmtap_makemsg(
-		GSMTAP_GMR1_RACH,
-		0, 0, rach, len
-	));
+	gsmtap_sendmsg(this->d_gti, gmr1_gsmtap_makemsg(GSMTAP_GMR1_RACH, 0, 0, 0, rach, len));
 }
 
   } // namespace gmr1

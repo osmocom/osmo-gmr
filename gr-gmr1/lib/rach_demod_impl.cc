@@ -62,7 +62,7 @@ rach_demod_impl::rach_demod_impl(int sps, int etoa, const std::string& len_tag_k
                 len_tag_key),
       d_sps(sps), d_etoa(etoa)
 {
-	message_port_register_out(PDU_PORT_ID);
+    this->message_port_register_out(pmt::mp("port"));
 }
 
 rach_demod_impl::~rach_demod_impl()
@@ -287,13 +287,14 @@ rach_demod_impl::work(int noutput_items,
 		);
 
 		/* Build vector with the data bytes */
-		pdu_vector = blocks::pdu::make_pdu_vector(blocks::pdu::byte_t, rach, 18);
+		pdu_vector = pdu::make_pdu_vector(gr::types::byte_t, rach, 18);
 
 		/* Builds message */
 		msg = pmt::cons(pdu_meta, pdu_vector);
 
 		/* Send it out */
-		message_port_pub(PDU_PORT_ID, msg);
+                this->message_port_register_out(pmt::mp("port"));
+
 	}
 
 	/* Consume the burst */

@@ -77,7 +77,7 @@ rach_detect_fft_impl::rach_detect_fft_impl(
       d_burst_length_pmt(pmt::from_long(burst_length))
 {
 	this->d_fft_size = 1 << (int)(round(log2(sample_rate / 1e3)));
-	this->d_fft = new gr::fft::fft_complex(this->d_fft_size, true, 1);
+	this->d_fft = new gr::fft::fft_complex_fwd(this->d_fft_size, 1);
 
 	this->d_buf = (gr_complex *) volk_malloc(this->d_fft_size * sizeof(gr_complex), 128);
 	this->d_win = (float *) volk_malloc(this->d_fft_size * sizeof(float), 128);

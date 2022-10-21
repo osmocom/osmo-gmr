@@ -52,8 +52,8 @@ rach_file_sink_impl::rach_file_sink_impl(const std::string &filename,
       d_filename(filename),
       d_center_freq(center_freq), d_invert_freq(invert_freq)
 {
-	message_port_register_in(PDU_PORT_ID);
-	set_msg_handler(PDU_PORT_ID, boost::bind(&rach_file_sink_impl::send_pdu, this, _1));
+    this->message_port_register_in(pmt::mp("port"));
+    this->set_msg_handler(pmt::mp("port"), [this](pmt::pmt_t msg) { this->send_pdu(msg); });
 
 	this->d_fh = fopen(filename.c_str(), "a");
 	if (!this->d_fh)
@@ -101,12 +101,14 @@ bool
 rach_file_sink_impl::start()
 {
 	/* Nothing yet */
+        return true;
 }
 
 bool
 rach_file_sink_impl::stop()
 {
 	fflush(this->d_fh);
+        return true;
 }
 
 

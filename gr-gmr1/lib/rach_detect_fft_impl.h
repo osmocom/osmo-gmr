@@ -63,7 +63,7 @@ namespace gr {
       pmt::pmt_t d_len_tag_key;
       pmt::pmt_t d_burst_length_pmt;
 
-      gr::fft::fft_complex *d_fft;
+      gr::fft::fft_complex_fwd *d_fft;
       gr_complex *d_buf;
       float *d_win;
       float *d_pwr;

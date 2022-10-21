@@ -23,7 +23,7 @@
 
 #include <gnuradio/gmr1/api.h>
 
-#include <gnuradio/blocks/pdu.h>
+#include <gnuradio/pdu.h>
 #include <gnuradio/block.h>
 
 namespace gr {
@@ -33,10 +33,10 @@ namespace gr {
      * \brief
      * \ingroup
      */
-    class GR_GMR1_API rach_file_sink : virtual public block
+    class GMR1_API rach_file_sink : virtual public block
     {
      public:
-      typedef boost::shared_ptr<rach_file_sink> sptr;
+      typedef std::shared_ptr<rach_file_sink> sptr;
 
       static sptr make(const std::string &filename,
                        const double center_freq, const bool invert_freq);

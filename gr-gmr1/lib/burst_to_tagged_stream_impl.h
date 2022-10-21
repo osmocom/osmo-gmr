@@ -34,10 +34,10 @@ namespace gr {
     class burst_to_tagged_stream_impl : public burst_to_tagged_stream
     {
      private:
-      pmt::pmt_t d_len_tag_key;
-
       bool d_active;
       int  d_offset;
+      pmt::pmt_t d_len_tag_key;
+
 
      public:
       burst_to_tagged_stream_impl(int max_length, const std::string& len_tag_key);

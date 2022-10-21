@@ -32,10 +32,10 @@ namespace gr {
      * \brief
      * \ingroup
      */
-    class GR_GMR1_API burst_to_tagged_stream : virtual public block
+    class GMR1_API burst_to_tagged_stream : virtual public block
     {
      public:
-      typedef boost::shared_ptr<burst_to_tagged_stream> sptr;
+      typedef std::shared_ptr<burst_to_tagged_stream> sptr;
 
       static sptr make(int max_length, const std::string& len_tag_key);
     };
